@@ -1,15 +1,24 @@
 import { gql } from '@apollo/client';
 
+export const GET_USER_PROFILE = gql`
+  query GetUserProfile {
+    getUserProfile {
+      email
+      motCredits
+      vdiCredits
+      freeMotChecksUsed
+    }
+  }
+`;
+
 export const MOT_CHECK = gql`
-  query motCheck($reg: String!) {
+  query MotCheck($reg: String!) {
     motCheck(reg: $reg)
   }
 `;
 
 export const VDI_CHECK = gql`
-  query vdiCheck($reg: String!) {
+  query VdiCheck($reg: String!) {
     vdiCheck(reg: $reg)
   }
 `;
-
-// ... Other queries and mutations
