@@ -1,25 +1,19 @@
 import React from 'react';
 
 function MOTResultDisplay({ data, isFreeCheck }) {
-  // Ensure data and motCheck are defined
-  if (!data || !data.motCheck) {
-    return <p>No MOT data returned.</p>;
+  // data should have something like: data.DataItems.VehicleDetails, data.DataItems.VehicleStatus, data.DataItems.MotHistory
+  if (!data.DataItems) {
+    return <p>No data available.</p>;
   }
 
-  // Access the Response object
-  const response = data.motCheck.Response;
-  if (!response) {
-    return <p>No response data available.</p>;
-  }
-
-  const { VehicleDetails, VehicleStatus, MotHistory } = response;
+  const { VehicleDetails, VehicleStatus, MotHistory } = data.DataItems;
 
   if (!VehicleDetails || !VehicleStatus) {
     return <p>Vehicle details or status not available.</p>;
   }
 
   return (
-    <div style={{ marginTop: '10px' }}>
+    <div>
       <h3>Vehicle Details</h3>
       <p><strong>Make:</strong> {VehicleDetails.Make}</p>
       <p><strong>Model:</strong> {VehicleDetails.Model}</p>
@@ -33,7 +27,7 @@ function MOTResultDisplay({ data, isFreeCheck }) {
       <p><strong>VED Currently Valid:</strong> {VehicleStatus.MotVed?.VedCurrentlyValid ? 'Yes' : 'No'}</p>
       <p><strong>VED Expiry Date:</strong> {VehicleStatus.MotVed?.VedExpiryDate || 'N/A'}</p>
 
-      {/* If not a free check, display additional MOT history data */}
+      {/* If it's not a free check, show the MOT history */}
       {!isFreeCheck && MotHistory && MotHistory.RecordList && MotHistory.RecordList.length > 0 && (
         <>
           <h3>Additional MOT History (Paid Feature)</h3>
@@ -43,40 +37,24 @@ function MOTResultDisplay({ data, isFreeCheck }) {
               <p><strong>Test Number:</strong> {record.TestNumber}</p>
               <p><strong>Result:</strong> {record.TestResult}</p>
               {record.ExpiryDate && <p><strong>Expiry Date:</strong> {record.ExpiryDate}</p>}
-              <p><strong>Odometer Reading:</strong> {record.OdometerReading} miles</p>
+              <p><strong>Odometer Reading:</strong> {record.OdometerReading} {record.OdometerUnit}</p>
 
+              {/* Advisory Notices */}
               {record.AdvisoryNoticeList && record.AdvisoryNoticeList.length > 0 && (
                 <div>
                   <h5>Advisory Notices:</h5>
                   <ul>
-                    {record.AdvisoryNoticeList.map((notice, i) => (
-                      <li key={i}>{notice}</li>
-                    ))}
+                    {record.AdvisoryNoticeList.map((notice, i) => <li key={i}>{notice}</li>)}
                   </ul>
                 </div>
               )}
 
+              {/* Failures */}
               {record.FailureReasonList && record.FailureReasonList.length > 0 && (
                 <div>
                   <h5>Failure Reasons:</h5>
                   <ul>
-                    {record.FailureReasonList.map((reason, i) => (
-                      <li key={i}>{reason}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {record.AnnotationDetailsList && record.AnnotationDetailsList.length > 0 && (
-                <div>
-                  <h5>Annotations:</h5>
-                  <ul>
-                    {record.AnnotationDetailsList.map((annotation, i) => (
-                      <li key={i}>
-                        <strong>Type:</strong> {annotation.Type} - {annotation.Text}
-                        {annotation.Dangerous && <span style={{ color: 'red' }}> (Dangerous)</span>}
-                      </li>
-                    ))}
+                    {record.FailureReasonList.map((reason, i) => <li key={i}>{reason}</li>)}
                   </ul>
                 </div>
               )}

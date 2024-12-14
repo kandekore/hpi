@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { MOT_CHECK } from '../graphql/queries';
+import MOTResultDisplay from '../components/MOTResultDisplay';
 
 function HomePage() {
   const [reg, setReg] = useState('');
@@ -13,6 +14,13 @@ function HomePage() {
   };
 
   const isLoggedIn = !!localStorage.getItem('authToken');
+
+  // Determine if it's a free check or not. If the user is not logged in, we consider it a free check.
+  // If user is logged in but they have not exhausted free checks, still free.
+  // If user is logged in and no free checks left, assume a paid check.
+  // For simplicity, let's assume if not logged in => free check, if logged in => paid check.
+  // Adjust logic as needed based on your actual free check counting logic.
+  const isFreeCheck = !isLoggedIn;
 
   return (
     <div>
@@ -28,10 +36,10 @@ function HomePage() {
       <button onClick={handleMOTCheck} disabled={loading}>
         {loading ? 'Checking...' : 'Check MOT'}
       </button>
-      {data && (
+      {data && data.motCheck && (
         <div style={{ marginTop: '20px' }}>
           <h2>MOT Check Result</h2>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(data.motCheck, null, 2)}</pre>
+          <MOTResultDisplay data={data.motCheck} isFreeCheck={isFreeCheck} />
         </div>
       )}
       <p>
