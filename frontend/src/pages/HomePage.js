@@ -4,16 +4,20 @@ import { MOT_CHECK } from '../graphql/queries';
 
 function HomePage() {
   const [reg, setReg] = useState('');
-  const [motCheck, { data, loading, error }] = useLazyQuery(MOT_CHECK);
+  const [motCheck, { data, loading, error }] = useLazyQuery(MOT_CHECK, {
+    fetchPolicy: 'no-cache'
+  });
 
   const handleMOTCheck = async () => {
-    // User must be logged in to use free or purchased checks (based on backend logic).
     await motCheck({ variables: { reg } });
   };
 
+  const isLoggedIn = !!localStorage.getItem('authToken');
+
   return (
-    <div style={{ padding: '20px' }}>
+    <div>
       <h1>Check your MOT for free</h1>
+      {!isLoggedIn && <p>Not logged in? You have a limited number of free checks. <a href="/register">Register</a> for more benefits!</p>}
       {error && <p style={{ color: 'red' }}>{error.message}</p>}
       <input 
         type="text" 

@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log("JWT_SECRET is", process.env.JWT_SECRET);
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const mongoose = require('mongoose');
@@ -7,24 +6,35 @@ const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
 const { verifyToken } = require('./services/auth');
 
+// Import the webhook router
+const webhookRouter = require('./webhook');
+
 async function startServer() {
   const app = express();
-  
+
+  // Webhook route needs raw body, so no app.use(express.json()) before it
+  app.use('/webhook', webhookRouter);
+
+  // After adding webhook, now you can use JSON middleware if needed
+  app.use(express.json()); // For other endpoints if required
+
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req }) => {
-      const token = req.headers.authorization || '';
-      if (token) {
-        try {
-          const payload = verifyToken(token.replace('Bearer ', ''));
-          return { user: payload };
-        } catch (e) {
-          console.error('Invalid token', e);
+    context: ({ req }) => {
+        const token = req.headers.authorization || '';
+        let userContext = {};
+        if (token) {
+          try {
+            const payload = verifyToken(token.replace('Bearer ', ''));
+            userContext.user = payload;
+          } catch (e) {
+            console.error('Invalid token', e);
+          }
         }
+        return { ...userContext, req };
       }
-      return {};
-    }
+      
   });
 
   await server.start();

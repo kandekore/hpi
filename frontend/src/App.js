@@ -6,13 +6,12 @@ import CreditManagementPage from './pages/CreditManagementPage';
 import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import Layout from './components/Layout';
 
-// Simple function to check auth status
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
 }
 
-// Protected route component
 function PrivateRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }
@@ -20,9 +19,7 @@ function PrivateRoute({ children }) {
 function App() {
   return (
     <Router>
-      <div className="app-container">
-        {/* Add a navigation bar or header here if desired */}
-        
+      <Layout>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
@@ -31,7 +28,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Route: only logged-in users can access the credit management page */}
+          {/* Protected Route */}
           <Route 
             path="/credits" 
             element={
@@ -41,12 +38,10 @@ function App() {
             }
           />
 
-          {/* Catch-all Route for undefined paths */}
+          {/* Catch-all Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-
-        {/* Footer or ads could go here */}
-      </div>
+      </Layout>
     </Router>
   );
 }

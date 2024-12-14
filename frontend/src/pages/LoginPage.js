@@ -14,7 +14,15 @@ function LoginPage() {
       const { data } = await loginMutation({ variables: { email, password } });
       if (data.login) {
         localStorage.setItem('authToken', data.login);
-        navigate('/');
+
+        // Now handle pendingReg logic INSIDE the success block
+        const pendingReg = sessionStorage.getItem('pendingReg');
+        if (pendingReg) {
+          sessionStorage.removeItem('pendingReg');
+          navigate(`/?autoCheck=${pendingReg}`);
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       console.error(err);

@@ -13,9 +13,17 @@ function RegisterPage() {
     try {
       const { data } = await registerMutation({ variables: { email, password } });
       if (data.register) {
-        // Save token and redirect
+        // Save token
         localStorage.setItem('authToken', data.register);
-        navigate('/');
+
+        // If you want to handle pendingReg here as well:
+        const pendingReg = sessionStorage.getItem('pendingReg');
+        if (pendingReg) {
+          sessionStorage.removeItem('pendingReg');
+          navigate(`/?autoCheck=${pendingReg}`);
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       console.error(err);
