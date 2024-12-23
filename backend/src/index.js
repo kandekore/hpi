@@ -1,49 +1,56 @@
+// backend/src/index.js
 require('dotenv').config();
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const mongoose = require('mongoose');
+const path = require('path'); // Possibly no longer needed if you use absolute paths directly
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
 const { verifyToken } = require('./services/auth');
 
-// Import the webhook router
-const webhookRouter = require('./webhook');
-
 async function startServer() {
   const app = express();
 
-  // Webhook route needs raw body, so no app.use(express.json()) before it
-  app.use('/webhook', webhookRouter);
-
-  // After adding webhook, now you can use JSON middleware if needed
-  app.use(express.json()); // For other endpoints if required
+  // Use the absolute path given by your host
+  app.use(express.static('/home/virtual/vps-abaa2c/8/875bf0ee83/public_html/frontend/build'));
 
   const server = new ApolloServer({
     typeDefs,
     resolvers,
     context: ({ req }) => {
-        const token = req.headers.authorization || '';
-        let userContext = {};
-        if (token) {
-          try {
-            const payload = verifyToken(token.replace('Bearer ', ''));
-            userContext.user = payload;
-          } catch (e) {
-            console.error('Invalid token', e);
-          }
+      const token = req.headers.authorization || '';
+      let userContext = {};
+      if (token) {
+        try {
+          const payload = verifyToken(token.replace('Bearer ', ''));
+          userContext.user = payload;
+        } catch (e) {
+          console.error('Invalid token', e);
         }
-        return { ...userContext, req };
       }
-      
+      return { ...userContext, req };
+    },
   });
 
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });
 
-  await mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  // Serve the index.html for any route not handled by GraphQL or static files
+  app.get('*', (req, res) => {
+    res.sendFile('/home/virtual/vps-abaa2c/8/875bf0ee83/public_html/frontend/build/index.html');
+  });
 
-  app.listen({ port: 4000 }, () => {
-    console.log('Server running at http://localhost:4000/graphql');
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB successfully.');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    process.exit(1);
+  }
+
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}/graphql`);
   });
 }
 

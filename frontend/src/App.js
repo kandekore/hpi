@@ -7,6 +7,18 @@ import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+
+// const client = new ApolloClient({
+ 
+//   uri: process.env.REACT_APP_GRAPHQL_URI || "/graphql",
+
+// cache: new InMemoryCache(),
+// })
+const client = new ApolloClient({
+  uri: "/graphql", // Relative path since frontend and backend are on the same domain
+  cache: new InMemoryCache(),
+});
 
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
@@ -18,6 +30,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
+    <ApolloProvider client={client}>
     <Router>
       <Layout>
         <Routes>
@@ -43,6 +56,8 @@ function App() {
         </Routes>
       </Layout>
     </Router>
+    </ApolloProvider>
+
   );
 }
 
