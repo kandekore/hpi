@@ -4,16 +4,17 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
-      "start-backend": "cd backend && node src/index.js",
-      "start-frontend": "cd frontend && npm start"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
+        "start-backend": "cd backend && node src/index.js",
+        "start-frontend": "cd frontend && npm start"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
+        "concurrently": "^9.1.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     }
-  }
+}
