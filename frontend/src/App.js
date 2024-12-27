@@ -7,16 +7,33 @@ import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { 
+  ApolloClient, 
+  InMemoryCache, 
+  ApolloProvider, 
+  createHttpLink
+} from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
-// const client = new ApolloClient({
- 
-//   uri: process.env.REACT_APP_GRAPHQL_URI || "/graphql",
+// 1) Create httpLink
+const httpLink = createHttpLink({
+  // For local dev, point to your backend's port
+  uri: 'http://localhost:4000/graphql',
+});
 
-// cache: new InMemoryCache(),
-// })
+// 2) Create authLink
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('authToken'); 
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
 const client = new ApolloClient({
-  uri: "/graphql", // Relative path since frontend and backend are on the same domain
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
