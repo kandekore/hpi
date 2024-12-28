@@ -31,7 +31,7 @@ async function startServer() {
   server.applyMiddleware({ app, path: '/graphql' });
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URL);
     console.log('Connected to MongoDB successfully.');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
