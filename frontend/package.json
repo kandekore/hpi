@@ -10,7 +10,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "^5.0.1",
-    "serve": "^14.2.4",
+    "serve": "^14.2.4",       
     "web-vitals": "^4.2.4"
   },
   "scripts": {
@@ -20,21 +20,14 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "extends": ["react-app", "react-app/jest"]
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      ">0.2%", "not dead", "not op_mini all"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 chrome version", "last 1 firefox version", "last 1 safari version"
     ]
   }
 }
