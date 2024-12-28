@@ -11,6 +11,7 @@ const { verifyToken } = require('./services/auth');
 async function startServer() {
   const app = express();
 
+  // Create the Apollo Server
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -29,13 +30,13 @@ async function startServer() {
     },
   });
 
+  // Start the Apollo Server and apply middleware
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });
 
-  // Connect to Mongo
+  // Connect to MongoDB
   try {
     await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URL, {
-      // optional Mongoose config
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -45,19 +46,20 @@ async function startServer() {
     process.exit(1);
   }
 
-  // Serve the React build if we're in production
-  // Adjust the path if your structure is different
+  // Serve the React app's build folder
   app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-  // Catch-all route to serve index.html for React Router
+  // Catch-all route for React Router
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
   });
 
-  // Use process.env.PORT for Dokku/Heroku
+  // Listen on process.env.PORT (for Dokku/Heroku) or default to 4000
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}. GraphQL endpoint: ${server.graphqlPath}`);
+    console.log(
+      `Server running on port ${PORT}. GraphQL endpoint: ${server.graphqlPath}`
+    );
   });
 }
 
