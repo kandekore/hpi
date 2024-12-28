@@ -7,35 +7,10 @@ import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
-import { 
-  ApolloClient, 
-  InMemoryCache, 
-  ApolloProvider, 
-  createHttpLink
-} from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloProvider } from '@apollo/client';
 
-// 1) Create httpLink
-const httpLink = createHttpLink({
-  // For local dev, point to your backend's port
-  uri: 'http://localhost:4000/graphql',
-});
-
-// 2) Create authLink
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('authToken'); 
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
-});
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
+// Reuse the client from apolloClient.js
+import { client } from './apolloClient';
 
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
@@ -48,33 +23,32 @@ function PrivateRoute({ children }) {
 function App() {
   return (
     <ApolloProvider client={client}>
-    <Router>
-      <Layout>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/vdi" element={<VdiCheckPage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
+      <Router>
+        <Layout>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/vdi" element={<VdiCheckPage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Protected Route */}
-          <Route 
-            path="/credits" 
-            element={
-              <PrivateRoute>
-                <CreditManagementPage />
-              </PrivateRoute>
-            }
-          />
+            {/* Protected Route */}
+            <Route 
+              path="/credits" 
+              element={
+                <PrivateRoute>
+                  <CreditManagementPage />
+                </PrivateRoute>
+              }
+            />
 
-          {/* Catch-all Route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
-    </Router>
+            {/* Catch-all Route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+      </Router>
     </ApolloProvider>
-
   );
 }
 
