@@ -3,6 +3,7 @@ const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
 const mongoose = require('mongoose');
 const path = require('path');
+const cors = require('cors');
 
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
@@ -11,6 +12,18 @@ const { verifyToken } = require('./services/auth');
 async function startServer() {
   const app = express();
 
+  // === Enable CORS here ===
+  // Adjust the `origin` array to match your frontend(s).
+  // For development, you can allow http://localhost:3000, or
+  // http://192.168.1.9:3000 if you're accessing from another device on the LAN.
+  app.use(
+    cors({
+      origin: ['http://localhost:3000', 'http://192.168.1.9:3000'],
+      credentials: true, // if you need cookies/auth headers
+    })
+  );
+
+  // Create and configure Apollo Server
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -32,6 +45,7 @@ async function startServer() {
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });
 
+  // Connect to MongoDB
   try {
     await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URL);
     console.log('Connected to MongoDB successfully.');
@@ -40,7 +54,7 @@ async function startServer() {
     process.exit(1);
   }
 
-  // Serve the built React files from ../frontend/build
+  // Serve the built React files from ../../frontend/build
   app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
   // For React Router, catch-all route
