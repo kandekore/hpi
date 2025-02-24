@@ -2,112 +2,156 @@
 import React from 'react';
 
 /**
- * Expects `data` to look like:
+ * Example of the data structure you actually receive:
  * {
  *   "StatusCode": "Success",
  *   "StatusMessage": "Success",
- *   "MetaDataForKeys": [...],
- *   "MetaDataForItems": {
- *     "ExtractNumber": { "Name": "ExtractNumber", "Type": "String" },
- *     "Mileage": { "Name": "Mileage", "Type": "String" },
- *     ...
- *   }
+ *   "DataItems": {
+ *     "Vrm": "KM12AKK",
+ *     "Mileage": "104,600",
+ *     "PlateYear": "2012-12",
+ *     "ValuationList": {
+ *       "OTR": "32316",
+ *       "Dealer forecourt": "8000",
+ *       "Trade Retail": "7301",
+ *       ...
+ *     },
+ *     "ValuationTime": "2025-02-24T17:47:26.0617393Z",
+ *     "VehicleDescription": "VOLKSWAGEN SHARAN SEL BLUE TECH TDI S-A",
+ *     "ValuationBook": "UKVD Direct",
+ *     "ExtractNumber": 0
+ *   },
+ *   "StatusInformation": {
+ *     "Lookup": { ... }
+ *   },
+ *   ...
  * }
  */
 
 function ValuationResultDisplay({ data, isFreeSearch }) {
-  // 1) Debug: Show the entire raw object.
-  //    This helps confirm whether the shape matches our assumptions.
-  console.log('ValuationResultDisplay received data:', data);
-
   if (!data) {
-    return <p>No valuation data returned from the server.</p>;
+    return (
+      <div className="alert alert-warning">
+        No valuation data returned from the server.
+      </div>
+    );
   }
 
-  // According to your structure, these should be at the top level
-  const { StatusCode, StatusMessage, MetaDataForItems } = data;
+  const {
+    StatusCode,
+    StatusMessage,
+    DataItems,
+    StatusInformation,
+    // If you still want to keep them, you can:
+    // MetaDataForItems,
+    // MetaDataForKeys,
+  } = data;
 
-  // 2) We can also show a debug <pre> to see raw data in the browser
-  //    (not just the console). You can remove it later.
+  // Destructure individual fields from DataItems so we don't show a big JSON dump
+  const {
+    Vrm,
+    Mileage,
+    PlateYear,
+    ValuationList,
+    ValuationTime,
+    VehicleDescription,
+    ValuationBook,
+    ExtractNumber,
+  } = DataItems || {};
+
   return (
-    <div className="card my-4 shadow-sm">
-      <div className="card-header bg-info text-white">
-        Valuation Data
+    <div className="card p-3 shadow-sm">
+      <h4 className="mb-3">Valuation Results</h4>
+
+      {/* Status badges */}
+      <div className="mb-3">
+        <span className="badge bg-secondary me-2">Code: {StatusCode}</span>
+        <span className="badge bg-success">Message: {StatusMessage}</span>
       </div>
-      <div className="card-body">
-        <p><strong>Debug Dump:</strong></p>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
 
-        {/* Basic status info */}
-        <p><strong>StatusCode:</strong> {StatusCode}</p>
-        <p><strong>StatusMessage:</strong> {StatusMessage}</p>
+      <div className="table-responsive">
+        <table className="table table-striped align-middle">
+          <thead>
+            <tr>
+              <th style={{ width: '40%' }}>Field</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* If DataItems is missing or empty, we can show "N/A" */}
+            <tr>
+              <td>Vrm</td>
+              <td>{Vrm ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Mileage</td>
+              <td>{Mileage ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>PlateYear</td>
+              <td>{PlateYear ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>ValuationTime</td>
+              <td>{ValuationTime ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>VehicleDescription</td>
+              <td>{VehicleDescription ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>ValuationBook</td>
+              <td>{ValuationBook ?? 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>ExtractNumber</td>
+              <td>{ExtractNumber ?? 'N/A'}</td>
+            </tr>
 
-        {/* If "MetaDataForItems" doesn't exist, show a fallback message. */}
-        {!MetaDataForItems ? (
-          <p>No valuation metadata available (MetaDataForItems missing).</p>
-        ) : (
-          <>
-            <h5 className="mt-3">MetaDataForItems</h5>
-            <ul className="list-group list-group-flush">
-              <li className="list-group-item">
-                <strong>ExtractNumber:</strong> {MetaDataForItems.ExtractNumber?.Name}
-                {' (Type: '}
-                {MetaDataForItems.ExtractNumber?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>Mileage:</strong> {MetaDataForItems.Mileage?.Name}
-                {' (Type: '}
-                {MetaDataForItems.Mileage?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>PlateYear:</strong> {MetaDataForItems.PlateYear?.Name}
-                {' (Type: '}
-                {MetaDataForItems.PlateYear?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>ValuationBook:</strong> {MetaDataForItems.ValuationBook?.Name}
-                {' (Type: '}
-                {MetaDataForItems.ValuationBook?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>ValuationList:</strong> {MetaDataForItems.ValuationList?.Name}
-                {' (Type: '}
-                {MetaDataForItems.ValuationList?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>ValuationTime:</strong> {MetaDataForItems.ValuationTime?.Name}
-                {' (Type: '}
-                {MetaDataForItems.ValuationTime?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>VehicleDescription:</strong> {MetaDataForItems.VehicleDescription?.Name}
-                {' (Type: '}
-                {MetaDataForItems.VehicleDescription?.Type}
-                {')'}
-              </li>
-              <li className="list-group-item">
-                <strong>Vrm:</strong> {MetaDataForItems.Vrm?.Name}
-                {' (Type: '}
-                {MetaDataForItems.Vrm?.Type}
-                {')'}
-              </li>
-            </ul>
-          </>
-        )}
+            {/* 
+              Show ValuationList as a sub-list, e.g. “OTR: 32316” 
+              If ValuationList doesn't exist, show "N/A"
+            */}
+            <tr>
+              <td>ValuationList</td>
+              <td>
+                {ValuationList && typeof ValuationList === 'object' ? (
+                  <ul className="mb-0">
+                    {Object.entries(ValuationList).map(([label, val]) => (
+                      <li key={label}>
+                        <strong>{label}</strong>: {val}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  'N/A'
+                )}
+              </td>
+            </tr>
 
-        {/* If you want to hide or show more fields for paid searches only: */}
-        {!isFreeSearch && (
-          <div className="mt-3">
-            <em>(Additional premium fields would go here.)</em>
-          </div>
-        )}
+            {/* Show StatusInformation if you want, or remove it */}
+            <tr>
+              <td>StatusInformation</td>
+              <td>
+                {StatusInformation ? (
+                  <pre className="bg-light p-2 mb-0">
+                    {JSON.stringify(StatusInformation, null, 2)}
+                  </pre>
+                ) : (
+                  'N/A'
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      {/* If you want to hide advanced fields for free searches */}
+      {!isFreeSearch && (
+        <div className="alert alert-primary mt-3">
+          (Additional valuation fields could be displayed here for paid users.)
+        </div>
+      )}
     </div>
   );
 }

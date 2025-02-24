@@ -1,71 +1,112 @@
+// src/components/MOTResultDisplay.js
 import React from 'react';
 
 function MOTResultDisplay({ data, isFreeCheck }) {
-  // data should have something like: data.DataItems.VehicleDetails, data.DataItems.VehicleStatus, data.DataItems.MotHistory
   if (!data.DataItems) {
-    return <p>No data available.</p>;
+    return <div className="alert alert-warning">No data available.</div>;
   }
 
   const { VehicleDetails, VehicleStatus, MotHistory } = data.DataItems;
 
   if (!VehicleDetails || !VehicleStatus) {
-    return <p>Vehicle details or status not available.</p>;
+    return <div className="alert alert-warning">Vehicle details or status not available.</div>;
   }
 
   return (
     <div>
-      <h3>Vehicle Details</h3>
-      <p><strong>Make:</strong> {VehicleDetails.Make}</p>
-      <p><strong>Model:</strong> {VehicleDetails.Model}</p>
-      <p><strong>Fuel Type:</strong> {VehicleDetails.FuelType}</p>
-      <p><strong>Colour:</strong> {VehicleDetails.Colour}</p>
-      <p><strong>Date First Registered:</strong> {VehicleDetails.DateFirstRegistered}</p>
+      <div className="mb-4">
+        <h3>Vehicle Details</h3>
+        <table className="table table-bordered">
+          <tbody>
+            <tr>
+              <th>Make</th>
+              <td>{VehicleDetails.Make}</td>
+            </tr>
+            <tr>
+              <th>Model</th>
+              <td>{VehicleDetails.Model}</td>
+            </tr>
+            <tr>
+              <th>Fuel Type</th>
+              <td>{VehicleDetails.FuelType}</td>
+            </tr>
+            <tr>
+              <th>Colour</th>
+              <td>{VehicleDetails.Colour}</td>
+            </tr>
+            <tr>
+              <th>Date First Registered</th>
+              <td>{VehicleDetails.DateFirstRegistered}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <h3>Vehicle Status</h3>
-      <p><strong>Next MOT Due Date:</strong> {VehicleStatus.NextMotDueDate}</p>
-      <p><strong>Days Until Next MOT Due:</strong> {VehicleStatus.DaysUntilNextMotIsDue}</p>
-      <p><strong>VED Currently Valid:</strong> {VehicleStatus.MotVed?.VedCurrentlyValid ? 'Yes' : 'No'}</p>
-      <p><strong>VED Expiry Date:</strong> {VehicleStatus.MotVed?.VedExpiryDate || 'N/A'}</p>
+      <div className="mb-4">
+        <h3>Vehicle Status</h3>
+        <table className="table table-bordered">
+          <tbody>
+            <tr>
+              <th>Next MOT Due Date</th>
+              <td>{VehicleStatus.NextMotDueDate}</td>
+            </tr>
+            <tr>
+              <th>Days Until Next MOT Due</th>
+              <td>{VehicleStatus.DaysUntilNextMotIsDue}</td>
+            </tr>
+            <tr>
+              <th>VED Currently Valid</th>
+              <td>{VehicleStatus.MotVed?.VedCurrentlyValid ? 'Yes' : 'No'}</td>
+            </tr>
+            <tr>
+              <th>VED Expiry Date</th>
+              <td>{VehicleStatus.MotVed?.VedExpiryDate || 'N/A'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      {/* If it's not a free check, show the MOT history */}
       {!isFreeCheck && MotHistory && MotHistory.RecordList && MotHistory.RecordList.length > 0 && (
-        <>
+        <div className="mb-4">
           <h3>Additional MOT History (Paid Feature)</h3>
           {MotHistory.RecordList.map((record, index) => (
-            <div key={index} style={{ border: '1px solid #ccc', padding: '10px', marginTop: '10px' }}>
-              <h4>MOT Test on {record.TestDate}</h4>
-              <p><strong>Test Number:</strong> {record.TestNumber}</p>
-              <p><strong>Result:</strong> {record.TestResult}</p>
-              {record.ExpiryDate && <p><strong>Expiry Date:</strong> {record.ExpiryDate}</p>}
-              <p><strong>Odometer Reading:</strong> {record.OdometerReading} {record.OdometerUnit}</p>
-
-              {/* Advisory Notices */}
-              {record.AdvisoryNoticeList && record.AdvisoryNoticeList.length > 0 && (
-                <div>
-                  <h5>Advisory Notices:</h5>
-                  <ul>
-                    {record.AdvisoryNoticeList.map((notice, i) => <li key={i}>{notice}</li>)}
-                  </ul>
-                </div>
-              )}
-
-              {/* Failures */}
-              {record.FailureReasonList && record.FailureReasonList.length > 0 && (
-                <div>
-                  <h5>Failure Reasons:</h5>
-                  <ul>
-                    {record.FailureReasonList.map((reason, i) => <li key={i}>{reason}</li>)}
-                  </ul>
-                </div>
-              )}
+            <div key={index} className="card mb-3">
+              <div className="card-header">
+                <h4 className="mb-0">MOT Test on {record.TestDate}</h4>
+              </div>
+              <div className="card-body">
+                <p><strong>Test Number:</strong> {record.TestNumber}</p>
+                <p><strong>Result:</strong> {record.TestResult}</p>
+                {record.ExpiryDate && <p><strong>Expiry Date:</strong> {record.ExpiryDate}</p>}
+                <p><strong>Odometer Reading:</strong> {record.OdometerReading} {record.OdometerUnit}</p>
+                {record.AdvisoryNoticeList && record.AdvisoryNoticeList.length > 0 && (
+                  <div>
+                    <h5>Advisory Notices:</h5>
+                    <ul className="list-group">
+                      {record.AdvisoryNoticeList.map((notice, i) => (
+                        <li key={i} className="list-group-item">{notice}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {record.FailureReasonList && record.FailureReasonList.length > 0 && (
+                  <div>
+                    <h5>Failure Reasons:</h5>
+                    <ul className="list-group">
+                      {record.FailureReasonList.map((reason, i) => (
+                        <li key={i} className="list-group-item">{reason}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
-        </>
+        </div>
       )}
 
-      {/* If it's a paid check but no MOT history is available */}
       {!isFreeCheck && (!MotHistory || !MotHistory.RecordList || MotHistory.RecordList.length === 0) && (
-        <p>No MOT history records found for this vehicle.</p>
+        <div className="alert alert-info">No MOT history records found for this vehicle.</div>
       )}
     </div>
   );

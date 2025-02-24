@@ -1,3 +1,4 @@
+// src/pages/RegisterPage.js
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { REGISTER } from '../graphql/mutations';
@@ -13,10 +14,7 @@ function RegisterPage() {
     try {
       const { data } = await registerMutation({ variables: { email, password } });
       if (data.register) {
-        // Save token
         localStorage.setItem('authToken', data.register);
-
-        // If you want to handle pendingReg here as well:
         const pendingReg = sessionStorage.getItem('pendingReg');
         if (pendingReg) {
           sessionStorage.removeItem('pendingReg');
@@ -31,26 +29,36 @@ function RegisterPage() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Register</h1>
-      {error && <p style={{ color: 'red' }}>{error.message}</p>}
-      <input 
-        type="email" 
-        placeholder="Email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
-      /><br/><br/>
-      <input 
-        type="password" 
-        placeholder="Password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
-      /><br/><br/>
-      <button onClick={handleRegister} disabled={loading}>
-        {loading ? 'Registering...' : 'Register'}
-      </button>
-      <p>Already have an account? <a href="/login">Login here</a>.</p>
-      <div className="ad-banner" style={{ marginTop: '20px', border: '1px solid #ccc', padding: '10px' }}>
+    <div className="container my-4">
+      <div className="card p-4 shadow-sm">
+        <h1 className="card-title mb-4">Register</h1>
+        {error && <div className="alert alert-danger">{error.message}</div>}
+        <div className="mb-3">
+          <input 
+            type="email" 
+            placeholder="Email" 
+            className="form-control" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+          />
+        </div>
+        <div className="mb-3">
+          <input 
+            type="password" 
+            placeholder="Password" 
+            className="form-control" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+          />
+        </div>
+        <button onClick={handleRegister} className="btn btn-primary w-100" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </button>
+      </div>
+      <p className="mt-3 text-center">
+        Already have an account? <a href="/login">Login here</a>.
+      </p>
+      <div className="card border rounded p-3 mt-4 text-center">
         [Ad Banner]
       </div>
     </div>
