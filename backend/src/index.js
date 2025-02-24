@@ -27,21 +27,23 @@ async function startServer() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: ({ req }) => {
-      const token = req.headers.authorization || '';
-      let userContext = {};
-      if (token) {
-        try {
-          const payload = verifyToken(token.replace('Bearer ', ''));
-          console.log("Decoded token payload:", payload);
+  // backend/src/index.js (excerpt)
+context: ({ req }) => {
+  const token = req.headers.authorization || '';
+  let userContext = {};
+  if (token.startsWith("Bearer ")) {
+    try {
+      const payload = verifyToken(token.replace("Bearer ", ""));
+      console.log("Decoded token payload:", payload); // Should log a valid payload
+      userContext.user = payload;
+    } catch (e) {
+      console.error("Invalid token", e);
+    }
+  }
+  return { ...userContext, req };
+}
 
-          userContext.user = payload;
-        } catch (e) {
-          console.error('Invalid token', e);
-        }
-      }
-      return { ...userContext, req };
-    },
+    
   });
 
   await server.start();

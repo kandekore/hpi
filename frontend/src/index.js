@@ -1,14 +1,13 @@
+// src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ApolloProvider } from '@apollo/client';
-import { client } from './apolloClient'; // Your Apollo Client instance
+import { AuthProvider } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <ApolloProvider client={client}>
+  <AuthProvider>
     <App />
-  </ApolloProvider>
+  </AuthProvider>
 );

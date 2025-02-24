@@ -1,7 +1,6 @@
-// src/pages/VdiCheckPage.js
 import React, { useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { VDI_CHECK, VALUATION_CHECK } from '../graphql/queries'; // Ensure you define VALUATION_CHECK appropriately
+import { VDI_CHECK, VALUATION_CHECK } from '../graphql/queries';
 import ValuationResultDisplay from '../components/ValuationResultDisplay';
 
 function VdiCheckPage() {

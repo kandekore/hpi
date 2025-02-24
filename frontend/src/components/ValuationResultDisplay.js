@@ -1,23 +1,24 @@
 import React from 'react';
 
 function ValuationResultDisplay({ data, isFreeSearch }) {
-  // Check that data is available and structured as expected.
+  // Ensure that data, Response, and MetaDataForItems exist
   if (!data || !data.Response || !data.Response.MetaDataForItems) {
     return <p className="text-danger">No valuation data available.</p>;
   }
 
   const items = data.Response.MetaDataForItems;
-  // Destructure common fields
+
+  // Each field is expected to be an object with a Name property,
+  // except for ValuationTime (which might be a string) and ValuationList (which is an array).
   const {
     VehicleDescription,
     Vrm,
     Mileage,
     PlateYear,
-    // Fields available in advanced searches
     ValuationBook,
     ExtractNumber,
     ValuationTime,
-    ValuationList
+    ValuationList,
   } = items;
 
   return (
@@ -26,18 +27,21 @@ function ValuationResultDisplay({ data, isFreeSearch }) {
         Valuation Details
       </div>
       <div className="card-body">
-        <h5 className="card-title">Vehicle: {VehicleDescription || 'N/A'}</h5>
+        <h5 className="card-title">
+          Vehicle: {VehicleDescription ? VehicleDescription.Name : 'N/A'}
+        </h5>
         <p className="card-text">
-          <strong>Registration:</strong> {Vrm || 'N/A'} <br />
-          <strong>Mileage:</strong> {Mileage || 'N/A'} <br />
-          <strong>Plate Year:</strong> {PlateYear || 'N/A'}
+          <strong>Registration:</strong> {Vrm ? Vrm.Name : 'N/A'} <br />
+          <strong>Mileage:</strong> {Mileage ? Mileage.Name : 'N/A'} <br />
+          <strong>Plate Year:</strong> {PlateYear ? PlateYear.Name : 'N/A'}
         </p>
+        {/* Show additional fields for advanced (paid) searches */}
         {!isFreeSearch && (
           <>
             <hr />
             <p className="card-text">
-              <strong>Valuation Book:</strong> {ValuationBook || 'N/A'} <br />
-              <strong>Extract Number:</strong> {ExtractNumber || 'N/A'} <br />
+              <strong>Valuation Book:</strong> {ValuationBook ? ValuationBook.Name : 'N/A'} <br />
+              <strong>Extract Number:</strong> {ExtractNumber ? ExtractNumber.Name : 'N/A'} <br />
               <strong>Valuation Time:</strong> {ValuationTime || 'N/A'}
             </p>
             {ValuationList && Array.isArray(ValuationList) && ValuationList.length > 0 && (
