@@ -8,8 +8,6 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
 import { ApolloProvider } from '@apollo/client';
-
-// Reuse the client from apolloClient.js
 import { client } from './apolloClient';
 
 function isAuthenticated() {

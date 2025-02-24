@@ -18,7 +18,7 @@ async function startServer() {
   // http://192.168.1.9:3000 if you're accessing from another device on the LAN.
   app.use(
     cors({
-      origin: ['http://localhost:3000', 'http://192.168.1.9:3000'],
+      origin: ['http://localhost:3000', 'http://192.168.1.9:3000', 'https://studio.apollographql.com', ' http://192.168.1.9:4000/graphql', 'http://localhost:4000/graphql'],
       credentials: true, // if you need cookies/auth headers
     })
   );
@@ -33,6 +33,8 @@ async function startServer() {
       if (token) {
         try {
           const payload = verifyToken(token.replace('Bearer ', ''));
+          console.log("Decoded token payload:", payload);
+
           userContext.user = payload;
         } catch (e) {
           console.error('Invalid token', e);

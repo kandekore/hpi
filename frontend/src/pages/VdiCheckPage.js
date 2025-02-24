@@ -1,38 +1,44 @@
+// src/pages/VdiCheckPage.js
 import React, { useState } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { VDI_CHECK } from '../graphql/queries';
+import { VDI_CHECK, VALUATION_CHECK } from '../graphql/queries'; // Ensure you define VALUATION_CHECK appropriately
+import ValuationResultDisplay from '../components/ValuationResultDisplay';
 
 function VdiCheckPage() {
   const [reg, setReg] = useState('');
-  const [vdiCheck, { data, loading, error }] = useLazyQuery(VDI_CHECK);
+  const [vdiCheck, { data: vdiData, loading: vdiLoading, error: vdiError }] = useLazyQuery(VDI_CHECK);
+  const [valuationCheck, { data: valuationData, loading: valuationLoading, error: valuationError }] = useLazyQuery(VALUATION_CHECK);
 
   const handleVDICheck = async () => {
-    // Check if user is logged in and has credits on the backend.
     await vdiCheck({ variables: { reg } });
+    await valuationCheck({ variables: { reg } });
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>VDI Check</h1>
-      {error && <p style={{ color: 'red' }}>{error.message}</p>}
-      <input 
-        type="text" 
-        placeholder="Enter Vehicle Registration" 
-        value={reg} 
-        onChange={(e) => setReg(e.target.value)} 
-      />
-      <button onClick={handleVDICheck} disabled={loading}>
-        {loading ? 'Checking...' : 'Check VDI'}
+    <div className="container my-4">
+      <h1 className="mb-4">VDI Check & Valuation</h1>
+      {vdiError && <div className="alert alert-danger">{vdiError.message}</div>}
+      {valuationError && <div className="alert alert-danger">{valuationError.message}</div>}
+      <div className="mb-3">
+        <input 
+          type="text" 
+          className="form-control" 
+          placeholder="Enter Vehicle Registration" 
+          value={reg} 
+          onChange={(e) => setReg(e.target.value)} 
+        />
+      </div>
+      <button onClick={handleVDICheck} className="btn btn-primary" disabled={vdiLoading || valuationLoading}>
+        {vdiLoading || valuationLoading ? 'Checking...' : 'Check VDI & Valuation'}
       </button>
-      {data && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>VDI Check Result</h2>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(data.vdiCheck, null, 2)}</pre>
+      
+      {/* Render valuation results */}
+      {valuationData && (
+        <div className="mt-4">
+          <ValuationResultDisplay data={valuationData.valuation} isFreeSearch={false} />
         </div>
       )}
-      <div className="ad-banner" style={{ marginTop: '20px', border: '1px solid #ccc', padding: '10px' }}>
-        [Ad Banner]
-      </div>
+      {/* Optionally, render VDI data as well */}
     </div>
   );
 }
