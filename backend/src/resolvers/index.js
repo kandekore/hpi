@@ -5,10 +5,10 @@ const paymentResolvers = require('./paymentResolvers');
 module.exports = {
   Query: {
     ...userResolvers.Query,
-    ...searchResolvers.Query
+    ...searchResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
-    ...paymentResolvers.Mutation
-  }
+    ...paymentResolvers.Mutation,
+  },
 };

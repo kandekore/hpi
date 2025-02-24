@@ -1,5 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ApolloProvider } from '@apollo/client';
+import { client } from './apolloClient';  // <-- Make sure this import path is correct
+
 import HomePage from './pages/HomePage';
 import VdiCheckPage from './pages/VdiCheckPage';
 import CreditManagementPage from './pages/CreditManagementPage';
@@ -7,8 +10,6 @@ import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
-import { ApolloProvider } from '@apollo/client';
-import { client } from './apolloClient';
 
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
@@ -33,7 +34,7 @@ function App() {
 
             {/* Protected Route */}
             <Route 
-              path="/credits" 
+              path="/credits"
               element={
                 <PrivateRoute>
                   <CreditManagementPage />
@@ -41,7 +42,7 @@ function App() {
               }
             />
 
-            {/* Catch-all Route */}
+            {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

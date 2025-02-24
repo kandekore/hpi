@@ -23,31 +23,9 @@ export const VDI_CHECK = gql`
   }
 `;
 
+// Add the valuation query:
 export const VALUATION_CHECK = gql`
   query ValuationCheck($reg: String!) {
-    valuation(reg: $reg) {
-      Response {
-        MetaDataForItems {
-          ExtractNumber {
-            Name
-          }
-          Mileage {
-            Name
-          }
-          PlateYear {
-            Name
-          }
-          ValuationBook {
-            Name
-          }
-          ValuationList
-          ValuationTime
-          VehicleDescription
-          Vrm {
-            Name
-          }
-        }
-      }
-    }
+    valuation(reg: $reg)
   }
 `;

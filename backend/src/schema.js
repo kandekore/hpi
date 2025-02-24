@@ -25,6 +25,9 @@ const typeDefs = gql`
     motCheck(reg: String!): JSON
     vdiCheck(reg: String!): JSON
     getSearchHistory: [SearchRecord]
+
+    # Valuation field
+    valuation(reg: String!): JSON
   }
 
   type Mutation {
@@ -35,6 +38,5 @@ const typeDefs = gql`
     finalizeCreditPurchase(creditType: String!, quantity: Int!): User
   }
 `;
-
 
 module.exports = typeDefs;

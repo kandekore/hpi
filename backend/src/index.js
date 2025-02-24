@@ -12,38 +12,37 @@ const { verifyToken } = require('./services/auth');
 async function startServer() {
   const app = express();
 
-  // === Enable CORS here ===
-  // Adjust the `origin` array to match your frontend(s).
-  // For development, you can allow http://localhost:3000, or
-  // http://192.168.1.9:3000 if you're accessing from another device on the LAN.
+  // CORS configuration
   app.use(
     cors({
-      origin: ['http://localhost:3000', 'http://192.168.1.9:3000', 'https://studio.apollographql.com', ' http://192.168.1.9:4000/graphql', 'http://localhost:4000/graphql'],
-      credentials: true, // if you need cookies/auth headers
+      origin: [
+        'http://localhost:3000',
+        'http://192.168.1.9:3000',
+        'https://studio.apollographql.com',
+        'http://192.168.1.9:4000', // no leading space
+        'http://localhost:4000'
+      ],
+      credentials: true,
     })
   );
 
-  // Create and configure Apollo Server
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-  // backend/src/index.js (excerpt)
-context: ({ req }) => {
-  const token = req.headers.authorization || '';
-  let userContext = {};
-  if (token.startsWith("Bearer ")) {
-    try {
-      const payload = verifyToken(token.replace("Bearer ", ""));
-      console.log("Decoded token payload:", payload); // Should log a valid payload
-      userContext.user = payload;
-    } catch (e) {
-      console.error("Invalid token", e);
-    }
-  }
-  return { ...userContext, req };
-}
-
-    
+    context: ({ req }) => {
+      const token = req.headers.authorization || '';
+      let userContext = {};
+      if (token.startsWith('Bearer ')) {
+        try {
+          const payload = verifyToken(token.replace('Bearer ', ''));
+          console.log('Decoded token payload:', payload);
+          userContext.user = payload;
+        } catch (e) {
+          console.error('Invalid token', e);
+        }
+      }
+      return { ...userContext, req };
+    },
   });
 
   await server.start();
@@ -58,10 +57,8 @@ context: ({ req }) => {
     process.exit(1);
   }
 
-  // Serve the built React files from ../../frontend/build
+  // Serve React from /frontend/build
   app.use(express.static(path.join(__dirname, '../../frontend/build')));
-
-  // For React Router, catch-all route
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
   });
