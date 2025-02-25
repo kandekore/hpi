@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const stripeService = require('../services/stripeService');
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 module.exports = {
     Mutation: {
@@ -9,8 +10,8 @@ module.exports = {
         const currentUser = await User.findById(user.userId);
         if (!currentUser) throw new Error('User not found');
   
-        const successUrl = 'http://localhost:3000/credits?status=success';
-        const cancelUrl = 'http://localhost:3000/credits?status=cancel';
+        const successUrl = `${FRONTEND_URL}/credits?status=success`;
+        const cancelUrl = `${FRONTEND_URL}/credits?status=cancel`;
   
         const session = await stripeService.createCheckoutSession(
           creditType,
