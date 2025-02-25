@@ -57,6 +57,10 @@ async function startServer() {
     process.exit(1);
   }
 
+  const webhookRoutes = require('./webhook'); // or wherever webhook.js is located
+app.use('/webhook', webhookRoutes);
+
+
   // Serve React from /frontend/build
   app.use(express.static(path.join(__dirname, '../../frontend/build')));
   app.get('*', (req, res) => {
