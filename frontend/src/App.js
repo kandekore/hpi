@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client';
 import { client } from './apolloClient';  // <-- Make sure this import path is correct
-
+import MOTPage from './pages/MOTPage';    // new MOT page
 import HomePage from './pages/HomePage';
 import VdiCheckPage from './pages/VdiCheckPage';
 import CreditManagementPage from './pages/CreditManagementPage';
@@ -28,6 +28,8 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/vdi" element={<VdiCheckPage />} />
+            <Route path="/mot" element={<MOTPage />} />
+            <Route path="/credits" element={<CreditManagementPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />

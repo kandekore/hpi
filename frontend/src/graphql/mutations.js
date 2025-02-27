@@ -1,3 +1,4 @@
+// frontend/src/graphql/mutations.js
 import { gql } from '@apollo/client';
 
 export const REGISTER = gql`
@@ -15,5 +16,25 @@ export const LOGIN = gql`
 export const CREATE_CREDIT_PURCHASE_SESSION = gql`
   mutation CreateCreditPurchaseSession($creditType: String!, $quantity: Int!) {
     createCreditPurchaseSession(creditType: $creditType, quantity: $quantity)
+  }
+`;
+
+// The useMOTCredit mutation
+// export const USE_MOT_CREDIT = gql`
+//   mutation UseMOTCredit {
+//     useMOTCredit {
+//       id
+//       motCredits
+//       freeMotChecksUsed
+//     }
+//   }
+// `;
+export const PAY_MOT_CREDIT = gql`
+  mutation PayMotCredit {
+    payMOTCredit {
+      id
+      motCredits
+      freeMotChecksUsed
+    }
   }
 `;

@@ -1,3 +1,4 @@
+// backend/src/schema.js
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
@@ -21,22 +22,27 @@ const typeDefs = gql`
   scalar JSON
 
   type Query {
-    getUserProfile: User
     motCheck(reg: String!): JSON
-    vdiCheck(reg: String!): JSON
+    getUserProfile: User
     getSearchHistory: [SearchRecord]
-
-    # Valuation field
+    vdiCheck(reg: String!): JSON
     valuation(reg: String!): JSON
+    motCheckPaid(reg: String!): JSON
   }
 
-  type Mutation {
-    register(email: String!, password: String!): String
-    login(email: String!, password: String!): String
+type Mutation {
+      
+  payMOTCredit: User     
 
-    createCreditPurchaseSession(creditType: String!, quantity: Int!): String
-    finalizeCreditPurchase(creditType: String!, quantity: Int!): User
-  }
+  register(email: String!, password: String!): String
+  login(email: String!, password: String!): String
+  createCreditPurchaseSession(creditType: String!, quantity: Int!): String
+  finalizeCreditPurchase(creditType: String!, quantity: Int!): User
+}
+
+  
 `;
+
+
 
 module.exports = typeDefs;

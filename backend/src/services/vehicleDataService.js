@@ -28,4 +28,20 @@ module.exports = {
     // Return the entire "Response" object
     return data.Response;
   },
+  // backend/src/services/vehicleDataService.js
+// (Excerpt showing new function)
+
+async imageCheck(reg) {
+  // Example endpoint for VehicleImageData:
+  const url = `${BASE_URL}/VehicleImageData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error('Vehicle Image API call failed');
+  }
+  const data = await res.json();
+  // Return data.Response to match your style
+  return data.Response;
+},
+
 };
+
