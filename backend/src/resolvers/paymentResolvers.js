@@ -28,6 +28,7 @@ module.exports = {
         return session.url;
       }
     },
+    Query: {
     async getTransactions(_, __, { user }) {
       // Ensure the user is logged in
       if (!user) throw new Error('Not authenticated');
@@ -39,6 +40,7 @@ module.exports = {
       const transactions = await Transaction.find({ userId: currentUser._id }).sort({ timestamp: -1 });
       return transactions;
     },
+  }
   };
 
 // module.exports = {
