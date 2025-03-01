@@ -19,10 +19,21 @@ const typeDefs = gql`
     responseData: JSON
   }
 
+  type Transaction {
+  id: ID!
+  transactionId: String
+  creditsPurchased: Int
+  creditType: String
+  amountPaid: Float
+  timestamp: String
+}
+
   scalar JSON
 
   type Query {
+    getSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON
+      getTransactions: [Transaction]
     getUserProfile: User
     getSearchHistory: [SearchRecord]
     vdiCheck(reg: String!): JSON

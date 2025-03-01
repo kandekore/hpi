@@ -27,7 +27,18 @@ module.exports = {
   
         return session.url;
       }
-    }
+    },
+    async getTransactions(_, __, { user }) {
+      // Ensure the user is logged in
+      if (!user) throw new Error('Not authenticated');
+
+      const currentUser = await User.findById(user.userId);
+      if (!currentUser) throw new Error('User not found');
+
+      // Fetch all transactions belonging to this user
+      const transactions = await Transaction.find({ userId: currentUser._id }).sort({ timestamp: -1 });
+      return transactions;
+    },
   };
 
 // module.exports = {

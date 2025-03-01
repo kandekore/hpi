@@ -10,6 +10,7 @@ import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Layout from './components/Layout';
+import SearchDetailPage from './pages/SearchDetailPage';
 
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
@@ -33,6 +34,7 @@ function App() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/search/:id" element={<SearchDetailPage />} />
 
             {/* Protected Route */}
             <Route 

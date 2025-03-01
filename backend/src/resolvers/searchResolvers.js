@@ -7,31 +7,40 @@ const FREE_MOT_CHECKS = 3;
 
 module.exports = {
   Query: {
-    async motCheck(_, { reg }, { user }) {
-      if (!user) throw new Error('Not authenticated.');
-      const currentUser = await User.findById(user.userId);
-      if (!currentUser) throw new Error('User not found.');
+// searchResolvers.js
+async motCheck(_, { reg }, { user }) {
+  if (!user) throw new Error('Not authenticated');
+  const currentUser = await User.findById(user.userId);
+  if (!currentUser) throw new Error('User not found');
 
-      if (currentUser.freeMotChecksUsed < FREE_MOT_CHECKS) {
-        currentUser.freeMotChecksUsed += 1;
-      } else if (currentUser.motCredits > 0) {
-        currentUser.motCredits -= 1;
-      } else {
-        throw new Error('No free checks or MOT credits available. Please purchase credits.');
-      }
+  // If you still want to track usage:
+  // If free checks remain, no credit used. Otherwise, deduct credit.
+  // But either way, we do NOT remove advanced data from the response.
+  if (currentUser.freeMotChecksUsed < 3) {
+    currentUser.freeMotChecksUsed++;
+  } else if (currentUser.motCredits > 0) {
+    currentUser.motCredits--;
+  } else {
+    throw new Error('No free checks or paid credits left.');
+  }
 
-      const data = await vehicleDataService.motCheck(reg);
-      const record = await SearchRecord.create({
-        userId: currentUser._id,
-        vehicleReg: reg,
-        searchType: 'MOT',
-        responseData: data,
-      });
-      currentUser.searchHistory.push(record._id);
-      await currentUser.save();
+  const fullData = await vehicleDataService.motCheck(reg); 
+  // Return the entire result with advanced info
+  // No code to remove RecordList
 
-      return data;
-    },
+  // Log search
+  const record = await SearchRecord.create({
+    userId: currentUser._id,
+    vehicleReg: reg,
+    searchType: 'MOT',
+    responseData: fullData
+  });
+  currentUser.searchHistory.push(record._id);
+  await currentUser.save();
+
+  // Return the entire data
+  return fullData;
+},
 
     async vdiCheck(_, { reg }, { user }) {
       if (!user) throw new Error('Not authenticated');
@@ -66,6 +75,27 @@ module.exports = {
       const currentUser = await User.findById(user.userId).populate('searchHistory');
       return currentUser.searchHistory;
     },
+
+    // e.g. inside module.exports = { Query: {...}, Mutation: {...} }
+
+async getSearchById(_, { id }, { user }) {
+  if (!user) throw new Error("Not authenticated");
+
+  // Attempt to find the record by its _id
+  const record = await SearchRecord.findById(id);
+  if (!record) {
+    throw new Error("No search record found for that ID");
+  }
+
+  // Optionally check if record.userId matches user.userId
+  // If you want to ensure the user can only see their own searches
+  if (record.userId.toString() !== user.userId) {
+    throw new Error("Not authorized to view this record");
+  }
+
+  return record;
+},
+
   },
 Mutation: {
  // in your Mutation block

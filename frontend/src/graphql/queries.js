@@ -38,3 +38,41 @@ export const VALUATION_CHECK = gql`
   }
 `;
 
+// Existing
+export const GET_SEARCH_HISTORY = gql`
+  query GetSearchHistory {
+    getSearchHistory {
+      id
+      vehicleReg
+      searchType
+      timestamp
+      responseData
+    }
+  }
+`;
+
+// New query if you have a backend resolver for transactions
+export const GET_TRANSACTIONS = gql`
+  query GetTransactions {
+    getTransactions {
+      id
+      transactionId
+      creditsPurchased
+      creditType
+      amountPaid
+      timestamp
+    }
+  }
+`;
+
+export const GET_SEARCH_BY_ID = gql`
+  query GetSearchById($id: ID!) {
+    getSearchById(id: $id) {
+      id
+      vehicleReg
+      searchType
+      timestamp
+      responseData
+    }
+  }
+`;
