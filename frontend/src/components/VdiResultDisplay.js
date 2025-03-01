@@ -11,40 +11,33 @@ import React from 'react';
  *     "WriteOffDate": null,
  *     "Make": "VOLKSWAGEN",
  *     "EngineCapacity": 1968,
- *     "FinanceRecordList": [],
- *     "WrittenOff": false,
- *     "VicTestDate": null,
- *     "WriteOffRecordList": null,
- *     "TransmissionType": "Semi Auto",
- *     "PreviousKeepers": null,
  *     ...
- *     "MileageRecordList": [
- *       {
- *         "DateOfInformation": "30/09/2022",
- *         "SourceOfInformation": "MOT",
- *         "Mileage": 104600
- *       },
- *       ...
- *     ],
- *     "HighRiskRecordCount": 0,
- *     "Stolen": false,
+ *     "VehicleImages": {
+ *       "ImageDetailsCount": 1,
+ *       "ImageDetailsList": [
+ *         {
+ *           "ImageUrl": "https://cdn2.vdicheck.com/VehicleImages/Image.ashx?Id=...",
+ *           "ExpiryDate": "2025-02-27T00:00:00",
+ *           "ViewPoint": "Exterior_Angle270"
+ *         }
+ *       ]
+ *     },
  *     ...
- *     "Colour": "GREY",
- *     "PlateChangeCount": 0,
- *     "PreviousKeeperCount": 2,
- *     "FinanceRecordCount": 0,
- *     "YearOfManufacture": "2012"
  *   }
  * }
  */
 
 function VdiResultDisplay({ data }) {
+  console.log("VDI Data =>", data);
+
   // If no data is given, show an alert
   if (!data) {
     return <div className="alert alert-warning">No VDI data available.</div>;
   }
 
   const { StatusCode, StatusMessage, DataItems } = data;
+
+  // If DataItems is missing, we can't display the fields
   if (!DataItems) {
     return (
       <div className="alert alert-info">
@@ -53,9 +46,12 @@ function VdiResultDisplay({ data }) {
     );
   }
 
-  // Destructure every field individually to display them in a table row.
-  // Feel free to remove or reorder these as you like.
+  // Extract relevant fields from DataItems, including VehicleImages
   const {
+    // Image stuff
+    VehicleImages,
+
+    // Various fields below
     DateFirstRegisteredUk,
     WriteOffDate,
     Make,
@@ -105,7 +101,7 @@ function VdiResultDisplay({ data }) {
     ExportDate,
     VinLast5,
     VicTestResult,
-    Data, 
+    Data,
     DateFirstRegistered,
     Colour,
     PlateChangeCount,
@@ -113,15 +109,34 @@ function VdiResultDisplay({ data }) {
     FinanceRecordCount,
     YearOfManufacture,
   } = DataItems;
+  const imageList = data?.DataItems?.VehicleImages?.ImageDetailsList;
+  console.log("imageList =>", imageList);
+    const vehicleImageUrl =imageList[0].ImageUrl;
 
+      console.log("vehicleImageUrl =>", vehicleImageUrl);
   return (
     <div className="card p-3 mb-4 shadow-sm">
       <h4 className="mb-3">VDI Check Details</h4>
 
       {/* Show top-level status info */}
       <div className="mb-3">
-        <span className="badge bg-secondary me-2">Code: {StatusCode}</span>
-        <span className="badge bg-success">Message: {StatusMessage}</span>
+        <span className="badge bg-secondary me-2">
+          Code: {StatusCode}
+        </span>
+        <span className="badge bg-success">
+          Message: {StatusMessage}
+        </span>
+      </div>
+
+      {/* Display the image (if any) above the table */}
+      <div className="mb-4 text-center">
+      <img
+      src={vehicleImageUrl}
+      alt="Vehicle"
+      className="img-fluid"
+      style={{ maxHeight: '300px', objectFit: 'contain' }}
+    />
+    
       </div>
 
       {/* Big table of every field from DataItems */}
@@ -134,7 +149,6 @@ function VdiResultDisplay({ data }) {
             </tr>
           </thead>
           <tbody>
-
             {/* Example row for each field */}
             <tr>
               <td>DateFirstRegisteredUk</td>
@@ -256,31 +270,33 @@ function VdiResultDisplay({ data }) {
               <td>StolenDate</td>
               <td>{StolenDate ?? 'N/A'}</td>
             </tr>
+
+            {/* Example custom table within a table for MileageRecordList */}
             <tr>
-            <td>Mileage at MOT's</td>
-            <td>
-              {MileageRecordList && MileageRecordList.length > 0 ? (
-                <table className="table table-sm mb-0">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Mileage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {MileageRecordList.map((record, idx) => (
-                      <tr key={idx}>
-                        <td>{record.DateOfInformation ?? 'N/A'}</td>
-                        <td>{record.Mileage ?? 'N/A'}</td>
+              <td>Mileage at MOT's</td>
+              <td>
+                {MileageRecordList && MileageRecordList.length > 0 ? (
+                  <table className="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Mileage</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                'N/A'
-              )}
-            </td>
-          </tr>
+                    </thead>
+                    <tbody>
+                      {MileageRecordList.map((record, idx) => (
+                        <tr key={idx}>
+                          <td>{record.DateOfInformation ?? 'N/A'}</td>
+                          <td>{record.Mileage ?? 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  'N/A'
+                )}
+              </td>
+            </tr>
 
             <tr>
               <td>LatestColourChangeDate</td>

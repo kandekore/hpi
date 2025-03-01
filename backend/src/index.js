@@ -19,7 +19,8 @@ async function startServer() {
         'http://localhost:3000',
         'http://192.168.1.9:3000',
         'https://studio.apollographql.com',
-        'http://192.168.1.9:4000', // no leading space
+        'http://192.168.1.9:4000',
+        'https://cdn2.vdicheck.com', 
         'http://localhost:4000'
       ],
       credentials: true,

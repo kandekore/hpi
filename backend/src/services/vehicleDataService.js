@@ -1,4 +1,4 @@
-const fetch = require('node-fetch'); 
+const fetch = require('node-fetch');  
 const API_KEY = process.env.VEHICLE_DATA_API_KEY;
 
 const BASE_URL = 'https://uk1.ukvehicledata.co.uk/api/datapackage';

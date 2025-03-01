@@ -38,7 +38,8 @@ function VdiCheckPage() {
   };
 
   // Extract some fields from VDI data
-  const vehicleImageUrl = vdiData?.vdiCheck?.DataItems?.VehicleImageUrl || '/placeholder-vehicle.jpg';
+  const imageList = vdiData?.vdiCheck?.DataItems?.VehicleImages?.ImageDetailsList;
+  const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
   const isWrittenOff = vdiData?.vdiCheck?.DataItems?.WrittenOff || false;
   const isStolen = vdiData?.vdiCheck?.DataItems?.Stolen || false;
   const yearOfManufacture = vdiData?.vdiCheck?.DataItems?.YearOfManufacture || 'N/A';

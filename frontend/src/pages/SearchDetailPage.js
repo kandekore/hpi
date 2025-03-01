@@ -6,6 +6,32 @@ import { GET_SEARCH_BY_ID, GET_USER_PROFILE } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import VdiResultDisplay from '../components/VdiResultDisplay';
 
+function formatTimestamp(ts) {
+  if (!ts) return 'N/A';
+
+  // If it's purely digits => parse as integer (epoch ms)
+  if (/^\d+$/.test(ts)) {
+    const ms = Number(ts);
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleString();
+    }
+    return 'N/A';
+  }
+
+  // Otherwise, handle potential ISO string with +00:00
+  let trimmed = ts.trim();
+  if (trimmed.endsWith('+00:00')) {
+    trimmed = trimmed.replace('+00:00', 'Z');
+  }
+
+  const d = new Date(trimmed);
+  if (isNaN(d.getTime())) {
+    return 'N/A';
+  }
+  return d.toLocaleString();
+}
+
 function SearchDetailPage() {
   const { id } = useParams();
 
@@ -43,7 +69,9 @@ function SearchDetailPage() {
 
   // Basic info about the search
   const { vehicleReg, searchType, timestamp, responseData } = record;
-  const dateString = new Date(timestamp).toLocaleString();
+
+  // Use our custom function instead of new Date(...)
+  const dateString = formatTimestamp(timestamp);
 
   return (
     <div className="container my-4">

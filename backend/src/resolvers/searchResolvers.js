@@ -42,28 +42,51 @@ async motCheck(_, { reg }, { user }) {
   return fullData;
 },
 
-    async vdiCheck(_, { reg }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+async vdiCheck(_, { reg }, { user }) {
+  if (!user) throw new Error('Not authenticated');
 
-      const currentUser = await User.findById(user.userId);
-      if (!currentUser) throw new Error('User not found');
-      if (currentUser.vdiCredits < 1) {
-        throw new Error('No VDI credits available');
-      }
+  const currentUser = await User.findById(user.userId);
+  if (!currentUser) throw new Error('User not found');
+  if (currentUser.vdiCredits < 1) {
+    throw new Error('No VDI credits available');
+  }
 
-      currentUser.vdiCredits -= 1;
-      const data = await vehicleDataService.vdiCheck(reg);
+  // Deduct 1 credit
+  currentUser.vdiCredits -= 1;
 
-      const record = await SearchRecord.create({
-        userId: currentUser._id,
-        vehicleReg: reg,
-        searchType: 'VDI',
-        responseData: data,
-      });
-      currentUser.searchHistory.push(record._id);
-      await currentUser.save();
-      return data;
+  // 1) Get the normal VDI data
+  const vdiResponse = await vehicleDataService.vdiCheck(reg);
+
+  // 2) Also get the image data
+  const imageResponse = await vehicleDataService.imageCheck(reg);
+
+  // 3) Merge the DataItems
+  //    So that the final "DataItems" includes the normal VDI fields (like `Make`, `Model`, etc.)
+  //    AND also has `VehicleImages` with `.ImageDetailsList`.
+  const mergedResponse = {
+    ...vdiResponse, // includes StatusCode, StatusMessage, DataItems, etc.
+    DataItems: {
+      // Start with the VDI DataItems
+      ...vdiResponse.DataItems,
+      // Then also merge in the image DataItems 
+      // (which typically has "VehicleImages.ImageDetailsList" etc.)
+      ...imageResponse.DataItems, 
     },
+  };
+
+  // Log the search
+  const record = await SearchRecord.create({
+    userId: currentUser._id,
+    vehicleReg: reg,
+    searchType: 'VDI',
+    responseData: mergedResponse,
+  });
+
+  currentUser.searchHistory.push(record._id);
+  await currentUser.save();
+
+  return mergedResponse;
+},        
 
     async valuation(_, { reg }) {
       const data = await vehicleDataService.valuationCheck(reg);
