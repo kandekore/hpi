@@ -358,7 +358,10 @@ function CreditManagementPage() {
                           <td>{tx.transactionId}</td>
                           <td>{tx.creditsPurchased}</td>
                           <td>{tx.creditType}</td>
-                          <td>{tx.amountPaid}</td>
+                          <td>
+  £{(tx.amountPaid / 100).toFixed(2)}
+</td>
+
                           <td>{dateStr}</td>
                         </tr>
                       );
