@@ -99,7 +99,21 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
                   {valuationError.message}
                 </div>
               )}
-            </div>
+            </div><h1>Your Comprehensive Vehicle History Solution</h1>
+            <p>
+              Welcome to our Car History Check service, the easiest way to get peace of
+              mind before purchasing a used car. Here, we combine MOT records, vehicle
+              data intelligence (VDI) checks, and more, to give you a complete snapshot
+              of a car’s background. Wondering if that dream car has outstanding finance
+              or hidden damage? Our reports reveal all the crucial details so you can
+              buy with confidence.
+            </p>
+            <p>
+              Whether you’re looking for a simple MOT history or an in-depth VDI check,
+              we’re here to make sure you never drive away with a risky purchase.
+              Explore our services below and see how we can help you make smarter
+              decisions when shopping for your next vehicle.
+            </p>
           </div>
         </div>
 
