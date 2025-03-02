@@ -19,8 +19,9 @@ const typeDefs = gql`
     responseData: JSON
   }
 
-  type Transaction {
+type Transaction {
   id: ID!
+  userId: ID!
   transactionId: String
   creditsPurchased: Int
   creditType: String
@@ -33,7 +34,7 @@ const typeDefs = gql`
   type Query {
     getSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON
-      getTransactions: [Transaction]
+    getTransactions: [Transaction]
     getUserProfile: User
     getSearchHistory: [SearchRecord]
     vdiCheck(reg: String!): JSON
