@@ -8,6 +8,52 @@ import {
 } from '../graphql/queries';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
 
+/*************************************************************
+ * parse +00:00 => Z, or numeric timestamps as epoch ms
+ * Adds console logs to debug each step
+ *************************************************************/
+function formatTimestamp(ts) {
+  if (!ts) {
+    console.log("formatTimestamp => no timestamp provided");
+    return 'N/A';
+  }
+
+  console.log("formatTimestamp => original:", ts);
+
+  // 1) If it's purely digits => parse as integer (epoch ms)
+  if (/^\d+$/.test(ts)) {
+    const ms = Number(ts);
+    console.log("formatTimestamp => recognized numeric ms =>", ms);
+    if (!isNaN(ms)) {
+      const d = new Date(ms);
+      if (!isNaN(d.getTime())) {
+        const localStr = d.toLocaleString();
+        console.log("formatTimestamp => parsed numeric date =>", localStr);
+        return localStr;
+      }
+    }
+    console.log("formatTimestamp => numeric parse failed =>", ts);
+    return 'N/A';
+  }
+
+  // 2) Else handle potential ISO string with +00:00
+  let trimmed = ts.trim();
+  if (trimmed.endsWith('+00:00')) {
+    trimmed = trimmed.replace('+00:00', 'Z');
+    console.log("formatTimestamp => replaced +00:00 -> Z =>", trimmed);
+  }
+
+  const d = new Date(trimmed);
+  if (isNaN(d.getTime())) {
+    console.log("formatTimestamp => invalid date =>", trimmed);
+    return 'N/A';
+  }
+
+  const localStr = d.toLocaleString();
+  console.log("formatTimestamp => final parsed =>", localStr);
+  return localStr;
+}
+
 function CreditManagementPage() {
   // 1) State for credits
   const [motCredits, setMotCredits] = useState(0);
@@ -196,50 +242,93 @@ function CreditManagementPage() {
           </div>
         )}
 
-        {/* TAB 2: SEARCH HISTORY */}
-        {activeTab === 'history' && (
-          <div>
-            <h2>Search History</h2>
-            {historyLoading && (
-              <div className="text-center my-3">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading history...</span>
-                </div>
+       {/* TAB 2: SEARCH HISTORY */}
+       {activeTab === 'history' && (
+        <div>
+          <h2>Search History</h2>
+          {historyLoading && (
+            <div className="text-center my-3">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading history...</span>
               </div>
-            )}
-            {historyError && (
-              <div className="alert alert-danger">
-                Error: {historyError.message}
-              </div>
-            )}
+            </div>
+          )}
+          {historyError && (
+            <div className="alert alert-danger">
+              Error: {historyError.message}
+            </div>
+          )}
 
-            {historyData && historyData.getSearchHistory && (
-              <div className="table-responsive">
-                <table className="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Vehicle Reg</th>
-                      <th>Search Type</th>
-                      <th>Date</th>
-                      <th>Make &amp; Model</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historyData.getSearchHistory.map((record) => {
-                      // ... existing logic ...
-                      return (
-                        <tr key={record.id}>
-                          {/* relevant columns */}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+          {historyData && historyData.getSearchHistory && (
+            <div className="table-responsive">
+              <table className="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Vehicle Reg</th>
+                    <th>Search Type</th>
+                    <th>Date</th>
+                    <th>Make &amp; Model</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyData.getSearchHistory.map((record) => {
+                    console.log("SearchRecord =>", record);
+
+                    // If record.timestamp is absent, try record.responseData?.timestamp
+                    const rawTimestamp =
+                      record.timestamp || record.responseData?.timestamp;
+                    console.log("rawTimestamp =>", rawTimestamp);
+
+                    const dateStr = formatTimestamp(rawTimestamp);
+                    console.log("Final dateStr =>", dateStr);
+
+                    // MOT vs VDI extraction
+                    const dataItems = record.responseData?.DataItems || {};
+                    const motMake = dataItems.VehicleDetails?.Make;
+                    const motModel = dataItems.VehicleDetails?.Model;
+                    const vdiMake = dataItems.Make;
+                    const vdiModel = dataItems.Model;
+
+                    let makeModel = 'N/A';
+                    if (motMake && motModel) {
+                      makeModel = `${motMake} ${motModel}`;
+                    } else if (vdiMake && vdiModel) {
+                      makeModel = `${vdiMake} ${vdiModel}`;
+                    } else if (dataItems.VehicleDescription) {
+                      makeModel = dataItems.VehicleDescription;
+                    }
+
+                    console.log("Final makeModel =>", makeModel);
+
+                    return (
+                      <tr key={record.id}>
+                        <td>{record.vehicleReg}</td>
+                        <td>{record.searchType}</td>
+                        <td>{dateStr}</td>
+                        <td>{makeModel}</td>
+                        <td>
+                          {/* 
+                            "View" button linking to /search/:id 
+                            You need a <Route path="/search/:id" element={<SearchDetailPage />} /> 
+                          */}
+                          <Link
+                            to={`/search/${record.id}`}
+                            className="btn btn-sm btn-outline-primary"
+                          >
+                            View
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
 
         {/* TAB 3: TRANSACTIONS */}
         {activeTab === 'transactions' && (
