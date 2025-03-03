@@ -361,16 +361,21 @@ function CreditManagementPage() {
                   </thead>
                   <tbody>
                     {transactionsData.getTransactions.map((tx) => {
-                      // existing logic ...
+                      // 1) JS statements
+                      const rawTimestamp = tx.timestamp || tx.responseData?.timestamp;
+                      console.log('rawTimestamp =>', rawTimestamp);
+            
+                      const dateStri = formatTimestamp(rawTimestamp);
+                      console.log('Final dateStr =>', dateStri);
+            
+                      // 2) Return JSX
                       return (
                         <tr key={tx.id}>
                           <td>{tx.transactionId}</td>
                           <td>{tx.creditsPurchased}</td>
                           <td>{tx.creditType}</td>
-                          <td>
-                            £{(tx.amountPaid / 100).toFixed(2)}
-                          </td>
-                          <td>{/* date formatting logic */}</td>
+                          <td>£{(tx.amountPaid / 100).toFixed(2)}</td>
+                          <td>{dateStri}</td>
                         </tr>
                       );
                     })}
@@ -378,6 +383,7 @@ function CreditManagementPage() {
                 </table>
               </div>
             )}
+            
           </div>
         )}
       </div>
