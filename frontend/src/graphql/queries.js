@@ -8,6 +8,7 @@ export const GET_USER_PROFILE = gql`
       email
       motCredits
       vdiCredits
+      hpiCredits
       freeMotChecksUsed
     }
   }
@@ -74,5 +75,11 @@ export const GET_SEARCH_BY_ID = gql`
       timestamp
       responseData
     }
+  }
+`;
+
+export const HPI_CHECK = gql`
+  query HpiCheck($reg: String!) {
+    hpiCheck(reg: $reg)
   }
 `;

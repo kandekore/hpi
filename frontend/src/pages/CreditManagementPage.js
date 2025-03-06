@@ -58,6 +58,7 @@ function CreditManagementPage() {
   // 1) State for credits
   const [motCredits, setMotCredits] = useState(0);
   const [vdiCredits, setVdiCredits] = useState(0);
+  const [hpiCredits, setHpiCredits] = useState(0); // <-- NEW
   const [freeMotChecksUsed, setFreeMotChecksUsed] = useState(0);
 
   // 2) Fetch user profile
@@ -71,10 +72,11 @@ function CreditManagementPage() {
   // 3) Once profileData is loaded or updated, sync to state
   useEffect(() => {
     if (profileData && profileData.getUserProfile) {
-      const { motCredits, vdiCredits, freeMotChecksUsed } = profileData.getUserProfile;
+      const { motCredits, vdiCredits, freeMotChecksUsed, hpiCredits } = profileData.getUserProfile;
       setMotCredits(motCredits);
       setVdiCredits(vdiCredits);
       setFreeMotChecksUsed(freeMotChecksUsed);
+      setHpiCredits(hpiCredits || 0); // fallback if undefined
     }
   }, [profileData]);
 
@@ -176,6 +178,9 @@ function CreditManagementPage() {
                   <strong>VDI Credits:</strong> {vdiCredits}
                 </p>
                 <p className="card-text">
+                  <strong>HPI Credits:</strong> {hpiCredits}
+                </p>
+                <p className="card-text">
                   <strong>Free MOT Checks Used:</strong> {freeMotChecksUsed} / 3
                 </p>
               </div>
@@ -234,6 +239,34 @@ function CreditManagementPage() {
               ))}
             </div>
 
+            {/* 30% Higher Price Than VDI */}
+            <h2 className="mt-5">Purchase Full HPI Credits</h2>
+            <div className="row">
+              {[
+                { quantity: 1, price: '£9.09' },   // ~30% higher than £6.99
+                { quantity: 10, price: '£78.00' }, // ~30% higher than £60
+                { quantity: 20, price: '£130.00' },// ~30% higher than £100
+                { quantity: 50, price: '£260.00' },// ~30% higher than £200
+                { quantity: 100, price: '£455.00' },// ~30% higher than £350
+              ].map((pkg) => (
+                <div key={pkg.quantity} className="col-md-3 mb-3">
+                  <div className="card text-center h-100">
+                    <div className="card-header">HPI Credits</div>
+                    <div className="card-body">
+                      <h5 className="card-title">{pkg.quantity} Checks</h5>
+                      <p className="card-text">{pkg.price}</p>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => handlePurchase('HPI', pkg.quantity)}
+                      >
+                        Buy Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="card mt-4 border-secondary">
               <div className="card-body text-center">
                 [Ad Banner]
@@ -242,93 +275,92 @@ function CreditManagementPage() {
           </div>
         )}
 
-       {/* TAB 2: SEARCH HISTORY */}
-       {activeTab === 'history' && (
-        <div>
-          <h2>Search History</h2>
-          {historyLoading && (
-            <div className="text-center my-3">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading history...</span>
+        {/* TAB 2: SEARCH HISTORY */}
+        {activeTab === 'history' && (
+          <div>
+            <h2>Search History</h2>
+            {historyLoading && (
+              <div className="text-center my-3">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading history...</span>
+                </div>
               </div>
-            </div>
-          )}
-          {historyError && (
-            <div className="alert alert-danger">
-              Error: {historyError.message}
-            </div>
-          )}
+            )}
+            {historyError && (
+              <div className="alert alert-danger">
+                Error: {historyError.message}
+              </div>
+            )}
 
-          {historyData && historyData.getSearchHistory && (
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Vehicle Reg</th>
-                    <th>Search Type</th>
-                    <th>Date</th>
-                    <th>Make &amp; Model</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historyData.getSearchHistory.map((record) => {
-                    console.log("SearchRecord =>", record);
+            {historyData && historyData.getSearchHistory && (
+              <div className="table-responsive">
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Vehicle Reg</th>
+                      <th>Search Type</th>
+                      <th>Date</th>
+                      <th>Make &amp; Model</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyData.getSearchHistory.map((record) => {
+                      console.log("SearchRecord =>", record);
 
-                    // If record.timestamp is absent, try record.responseData?.timestamp
-                    const rawTimestamp =
-                      record.timestamp || record.responseData?.timestamp;
-                    console.log("rawTimestamp =>", rawTimestamp);
+                      // If record.timestamp is absent, try record.responseData?.timestamp
+                      const rawTimestamp =
+                        record.timestamp || record.responseData?.timestamp;
+                      console.log("rawTimestamp =>", rawTimestamp);
 
-                    const dateStr = formatTimestamp(rawTimestamp);
-                    console.log("Final dateStr =>", dateStr);
+                      const dateStr = formatTimestamp(rawTimestamp);
+                      console.log("Final dateStr =>", dateStr);
 
-                    // MOT vs VDI extraction
-                    const dataItems = record.responseData?.DataItems || {};
-                    const motMake = dataItems.VehicleDetails?.Make;
-                    const motModel = dataItems.VehicleDetails?.Model;
-                    const vdiMake = dataItems.Make;
-                    const vdiModel = dataItems.Model;
+                      // MOT vs VDI extraction
+                      const dataItems = record.responseData?.DataItems || {};
+                      const motMake = dataItems.VehicleDetails?.Make;
+                      const motModel = dataItems.VehicleDetails?.Model;
+                      const vdiMake = dataItems.Make;
+                      const vdiModel = dataItems.Model;
 
-                    let makeModel = 'N/A';
-                    if (motMake && motModel) {
-                      makeModel = `${motMake} ${motModel}`;
-                    } else if (vdiMake && vdiModel) {
-                      makeModel = `${vdiMake} ${vdiModel}`;
-                    } else if (dataItems.VehicleDescription) {
-                      makeModel = dataItems.VehicleDescription;
-                    }
+                      let makeModel = 'N/A';
+                      if (motMake && motModel) {
+                        makeModel = `${motMake} ${motModel}`;
+                      } else if (vdiMake && vdiModel) {
+                        makeModel = `${vdiMake} ${vdiModel}`;
+                      } else if (dataItems.VehicleDescription) {
+                        makeModel = dataItems.VehicleDescription;
+                      }
 
-                    console.log("Final makeModel =>", makeModel);
+                      console.log("Final makeModel =>", makeModel);
 
-                    return (
-                      <tr key={record.id}>
-                        <td>{record.vehicleReg}</td>
-                        <td>{record.searchType}</td>
-                        <td>{dateStr}</td>
-                        <td>{makeModel}</td>
-                        <td>
-                          {/* 
-                            "View" button linking to /search/:id 
-                            You need a <Route path="/search/:id" element={<SearchDetailPage />} /> 
-                          */}
-                          <Link
-                            to={`/search/${record.id}`}
-                            className="btn btn-sm btn-outline-primary"
-                          >
-                            View
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
+                      return (
+                        <tr key={record.id}>
+                          <td>{record.vehicleReg}</td>
+                          <td>{record.searchType}</td>
+                          <td>{dateStr}</td>
+                          <td>{makeModel}</td>
+                          <td>
+                            {/* 
+                              "View" button linking to /search/:id 
+                              You need a <Route path="/search/:id" element={<SearchDetailPage />} /> 
+                            */}
+                            <Link
+                              to={`/search/${record.id}`}
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              View
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TAB 3: TRANSACTIONS */}
         {activeTab === 'transactions' && (
@@ -361,14 +393,12 @@ function CreditManagementPage() {
                   </thead>
                   <tbody>
                     {transactionsData.getTransactions.map((tx) => {
-                      // 1) JS statements
                       const rawTimestamp = tx.timestamp || tx.responseData?.timestamp;
                       console.log('rawTimestamp =>', rawTimestamp);
-            
+
                       const dateStri = formatTimestamp(rawTimestamp);
                       console.log('Final dateStr =>', dateStri);
-            
-                      // 2) Return JSX
+
                       return (
                         <tr key={tx.id}>
                           <td>{tx.transactionId}</td>
@@ -383,7 +413,6 @@ function CreditManagementPage() {
                 </table>
               </div>
             )}
-            
           </div>
         )}
       </div>

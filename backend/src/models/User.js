@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
   freeMotChecksUsed: { type: Number, default: 0 },
   motCredits: { type: Number, default: 0 },
   vdiCredits: { type: Number, default: 0 },
+  hpiCredits: {
+  type: Number,
+  default: 0
+},
+
   searchHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SearchRecord' }]
 });
 

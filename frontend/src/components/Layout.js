@@ -40,6 +40,9 @@ function Layout({ children }) {
                 <li className="nav-item">
                 <Link className="nav-link" to="/mot">MOT Check</Link>
               </li>
+              <li className="nav-item">
+              <a className="nav-link" href="/hpi">Full HPI Check</a>
+            </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/credits">Credits</Link>
                 </li>

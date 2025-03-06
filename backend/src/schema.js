@@ -7,6 +7,7 @@ const typeDefs = gql`
     email: String!
     motCredits: Int
     vdiCredits: Int
+    hpiCredits: Int  
     freeMotChecksUsed: Int
     searchHistory: [SearchRecord]
   }
@@ -40,6 +41,9 @@ type Transaction {
     vdiCheck(reg: String!): JSON
     valuation(reg: String!): JSON
     motCheckPaid(reg: String!): JSON
+    hpiCheck(reg: String!): JSON
+    
+
   }
 
 type Mutation {

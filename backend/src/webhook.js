@@ -30,6 +30,8 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
         user.motCredits += parseInt(quantity, 10);
       } else if (creditType === 'VDI') {
         user.vdiCredits += parseInt(quantity, 10);
+      } else if (creditType === 'HPI') {
+        user.hpiCredits += parseInt(quantity, 10); // <--- handle HPI
       }
 
       // Create a transaction record

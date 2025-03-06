@@ -4,24 +4,17 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-      "postinstall": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
-      
-
-      "build-frontend": "npm run build --prefix frontend",
-  
-
-      "start-backend": "npm run start --prefix backend",
-  
-
-      "start-frontend": "npm run start --prefix frontend",
-  
-      "start": "node backend/src/index.js"
+        "postinstall": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+        "build-frontend": "npm run build --prefix frontend",
+        "start-backend": "npm run start --prefix backend",
+        "start-frontend": "npm run start --prefix frontend",
+        "start": "node backend/src/index.js"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "concurrently": "^9.1.0"
+        "classnames": "^2.5.1",
+        "concurrently": "^9.1.0"
     }
-  }
-  
+}
