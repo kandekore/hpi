@@ -22,6 +22,9 @@ export default function HpiResultDisplay({ hpiData }) {
   //   vehicleAndMotHistory,
   //   valuation,
   //   images
+
+const { motTaxStatus } = hpiData;
+
   const { vdiCheckFull, vehicleAndMotHistory, valuation, images } = hpiData;
 
   // DataItems for convenience
@@ -32,7 +35,7 @@ export default function HpiResultDisplay({ hpiData }) {
 
   // The images array might be in images?.VehicleImages?.ImageDetailsList or a similar structure
   // Example:
-  const vehicleImages = images?.VehicleImages?.ImageDetailsList || [];
+ // const vehicleImages = images?.VehicleImages?.ImageDetailsList || [];
 
   return (
     <div className="container my-4">
@@ -40,12 +43,16 @@ export default function HpiResultDisplay({ hpiData }) {
 
       {/* Vehicle Details Panel */}
       <VehicleDetails
-        dataItems={dataItems}
-        images={vehicleImages}
-      />
+      dataItems={dataItems}
+      images={images}              // pass the entire images object
+      vdiCheckFull={vdiCheckFull} // so the child can read MileageRecordList
+    />
 
       {/* "At a Glance" section => anchors to sub-panels */}
-      <AtAGlance dataItems={dataItems} motHistory={motHistory} />
+     <AtAGlance
+  dataItems={dataItems}
+  motTaxStatus={motTaxStatus} // pass motTaxStatus exactly
+/>
 
       {/* Valuation Summary (could be part of "At a Glance" or separate) */}
       {/* Or just a smaller summary that links to Valuation Results */}
@@ -79,7 +86,7 @@ export default function HpiResultDisplay({ hpiData }) {
       </div>
 
       <div className="mt-5" id="motHistorySection">
-        <MotResultDisplay motHistory={motHistory} />
+      <MotResultDisplay motCheck={motTaxStatus} />
       </div>
 
       <div className="mt-5" id="valuationSection">

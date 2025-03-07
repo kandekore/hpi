@@ -5,7 +5,7 @@ import { useQuery } from '@apollo/client';
 import { GET_SEARCH_BY_ID, GET_USER_PROFILE } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import VdiResultDisplay from '../components/VdiResultDisplay';
-
+import HpiResultDisplay from '../components/HpiResultDisplay';
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
 
@@ -101,6 +101,16 @@ function SearchDetailPage() {
           {/* If you have partial logic for VDI, pass userProfile similarly */}
           <VdiResultDisplay 
             data={responseData} 
+            userProfile={userProfile} 
+          />
+        </>
+      )}
+        {searchType === 'HPI' && (
+        <>
+          <h3>HPI Data</h3>
+          {/* If you have partial logic for VDI, pass userProfile similarly */}
+          <HpiResultDisplay 
+            hpidata={responseData} 
             userProfile={userProfile} 
           />
         </>

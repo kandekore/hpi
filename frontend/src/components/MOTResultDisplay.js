@@ -1,10 +1,12 @@
 import React from 'react';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 // or any date-fns / moment library for formatting dates, or a simple custom function
 
-export default function MOTResultDisplay({ motData }) {
+export default function MOTResultDisplay({ motCheck }) {
   // 1) Handle null or missing data
-  if (!motData) {
+  if (!motCheck) {
     return (
       <div className="alert alert-warning">
         No MOT data available.
@@ -12,27 +14,34 @@ export default function MOTResultDisplay({ motData }) {
     );
   }
 
-  // 2) Extract top-level status info (optional)
-  const statusCode = motData.StatusCode || 'N/A';
-  const statusMessage = motData.StatusMessage || 'N/A';
+  
 
-  // 3) Extract vehicle status info
-  const nextMotDueDate = motData.VehicleStatus?.NextMotDueDate ?? 'N/A';
-  const daysUntilNextMot = motData.VehicleStatus?.DaysUntilNextMotIsDue ?? null;
+  // In the real shape, everything is under DataItems:
+  const vehicleStatus = motCheck.DataItems?.VehicleStatus;
+  const motHistory = motCheck.DataItems?.MotHistory ?? {};
 
-  // 4) Extract the MOT history
-  const motHistory = motData.MotHistory || {};
+  // Then:
+  const statusCode = motCheck.StatusCode || 'N/A';
+  const statusMessage = motCheck.StatusMessage || 'N/A';
+
+  const nextMotDueDate = vehicleStatus?.NextMotDueDate ?? 'N/A';
+  const daysUntilNextMot = vehicleStatus?.DaysUntilNextMotIsDue ?? null;
+
   const recordCount = motHistory.RecordCount || 0;
   const recordList = Array.isArray(motHistory.RecordList)
     ? motHistory.RecordList
     : [];
-
   // 5) Optional date formatting helper
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'N/A';
-    // try dayjs or your favorite date library
-    return dayjs(dateStr).format('DD/MM/YYYY');
-  };
+  dayjs.extend(customParseFormat);
+
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';  // guard if it's null or undefined
+    const parsed = dayjs(dateStr, "DD/MM/YYYY");
+    if (!parsed.isValid()) {
+      return 'N/A'; // or some fallback
+    }
+    return parsed.format("DD/MM/YYYY"); // re-format as you like
+  }
 
   return (
     <div className="card mt-4" id="motHistorySection">

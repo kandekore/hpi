@@ -62,7 +62,7 @@ function MOTPage() {
       {/* Show results if we have them */}
       {motData && motData.motCheck && (
         <MOTResultDisplay 
-          data={motData.motCheck}
+          motCheck={motData.motCheck}
           userProfile={userProfile}
         />
       )}

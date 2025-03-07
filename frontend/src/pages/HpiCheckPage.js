@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLazyQuery } from '@apollo/client';
 import { HPI_CHECK } from '../graphql/queries';
 import HpiResultDisplay from '../components/HpiResultDisplay';
@@ -6,6 +6,14 @@ import HpiResultDisplay from '../components/HpiResultDisplay';
 function HpiCheckPage() {
   const [reg, setReg] = useState('');
   const [fetchHpi, { loading, error, data }] = useLazyQuery(HPI_CHECK);
+  useEffect(() => {
+    if (data) {
+      console.log('Frontend: hpiCheck data =>', data);
+      // If needed, you can do:
+      // console.log('Frontend: hpiCheck data (stringified) =>', JSON.stringify(data, null, 2));
+    }
+  }, [data]);
+
 
   const handleSearch = () => {
     if (!reg) return;

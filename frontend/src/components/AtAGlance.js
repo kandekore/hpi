@@ -1,5 +1,8 @@
 import React from 'react';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
+
 
 export default function AtAGlance({ dataItems, motTaxStatus }) {
   // 1) Determine booleans for your existing fields
@@ -13,30 +16,31 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
   const isColourChanged = colourChangeCount > 0;
   const isImported = dataItems.Imported === true;
 
-  // 2) Retrieve Next MOT Due Date from the new MOT & Tax Status data
-  //    i.e. the result from fetchMotHistoryAndTaxStatusData(reg).
-  //    This is typically at motTaxStatus.VehicleStatus.NextMotDueDate
+  // 2) Retrieve ExpiryDate from the *first* MOT history record
+  const recordList = motTaxStatus?.DataItems?.MotHistory?.RecordList || [];
   let motExpiryString = 'N/A';
   let isMotExpired = false;
 
-  const nextMotDueDate = motTaxStatus?.VehicleStatus?.NextMotDueDate || null;
-  if (nextMotDueDate) {
-    // Attempt to parse it as a date:
-    const motDate = dayjs(nextMotDueDate); 
-    // If your data is guaranteed to be in ISO8601 or recognized by dayjs, 
-    // you can parse directly. If the date is in dd/mm/yyyy, do:
-    // const motDate = dayjs(nextMotDueDate, "DD/MM/YYYY");
+  if (recordList.length > 0) {
+    const expiryStr = recordList[0].ExpiryDate;  // e.g. "29/09/2023"
+    if (expiryStr) {
+      const motDate = dayjs(expiryStr, 'DD/MM/YYYY');
+      console.log("Parsed MOT date =>", motDate.format(), "isValid?", motDate.isValid());
 
-    // Format for display:
-    motExpiryString = motDate.isValid() 
-      ? motDate.format('DD/MM/YYYY') 
-      : nextMotDueDate; // fallback, in case parse fails
-
-    // Check if it's before "today"
-    if (motDate.isBefore(dayjs())) {
-      isMotExpired = true;
+      if (motDate.isValid()) {
+        motExpiryString = motDate.format('DD/MM/YYYY');
+        
+        // If it's before *today*, mark as expired
+        if (motDate.isBefore(dayjs(), 'day')) {
+          isMotExpired = true;
+        }
+      } else {
+        // fallback if parse fails
+        motExpiryString = expiryStr;
+      }
     }
   }
+  
 
   // 3) Helper to pick color for each tile
   const tileStyle = (danger) =>
@@ -52,10 +56,7 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
 
           {/* Finance */}
           <div className="col-md-3">
-            <a href="#financeSection"
-               className={tileStyle(hasFinance)}
-               style={{ textDecoration: 'none' }}
-            >
+            <a href="#financeSection" className={tileStyle(hasFinance)}>
               <div>Outstanding Finance</div>
               <div>{hasFinance ? 'Finance Found' : 'Clear'}</div>
             </a>
@@ -79,9 +80,7 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
 
           {/* Mileage anomaly */}
           <div className="col-md-3">
-            <a href="#mileageAnomalySection"
-               className={tileStyle(mileageAnomaly)}
-            >
+            <a href="#mileageAnomalySection" className={tileStyle(mileageAnomaly)}>
               <div>Mileage Anomaly</div>
               <div>{mileageAnomaly ? 'Yes' : 'No'}</div>
             </a>
@@ -97,9 +96,7 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
 
           {/* Colour changed */}
           <div className="col-md-3">
-            <a href="#colourChangeSection"
-               className={tileStyle(isColourChanged)}
-            >
+            <a href="#colourChangeSection" className={tileStyle(isColourChanged)}>
               <div>Colour Changed</div>
               <div>{isColourChanged ? 'Yes' : 'No'}</div>
             </a>
@@ -113,16 +110,14 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
             </a>
           </div>
 
-          {/* MOT Expiry */}
+          {/* MOT Expiry (from first record) */}
           <div className="col-md-3">
             <a href="#motHistorySection" className={tileStyle(isMotExpired)}>
               <div>MOT Expiry Date</div>
               <div>
                 {motExpiryString}{' '}
                 {isMotExpired && motExpiryString !== 'N/A' && <span> - Expired</span>}
-                {!isMotExpired && motExpiryString !== 'N/A' && (
-                  <span> ✓</span>
-                )}
+                {!isMotExpired && motExpiryString !== 'N/A' && <span> ✓</span>}
               </div>
             </a>
           </div>

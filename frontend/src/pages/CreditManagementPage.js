@@ -316,21 +316,51 @@ function CreditManagementPage() {
                       const dateStr = formatTimestamp(rawTimestamp);
                       console.log("Final dateStr =>", dateStr);
 
-                      // MOT vs VDI extraction
-                      const dataItems = record.responseData?.DataItems || {};
-                      const motMake = dataItems.VehicleDetails?.Make;
-                      const motModel = dataItems.VehicleDetails?.Model;
-                      const vdiMake = dataItems.Make;
-                      const vdiModel = dataItems.Model;
+                      // // MOT vs VDI extraction
+                      // const dataItems = record.responseData?.DataItems || {};
+                      // const motMake = dataItems.VehicleDetails?.Make;
+                      // const motModel = dataItems.VehicleDetails?.Model;
+                      // const vdiMake = dataItems.Make;
+                      // const vdiModel = dataItems.Model;
 
-                      let makeModel = 'N/A';
-                      if (motMake && motModel) {
-                        makeModel = `${motMake} ${motModel}`;
-                      } else if (vdiMake && vdiModel) {
-                        makeModel = `${vdiMake} ${vdiModel}`;
-                      } else if (dataItems.VehicleDescription) {
-                        makeModel = dataItems.VehicleDescription;
-                      }
+                      
+
+                      // let makeModel = 'N/A';
+                      // if (motMake && motModel) {
+                      //   makeModel = `${motMake} ${motModel}`;
+                      // } else if (vdiMake && vdiModel) {
+                      //   makeModel = `${vdiMake} ${vdiModel}`;
+                      // } else if (dataItems.VehicleDescription) {
+                      //   makeModel = dataItems.VehicleDescription;
+                      // }
+                      // Pseudocode
+let makeModel = 'N/A';
+
+if (record.searchType === 'MOT') {
+  const dataItems = record.responseData?.DataItems || {};
+  const motMake = dataItems.VehicleDetails?.Make;
+  const motModel = dataItems.VehicleDetails?.Model;
+  if (motMake && motModel) {
+    makeModel = `${motMake} ${motModel}`;
+  }
+} else if (record.searchType === 'VDI') {
+  const dataItems = record.responseData?.DataItems || {};
+  const vdiMake = dataItems.Make;
+  const vdiModel = dataItems.Model;
+  if (vdiMake && vdiModel) {
+    makeModel = `${vdiMake} ${vdiModel}`;
+  }
+} else if (record.searchType === 'HPI') {
+  // The aggregator structure
+  const hpiVdi = record.responseData?.vdiCheckFull?.DataItems || {};
+  // or use motTaxStatus if that’s simpler
+  const hpiMake = hpiVdi.Make || record.responseData?.motTaxStatus?.DataItems?.VehicleDetails?.Make;
+  const hpiModel = hpiVdi.Model || record.responseData?.motTaxStatus?.DataItems?.VehicleDetails?.Model;
+  if (hpiMake && hpiModel) {
+    makeModel = `${hpiMake} ${hpiModel}`;
+  }
+}
+
 
                       console.log("Final makeModel =>", makeModel);
 

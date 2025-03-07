@@ -16,22 +16,20 @@ export default function VehicleDetails({ dataItems, images, vdiCheckFull }) {
   const colour = dataItems.Colour || 'N/A';
   const yearOfManufacture = dataItems.YearOfManufacture || 'N/A';
   //const lastRecordedMileage = dataItems.Mileage || 'N/A';
+// Instead of images?.VehicleImages...
+const imageList = images?.DataItems?.VehicleImages?.ImageDetailsList || [];
+const firstImageUrl = imageList.length > 0 
+  ? imageList[0].ImageUrl
+  : '/placeholder-vehicle.jpg';
 
-  const imageList = images?.VehicleImages?.ImageDetailsList || [];
-  const firstImageUrl = imageList.length > 0 
-    ? imageList[0] 
-    : '/placeholder-vehicle.jpg';
 
-      const mileageRecords = vdiCheckFull?.DataItems?.MileageRecordList || [];
-  // Sort by date if you want the most recent or just pick the last entry 
-  // if the array is always chronological. 
-  // E.g. if newest is last:
+  const mileageRecords = vdiCheckFull?.DataItems?.MileageRecordList || [];
   let lastMileage = 'N/A';
   if (mileageRecords.length > 0) {
-    // If they are chronological, the last item is the latest:
-    const mostRecent = mileageRecords[mileageRecords.length - 1];
+    // The first item is the newest if the array is already sorted descending
+    const mostRecent = mileageRecords[0];
     lastMileage = mostRecent.Mileage ?? 'N/A';
-  };
+  }
 
   const handleImageClick = (imgUrl) => {
     setModalImage(imgUrl);

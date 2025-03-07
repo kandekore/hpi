@@ -33,7 +33,7 @@ module.exports = {
       });
       currentUser.searchHistory.push(record._id);
       await currentUser.save();
-
+console.log('Server: motCheck =>', fullData);
       return fullData;
     },
 
@@ -132,8 +132,12 @@ module.exports = {
       ]);
       await new Promise((r) => setTimeout(r, 600));
 
-     
-      // no final delay needed unless you want it
+      // console.log('Server: vdiFull =>', JSON.stringify(vdiFull, null, 2));
+      // console.log('Server: images =>', JSON.stringify(images, null, 2));
+      // console.log('Server: vehicleAndMot =>', JSON.stringify(vehicleAndMot, null, 2));
+      // console.log('Server: valuation =>', JSON.stringify(valuation, null, 2));
+      // console.log('Server: motTaxStatus =>', JSON.stringify(motTaxStatus, null, 2));
+      // // no final delay needed unless you want it
 
       // build
       const combinedResponse = {
@@ -145,6 +149,7 @@ module.exports = {
         motTaxStatus,
         images,
       };
+      console.log('Server: final HPI =>', JSON.stringify(combinedResponse, null, 2));
 
       // log search
       const record = await SearchRecord.create({
@@ -155,6 +160,8 @@ module.exports = {
       });
       currentUser.searchHistory.push(record._id);
       await currentUser.save();
+
+      console.log('Server: hpiCheck =>', combinedResponse);
 
       return combinedResponse;
     },
