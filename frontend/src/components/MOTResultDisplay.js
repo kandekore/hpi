@@ -1,127 +1,144 @@
-// frontend/src/components/MOTResultDisplay.js
 import React from 'react';
+import dayjs from 'dayjs';
+// or any date-fns / moment library for formatting dates, or a simple custom function
 
-function MOTResultDisplay({ data }) {
-  // If the server response has no data at all
-  if (!data?.DataItems) {
-    return <p>No MOT data available.</p>;
+export default function MOTResultDisplay({ motData }) {
+  // 1) Handle null or missing data
+  if (!motData) {
+    return (
+      <div className="alert alert-warning">
+        No MOT data available.
+      </div>
+    );
   }
 
-  const { VehicleDetails, VehicleStatus, MotHistory } = data.DataItems;
+  // 2) Extract top-level status info (optional)
+  const statusCode = motData.StatusCode || 'N/A';
+  const statusMessage = motData.StatusMessage || 'N/A';
 
-  // If partial data is missing
-  if (!VehicleDetails || !VehicleStatus) {
-    return <p>Vehicle details or status not available.</p>;
-  }
+  // 3) Extract vehicle status info
+  const nextMotDueDate = motData.VehicleStatus?.NextMotDueDate ?? 'N/A';
+  const daysUntilNextMot = motData.VehicleStatus?.DaysUntilNextMotIsDue ?? null;
+
+  // 4) Extract the MOT history
+  const motHistory = motData.MotHistory || {};
+  const recordCount = motHistory.RecordCount || 0;
+  const recordList = Array.isArray(motHistory.RecordList)
+    ? motHistory.RecordList
+    : [];
+
+  // 5) Optional date formatting helper
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    // try dayjs or your favorite date library
+    return dayjs(dateStr).format('DD/MM/YYYY');
+  };
 
   return (
-    <div>
-      {/* BASIC: Vehicle Details */}
-      <div className="mb-4">
-        <h3>Vehicle Details</h3>
-        <table className="table table-bordered">
-          <tbody>
-            <tr>
-              <th>Make</th>
-              <td>{VehicleDetails.Make}</td>
-            </tr>
-            <tr>
-              <th>Model</th>
-              <td>{VehicleDetails.Model}</td>
-            </tr>
-            <tr>
-              <th>Fuel Type</th>
-              <td>{VehicleDetails.FuelType}</td>
-            </tr>
-            <tr>
-              <th>Colour</th>
-              <td>{VehicleDetails.Colour}</td>
-            </tr>
-            <tr>
-              <th>Date First Registered</th>
-              <td>{VehicleDetails.DateFirstRegistered}</td>
-            </tr>
-          </tbody>
-        </table>
+    <div className="card mt-4" id="motHistorySection">
+      <div className="card-header">
+        <h3>MOT History & Tax Status</h3>
       </div>
+      <div className="card-body">
 
-      {/* BASIC: Vehicle Status */}
-      <div className="mb-4">
-        <h3>Vehicle Status</h3>
-        <table className="table table-bordered">
-          <tbody>
-            <tr>
-              <th>Next MOT Due Date</th>
-              <td>{VehicleStatus.NextMotDueDate}</td>
-            </tr>
-            <tr>
-              <th>Days Until Next MOT Due</th>
-              <td>{VehicleStatus.DaysUntilNextMotIsDue}</td>
-            </tr>
-            <tr>
-              <th>VED Currently Valid</th>
-              <td>{VehicleStatus.MotVed?.VedCurrentlyValid ? 'Yes' : 'No'}</td>
-            </tr>
-            <tr>
-              <th>VED Expiry Date</th>
-              <td>{VehicleStatus.MotVed?.VedExpiryDate || 'N/A'}</td>
-            </tr>
-          </tbody>
-        </table>
+        {/* Example top-level status badges (if you want them) */}
+        <div className="mb-2">
+          <span className="badge bg-secondary me-2">Code: {statusCode}</span>
+          <span className="badge bg-success">Message: {statusMessage}</span>
+        </div>
+
+        {/* Next MOT Due */}
+        <div className="mb-3">
+          <strong>Next MOT Due Date:</strong>{' '}
+          {nextMotDueDate !== 'N/A'
+            ? formatDate(nextMotDueDate)
+            : 'N/A'}
+          {daysUntilNextMot != null && (
+            <span className="ms-2">
+              ({daysUntilNextMot} days left)
+            </span>
+          )}
+        </div>
+
+        {/* Show summary of how many records in the MOT history */}
+        <h5 className="mb-3">
+          MOT Records Found: {recordCount}
+        </h5>
+
+        {/* MOT Records Table */}
+        {recordCount < 1 ? (
+          <div className="alert alert-info">
+            No MOT history records found.
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Test Date</th>
+                  <th>Odometer</th>
+                  <th>Result</th>
+                  <th>Expiry Date</th>
+                  <th>Advisories</th>
+                  <th>Failures</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recordList.map((record, idx) => {
+                  const {
+                    TestDate,
+                    OdometerReading,
+                    TestResult,
+                    ExpiryDate,
+                    AdvisoryNoticeList,
+                    FailureReasonList,
+                  } = record;
+
+                  return (
+                    <tr key={idx}>
+                      <td>{formatDate(TestDate)}</td>
+                      <td>
+                        {OdometerReading?.toLocaleString() ?? 'N/A'} mi
+                      </td>
+                      <td>
+                        {/* Possibly style "Passed"/"Failed" */}
+                        {TestResult}
+                      </td>
+                      <td>
+                        {ExpiryDate
+                          ? formatDate(ExpiryDate)
+                          : 'N/A'}
+                      </td>
+                      <td>
+                        {AdvisoryNoticeList && AdvisoryNoticeList.length > 0 ? (
+                          <ul className="mb-0">
+                            {AdvisoryNoticeList.map((advice, i) => (
+                              <li key={i}>{advice}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          'None'
+                        )}
+                      </td>
+                      <td>
+                        {FailureReasonList && FailureReasonList.length > 0 ? (
+                          <ul className="mb-0">
+                            {FailureReasonList.map((fail, i) => (
+                              <li key={i}>{fail}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          'None'
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-
-      {/* FULL ADDITIONAL MOT HISTORY (if present) */}
-      {MotHistory?.RecordList?.length > 0 ? (
-        <div className="mb-4">
-          <h3>Additional MOT History</h3>
-          {MotHistory.RecordList.map((record, idx) => (
-            <div key={idx} className="card mb-3">
-              <div className="card-header">
-                <h4 className="mb-0">MOT Test on {record.TestDate}</h4>
-              </div>
-              <div className="card-body">
-                <p><strong>Test Number:</strong> {record.TestNumber}</p>
-                <p><strong>Result:</strong> {record.TestResult}</p>
-                {record.ExpiryDate && (
-                  <p><strong>Expiry Date:</strong> {record.ExpiryDate}</p>
-                )}
-                <p>
-                  <strong>Odometer Reading:</strong> {record.OdometerReading} {record.OdometerUnit}
-                </p>
-                
-                {/* If you have advisory/failure arrays, show them here */}
-                {record.AdvisoryNoticeList?.length > 0 && (
-                  <div>
-                    <h5>Advisory Notices:</h5>
-                    <ul className="list-group">
-                      {record.AdvisoryNoticeList.map((notice, i2) => (
-                        <li key={i2} className="list-group-item">{notice}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {record.FailureReasonList?.length > 0 && (
-                  <div>
-                    <h5>Failure Reasons:</h5>
-                    <ul className="list-group">
-                      {record.FailureReasonList.map((reason, i3) => (
-                        <li key={i3} className="list-group-item">{reason}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="alert alert-info">
-          No advanced records found for this vehicle.
-        </div>
-      )}
     </div>
   );
 }
-
-export default MOTResultDisplay;

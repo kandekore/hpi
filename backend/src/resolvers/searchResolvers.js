@@ -112,31 +112,27 @@ module.exports = {
       currentUser.hpiCredits -= 1;
 
       // BATCH 1
-      const [vdiFull, vedData] = await Promise.all([
+      const [vdiFull, images] = await Promise.all([
         vehicleDataService.fetchVdiCheckFull(reg),
-        vehicleDataService.fetchVedData(reg),
+        vehicleDataService.fetchVehicleImageData(reg),
       ]);
       await new Promise((r) => setTimeout(r, 600));
 
       // BATCH 2
-      const [vehicleAndMot, vehicleData] = await Promise.all([
+      const [vehicleAndMot, valuation] = await Promise.all([
         vehicleDataService.fetchVehicleAndMotHistory(reg),
-        vehicleDataService.fetchVehicleData(reg),
+        vehicleDataService.fetchValuationData(reg),
       ]);
       await new Promise((r) => setTimeout(r, 600));
 
       // BATCH 3
-      const [valuation, motTaxStatus] = await Promise.all([
-        vehicleDataService.fetchValuationData(reg),
+      const [motTaxStatus] = await Promise.all([
+        
         vehicleDataService.fetchMotHistoryAndTaxStatusData(reg),
       ]);
       await new Promise((r) => setTimeout(r, 600));
 
-      // BATCH 4
-      const [images, specAndOptions] = await Promise.all([
-        vehicleDataService.fetchVehicleImageData(reg),
-        vehicleDataService.fetchSpecAndOptions(reg),
-      ]);
+     
       // no final delay needed unless you want it
 
       // build
@@ -144,13 +140,10 @@ module.exports = {
         reg,
         timestamp: new Date().toISOString(),
         vdiCheckFull: vdiFull,
-        vedData,
         vehicleAndMotHistory: vehicleAndMot,
-        vehicleData,
         valuation,
         motTaxStatus,
         images,
-        specAndOptions,
       };
 
       // log search

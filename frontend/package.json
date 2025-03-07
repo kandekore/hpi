@@ -6,8 +6,10 @@
     "@apollo/client": "^3.12.3",
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
+    "dayjs": "^1.11.13",
     "graphql": "^16.9.0",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "^5.0.1",
@@ -38,7 +40,5 @@
       "last 1 safari version"
     ],
     "proxy": "http://localhost:4000"
-
-    
   }
 }
