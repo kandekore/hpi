@@ -1,14 +1,12 @@
-// src/components/InsuranceWriteOff.js
 import React from 'react';
 
 export default function InsuranceWriteOff({ dataItems }) {
-  // from the JSON
   const writeOffCategory = dataItems.WriteOffCategory || 'N/A';
   const writeOffDate = dataItems.WriteOffDate || 'N/A';
   const writeOffCount = dataItems.WriteOffRecordCount || 0;
   const writeOffRecordList = dataItems.WriteOffRecordList;
 
-  // If no records
+  // If no records at all
   if (!writeOffRecordList && writeOffCount === 0 && writeOffCategory === 'N/A') {
     return (
       <div className="card">
@@ -47,7 +45,22 @@ export default function InsuranceWriteOff({ dataItems }) {
             </tr>
             <tr>
               <th>Write Off Record List</th>
-              <td>{writeOffRecordList || 'N/A'}</td>
+              <td>
+                {writeOffRecordList && writeOffRecordList.length > 0 ? (
+                  <ul>
+                    {writeOffRecordList.map((item, idx) => (
+                      <li key={idx}>
+                        <strong>Loss Type:</strong> {item.LossType}<br/>
+                        <strong>Category:</strong> {item.Category}<br/>
+                        <strong>Loss Date:</strong> {item.LossDate}<br/>
+                        <strong>MiaftrEntryDate:</strong> {item.MiaftrEntryDate}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  'N/A'
+                )}
+              </td>
             </tr>
           </tbody>
         </table>

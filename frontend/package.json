@@ -8,6 +8,7 @@
     "cra-template": "1.2.0",
     "dayjs": "^1.11.13",
     "graphql": "^16.9.0",
+    "nodemon": "^3.1.9",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",

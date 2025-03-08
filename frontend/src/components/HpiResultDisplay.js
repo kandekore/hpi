@@ -12,7 +12,8 @@ import StolenVehicleChecks from './StolenVehicleChecks';
 import ScrappedInfo from './ScrappedInfo';
 import ImportedInfo from './ImportedInfo';
 
-export default function HpiResultDisplay({ hpiData }) {
+export default function HpiResultDisplay({ hpiData, userProfile }) {
+  console.log('hpiData:', hpiData);
   if (!hpiData) {
     return <div className="alert alert-warning">No HPI data available.</div>;
   }
@@ -25,7 +26,8 @@ export default function HpiResultDisplay({ hpiData }) {
 
 const { motTaxStatus } = hpiData;
 
-  const { vdiCheckFull, vehicleAndMotHistory, valuation, images } = hpiData;
+// HpiResultDisplay.js
+const { vdiCheckFull, vehicleAndMotHistory, valuation, images } = hpiData;
 
   // DataItems for convenience
   const dataItems = vdiCheckFull?.DataItems || {};

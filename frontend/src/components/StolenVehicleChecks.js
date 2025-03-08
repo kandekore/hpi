@@ -63,9 +63,24 @@ export default function StolenVehicleChecks({ dataItems }) {
               <td>{StolenMiaftrRecordCount ?? '0'}</td>
             </tr>
             <tr>
-              <th>Stolen MIAFTR Record List</th>
-              <td>{StolenMiaftrRecordList || 'N/A'}</td>
-            </tr>
+            <th>Stolen MIAFTR Record List</th>
+            <td>
+              {Array.isArray(StolenMiaftrRecordList) && StolenMiaftrRecordList.length > 0 ? (
+                <ul>
+                  {StolenMiaftrRecordList.map((item, idx) => (
+                    <li key={idx}>
+                      {/* Render each field as needed */}
+                      {/* e.g. item.SomeField, item.OtherField, or just JSON.stringify(item) */}
+                      {JSON.stringify(item)} 
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                'N/A'
+              )}
+            </td>
+          </tr>
+          
             <tr>
               <th>Stolen Status</th>
               <td>{StolenStatus || 'N/A'}</td>
