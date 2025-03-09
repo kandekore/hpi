@@ -1,5 +1,6 @@
 // src/components/ValuationResults.js
 import React from 'react';
+import { formatNumber } from '../utils/formatNumber';
 
 export default function ValuationResults({ valuation, isSummary = false }) {
   if (!valuation || !valuation.DataItems) {
@@ -23,37 +24,59 @@ export default function ValuationResults({ valuation, isSummary = false }) {
     const privateSale = ValuationList['Private Average'] || 'N/A';
     const px = ValuationList['Part Exchange'] || 'N/A';
     return (
+      <>
+      <style>
+      {`
+        .border.p-2.rounded.mb-2 {
+          background: #008000;
+          color: white;
+          text-align: center;
+        }
+        p.price {
+    font-size: 30px!important;
+    font-weight: 800;
+        text-shadow: 1px 1px #000;
+} 
+        .valbutton {
+    text-align: center;
+}
+      `}
+    </style>
+    
       <div className="card">
         <div className="card-header">
           <h3>Valuation Summary</h3>
         </div>
         <div className="card-body">
-          <p><strong>Vehicle:</strong> {VehicleDescription || 'N/A'}</p>
+      
           <div className="row">
             <div className="col-sm-4">
               <div className="border p-2 rounded mb-2">
                 <strong>Retail</strong><br />
-                £{retail}
+                <p className="price">£{formatNumber(retail)}</p>
               </div>
             </div>
             <div className="col-sm-4">
               <div className="border p-2 rounded mb-2">
                 <strong>Average Private Sale</strong><br />
-                £{privateSale}
+                <p className="price">£{formatNumber(privateSale)}</p>
               </div>
             </div>
             <div className="col-sm-4">
               <div className="border p-2 rounded mb-2">
                 <strong>Part Exchange</strong><br />
-                £{px}
+              <p className="price">£{formatNumber(px)}</p>
               </div>
             </div>
           </div>
+          <div className="valbutton">
           <a href="#valuationSection" className="btn btn-primary btn-sm">
-            All Valuation Data
+            Click Here to View All Valuation Data
           </a>
+          </div>
         </div>
       </div>
+       </>
     );
   }
 
@@ -77,7 +100,7 @@ export default function ValuationResults({ valuation, isSummary = false }) {
               {Object.entries(ValuationList).map(([desc, val]) => (
                 <tr key={desc}>
                   <td>{desc}</td>
-                  <td>£{val}</td>
+                  <td>£{formatNumber(val)}</td>
                 </tr>
               ))}
             </tbody>

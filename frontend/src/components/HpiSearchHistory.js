@@ -15,6 +15,7 @@ import OwnershipAndIdentity from './OwnershipAndIdentity';
 import VehicleTaxRates from './VehicleTaxRates';
 import VedCo2Emissions from './VedCo2Emissions';
 import TechnicalDetails from './TechnicalDetails';
+import VehicleDetailsHistory from './VehicleDetailsHistory';
 export default function HpiResultDisplay({ hpiData, userProfile }) {
   console.log('hpiData:', hpiData);
   if (!hpiData) {
@@ -68,7 +69,7 @@ const motApi = vehicleAndMotHistory?.DataItems.MotHistory || {};
     
 
       {/* Vehicle Details Panel */}
-      <VehicleDetails
+      <VehicleDetailsHistory
       dataItems={vehicleDetails}
       motapi={motApi}
       images={images}              // pass the entire images object

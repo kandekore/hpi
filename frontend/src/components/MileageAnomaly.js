@@ -1,5 +1,6 @@
 // src/components/MileageAnomaly.js
 import React from 'react';
+import { formatNumber } from '../utils/formatNumber';
 
 export default function MileageAnomaly({ dataItems }) {
   const anomalyDetected = dataItems.MileageAnomalyDetected === true;
@@ -41,7 +42,7 @@ export default function MileageAnomaly({ dataItems }) {
                   <tr key={i}>
                     <td>{r.DateOfInformation || 'N/A'}</td>
                     <td>{r.SourceOfInformation || 'N/A'}</td>
-                    <td>{r.Mileage || 'N/A'}</td>
+                    <td>{formatNumber(r.Mileage) || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

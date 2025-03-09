@@ -24,7 +24,16 @@ export default function InsuranceWriteOff({ dataItems }) {
 
   // Otherwise show them
   return (
-    <div className="card">
+    <>
+    <style>
+  {`
+    li {
+      list-style: none;
+      padding: 10px;
+    }
+  `}
+</style>
+  <div className="card">
       <div className="card-header">
         <h3>Insurance Write Off</h3>
       </div>
@@ -66,5 +75,6 @@ export default function InsuranceWriteOff({ dataItems }) {
         </table>
       </div>
     </div>
+    </>
   );
 }

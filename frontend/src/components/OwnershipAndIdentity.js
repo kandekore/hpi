@@ -5,6 +5,7 @@ export default function OwnershipAndIdentity({ dataItems }) {
   const previousKeeperCount = dataItems.PreviousKeeperCount || 0;
   const plateChangeCount = dataItems.PlateChangeCount || 0;
   const plateChangeList = dataItems.PlateChangeList || [];
+  const VinLast5 = dataItems.VinLast5 || 'N/A';
 
   // If there's effectively no ownership/plate data
   const noOwnershipData =
@@ -45,6 +46,10 @@ export default function OwnershipAndIdentity({ dataItems }) {
               <th>Plate Change Count</th>
               <td>{plateChangeCount}</td>
             </tr>
+            <tr>
+            <th>Last 5 of Vin No</th>
+            <td>{VinLast5}</td>
+          </tr>
           </tbody>
         </table>
 

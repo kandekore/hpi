@@ -5,7 +5,7 @@
  import { GET_SEARCH_BY_ID, GET_USER_PROFILE } from '../graphql/queries';
  import MOTResultDisplay from '../components/MOTResultDisplay';
  import VdiResultDisplay from '../components/VdiResultDisplay';
- import HpiResultDisplay from '../components/HpiResultDisplay';
+ import HpiSearchHistory from '../components/HpiSearchHistory';
  
  function formatTimestamp(ts) {
    if (!ts) return 'N/A';
@@ -80,15 +80,25 @@
    
    return (
      <div className="container my-4">
-       <h2>Search Details</h2>
-       <p><strong>ID:</strong> {id}</p>
-       <p><strong>Vehicle Reg:</strong> {vehicleReg}</p>
-       <p><strong>Search Type:</strong> {searchType}</p>
-       <p><strong>Date/Time:</strong> {dateString}</p>
+     <div className="row row-cols-1 row-cols-sm-2 g-3">
+  <div className="col">
+    <h3><strong>ID:</strong> {id}</h3>
+  </div>
+  <div className="col">
+    <h3><strong>Vehicle Reg:</strong> {vehicleReg}</h3>
+  </div>
+  <div className="col">
+    <h3><strong>Search Type:</strong> {searchType}</h3>
+  </div>
+  <div className="col">
+    <h3><strong>Date/Time:</strong> {dateString}</h3>
+  </div>
+</div>
+
  
        {searchType === 'MOT' && (
          <>
-           <h3>MOT Data</h3>
+           
            {/* 
              Pass userProfile so MOTResultDisplay can do the free check 
              vs. advanced data logic (locked/unlocked).
@@ -102,7 +112,7 @@
  
        {searchType === 'VDI' && (
          <>
-           <h3>VDI Data</h3>
+           
            {/* If you have partial logic for VDI, pass userProfile similarly */}
            <VdiResultDisplay 
              data={responseData} 
@@ -112,8 +122,8 @@
        )}
         {searchType === 'HPI' && (
   <>
-    <h3>HPI Data</h3>
-    <HpiResultDisplay 
+    
+    <HpiSearchHistory 
       hpiData={responseData}      // <--- rename here
       userProfile={userProfile} 
     />

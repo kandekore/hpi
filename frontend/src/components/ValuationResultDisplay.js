@@ -1,5 +1,6 @@
 // src/components/ValuationResultDisplay.js
 import React from 'react';
+import { formatNumber } from '../utils/formatNumber'; 
 
 /**
  * Example of the data structure you actually receive:

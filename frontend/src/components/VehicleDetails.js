@@ -1,10 +1,11 @@
 // src/components/VehicleDetails.js
 import React, { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import { formatNumber } from '../utils/formatNumber';
 // or from 'react-bootstrap' if you're using the standard approach
 // Ensure you have bootstrap and react-bootstrap installed, or manually create a modal
 
-export default function VehicleDetails({ dataItems, images, vdiCheckFull }) {
+export default function VehicleDetails({ dataItems, images, motapi}) {
   const [showModal, setShowModal] = useState(false);
   const [modalImage, setModalImage] = useState(null);
 
@@ -23,13 +24,27 @@ const firstImageUrl = imageList.length > 0
   : '/placeholder-vehicle.jpg';
 
 
-  const mileageRecords = vdiCheckFull?.DataItems?.MileageRecordList || [];
-  let lastMileage = 'N/A';
-  if (mileageRecords.length > 0) {
-    // The first item is the newest if the array is already sorted descending
-    const mostRecent = mileageRecords[0];
-    lastMileage = mostRecent.Mileage ?? 'N/A';
-  }
+  // const mileageRecords = vdiCheckFull?.DataItems?.MileageRecordList || [];
+  // let lastMileage = 'N/A';
+  // if (mileageRecords.length > 0) {
+  //   // The first item is the newest if the array is already sorted descending
+  //   const mostRecent = mileageRecords[0];
+  //   lastMileage = mostRecent.Mileage ?? 'N/A';
+  // }
+
+// Safely access the array
+const recordList = motapi.RecordList || [];
+
+// Then check if it’s non-empty
+let odometer = null;
+if (recordList.length > 0) {
+  // The first object in the array
+  const firstRecord = recordList[0];
+  // Extract the odometer
+  odometer = firstRecord.OdometerReading;
+}
+
+console.log("First record odometer =>", odometer);
 
   const handleImageClick = (imgUrl) => {
     setModalImage(imgUrl);
@@ -43,12 +58,12 @@ const firstImageUrl = imageList.length > 0
       </div>
       <div className="card-body d-flex flex-row">
         {/* 1/3 for the image */}
-        <div className="col-4 p-2">
+        <div className="col-4 p-2 d-flex align-items-center justify-content-center">
         <img
         src={firstImageUrl}
         alt="Vehicle"
         className="img-fluid"
-        style={{ cursor: 'pointer', maxHeight: '250px', objectFit: 'cover' }}
+        style={{ cursor: 'pointer', maxHeight: '250px', objectFit: 'cover', verticalAlign: 'middle' }}
         onClick={() => handleImageClick(firstImageUrl)} 
       />
       
@@ -80,7 +95,7 @@ const firstImageUrl = imageList.length > 0
               </tr>
               <tr>
                 <th>Last Recorded Mileage</th>
-                <td>{lastMileage}</td>
+                <td>{formatNumber(odometer)}</td>
               </tr>
             </tbody>
           </table>
