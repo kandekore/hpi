@@ -11,7 +11,10 @@ import ValuationResults from './ValuationResults';
 import StolenVehicleChecks from './StolenVehicleChecks';
 import ScrappedInfo from './ScrappedInfo';
 import ImportedInfo from './ImportedInfo';
-
+import OwnershipAndIdentity from './OwnershipAndIdentity';
+import VehicleTaxRates from './VehicleTaxRates';
+import VedCo2Emissions from './VedCo2Emissions';
+import TechnicalDetails from './TechnicalDetails';
 export default function HpiResultDisplay({ hpiData, userProfile }) {
   console.log('hpiData:', hpiData);
   if (!hpiData) {
@@ -34,6 +37,14 @@ const { vdiCheckFull, vehicleAndMotHistory, valuation, images } = hpiData;
 
   // For the MOT, we'll assume vehicleAndMotHistory has the MOT data
   const motHistory = vehicleAndMotHistory?.MotHistory || {};
+
+  // Let's say in HpiResultDisplay or VehicleAndMotHistory
+const vedRate = vehicleAndMotHistory?.DataItems?.VehicleStatus?.MotVed?.VedRate;
+
+const co2Value = vehicleAndMotHistory?.DataItems?.VehicleStatus?.MotVed?.VedCo2Emissions;
+
+const techDataItems = vehicleAndMotHistory?.DataItems || {};
+
 
   // The images array might be in images?.VehicleImages?.ImageDetailsList or a similar structure
   // Example:
@@ -106,6 +117,16 @@ const { vdiCheckFull, vehicleAndMotHistory, valuation, images } = hpiData;
       <div className="mt-5" id="importedSection">
         <ImportedInfo dataItems={dataItems} />
       </div>
+      <div>
+<OwnershipAndIdentity dataItems={vdiCheckFull?.DataItems || {}} />
+</div>
+<div>
+<VehicleTaxRates vedRate={vedRate} />
+</div>
+<div><VedCo2Emissions co2Value={co2Value} />
+</div>
+<div><TechnicalDetails dataItems={techDataItems} />
+</div>
     </div>
   );
 }

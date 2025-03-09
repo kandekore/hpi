@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+card.p-2.m-2.text-white {
+  text-align: center!important;
+  text-decoration: none!important;
+  font-weight: 600!important;
+  font-size: 21px!important;
+}
