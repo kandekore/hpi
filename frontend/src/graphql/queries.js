@@ -7,7 +7,7 @@ export const GET_USER_PROFILE = gql`
       id
       email
       motCredits
-      vdiCredits
+      valuationCredits
       hpiCredits
       freeMotChecksUsed
     }

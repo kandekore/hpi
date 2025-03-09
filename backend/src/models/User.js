@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   freeMotChecksUsed: { type: Number, default: 0 },
   motCredits: { type: Number, default: 0 },
-  vdiCredits: { type: Number, default: 0 },
+  valuationCredits: { type: Number, default: 0 },
   hpiCredits: {
   type: Number,
   default: 0

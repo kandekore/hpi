@@ -4,7 +4,7 @@ import { ApolloProvider } from '@apollo/client';
 import { client } from './apolloClient';  // <-- Make sure this import path is correct
 import MOTPage from './pages/MOTPage';    // new MOT page
 import HomePage from './pages/HomePage';
-import VdiCheckPage from './pages/VdiCheckPage';
+import ValuationPage from './pages/ValuationPage';
 import CreditManagementPage from './pages/CreditManagementPage';
 import ServicesPage from './pages/ServicesPage';
 import RegisterPage from './pages/RegisterPage';
@@ -29,7 +29,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/vdi" element={<VdiCheckPage />} />
+            <Route path="/valuation" element={<ValuationPage />} />
             <Route path="/mot" element={<MOTPage />} />
             <Route path="/credits" element={<CreditManagementPage />} />
             <Route path="/services" element={<ServicesPage />} />

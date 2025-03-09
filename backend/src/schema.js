@@ -6,7 +6,7 @@ const typeDefs = gql`
     id: ID!
     email: String!
     motCredits: Int
-    vdiCredits: Int
+    valuationCredits: Int
     hpiCredits: Int  
     freeMotChecksUsed: Int
     searchHistory: [SearchRecord]

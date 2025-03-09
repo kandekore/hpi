@@ -5,6 +5,27 @@ const vehicleDataService = require('../services/vehicleDataService');
 
 const FREE_MOT_CHECKS = 3;
 
+async function fetchValuationBundle(reg) {
+  // 1) First batch: fetchValuationData
+  const valuationData = await vehicleDataService.fetchValuationData(reg);
+
+  // 2) Sleep 600ms
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
+  // 3) Second batch in parallel
+  const [vehicleAndMotHistory, vehicleImageData] = await Promise.all([
+    vehicleDataService.fetchVehicleAndMotHistory(reg),
+    vehicleDataService.fetchVehicleImageData(reg),
+  ]);
+
+  // 4) Combine
+  return {
+    valuation: valuationData,
+    vehicleAndMotHistory,
+    images: vehicleImageData,
+  };
+}
+
 module.exports = {
   Query: {
     // 1) MOT Check
@@ -43,11 +64,11 @@ console.log('Server: motCheck =>', fullData);
 
       const currentUser = await User.findById(user.userId);
       if (!currentUser) throw new Error('User not found');
-      if (currentUser.vdiCredits < 1) {
+      if (currentUser.valuationCredits < 1) {
         throw new Error('No VDI credits available');
       }
       // deduct
-      currentUser.vdiCredits -= 1;
+      currentUser.valuationCredits -= 1;
 
       // get normal VDI data
       const vdiResponse = await vehicleDataService.vdiCheck(reg);
@@ -78,9 +99,32 @@ console.log('Server: motCheck =>', fullData);
     },
 
     // 3) Valuation
-    async valuation(_, { reg }) {
-      const data = await vehicleDataService.valuationCheck(reg);
-      return data;
+    // New single "valuation" that calls fetchValuationBundle
+    async valuation(_, { reg }, { user }) {
+      if (!user) throw new Error('Not authenticated');
+      const currentUser = await User.findById(user.userId);
+      if (!currentUser) throw new Error('User not found');
+
+      if (currentUser.valuationCredits < 1) {
+        throw new Error('No Valuation credits available');
+      }
+      currentUser.valuationCredits--;
+
+      // 1) Call fetchValuationBundle
+      const fullResponse = await fetchValuationBundle(reg);
+console.log('Server: fetchValuationBundle =>', fullResponse);
+      // 2) Save
+      const record = await SearchRecord.create({
+        userId: currentUser._id,
+        vehicleReg: reg,
+        searchType: 'Valuation',
+        responseData: fullResponse,
+      });
+      currentUser.searchHistory.push(record._id);
+      await currentUser.save();
+
+      // 3) Return
+      return fullResponse;
     },
 
     // 4) Get search history
@@ -165,6 +209,7 @@ console.log('Server: motCheck =>', fullData);
 
       return combinedResponse;
     },
+    
   },
 
   Mutation: {

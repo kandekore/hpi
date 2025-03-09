@@ -24,13 +24,13 @@ function VdiCheckPage() {
   const isLoggedIn = !!localStorage.getItem('authToken');
   // Access user profile from the query
   const userProfile = profileData?.getUserProfile || null;
-  const hasVdiCredits = userProfile?.vdiCredits > 0;
+  const hasValuationCredits = userProfile?.valuationCredits > 0;
 
   // Handler for performing VDI + Valuation checks
   const handleVDICheck = async () => {
     setAttemptedSearch(true);
     // If not logged in or no credits, don't run queries
-    if (!isLoggedIn || !hasVdiCredits) return;
+    if (!isLoggedIn || !hasValuationCredits) return;
 
     // Run both queries
     await vdiCheck({ variables: { reg } });
@@ -76,7 +76,7 @@ function VdiCheckPage() {
           )}
 
           {/* If the user attempted a search but is out of credits */}
-          {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.vdiCredits < 1 && (
+          {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.valuationCredits < 1 && (
             <div className="alert alert-warning">
               You have 0 VDI credits. Please{' '}
               <a href="/credits" className="alert-link">purchase credits</a> to continue.

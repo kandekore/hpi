@@ -57,7 +57,7 @@ function formatTimestamp(ts) {
 function CreditManagementPage() {
   // 1) State for credits
   const [motCredits, setMotCredits] = useState(0);
-  const [vdiCredits, setVdiCredits] = useState(0);
+  const [valuationCredits, setValuationCredits] = useState(0);
   const [hpiCredits, setHpiCredits] = useState(0); // <-- NEW
   const [freeMotChecksUsed, setFreeMotChecksUsed] = useState(0);
 
@@ -72,9 +72,9 @@ function CreditManagementPage() {
   // 3) Once profileData is loaded or updated, sync to state
   useEffect(() => {
     if (profileData && profileData.getUserProfile) {
-      const { motCredits, vdiCredits, freeMotChecksUsed, hpiCredits } = profileData.getUserProfile;
+      const { motCredits, valuationCredits, freeMotChecksUsed, hpiCredits } = profileData.getUserProfile;
       setMotCredits(motCredits);
-      setVdiCredits(vdiCredits);
+      setValuationCredits(valuationCredits);
       setFreeMotChecksUsed(freeMotChecksUsed);
       setHpiCredits(hpiCredits || 0); // fallback if undefined
     }
@@ -175,7 +175,7 @@ function CreditManagementPage() {
                   <strong>MOT Credits:</strong> {motCredits}
                 </p>
                 <p className="card-text">
-                  <strong>VDI Credits:</strong> {vdiCredits}
+                  <strong>Valuation Credits:</strong> {valuationCredits}
                 </p>
                 <p className="card-text">
                   <strong>HPI Credits:</strong> {hpiCredits}
@@ -212,7 +212,7 @@ function CreditManagementPage() {
               ))}
             </div>
 
-            <h2 className="mt-5">Purchase VDI Credits</h2>
+            <h2 className="mt-5">Purchase Valuation Credits</h2>
             <div className="row">
               {[
                 { quantity: 1, price: '£6.99' },
@@ -223,13 +223,13 @@ function CreditManagementPage() {
               ].map((pkg) => (
                 <div key={pkg.quantity} className="col-md-3 mb-3">
                   <div className="card text-center h-100">
-                    <div className="card-header">VDI Credits</div>
+                    <div className="card-header">Valuation Credits</div>
                     <div className="card-body">
                       <h5 className="card-title">{pkg.quantity} Checks</h5>
                       <p className="card-text">{pkg.price}</p>
                       <button
                         className="btn btn-primary"
-                        onClick={() => handlePurchase('VDI', pkg.quantity)}
+                        onClick={() => handlePurchase('VALUATION', pkg.quantity)}
                       >
                         Buy Now
                       </button>
@@ -343,8 +343,10 @@ if (record.searchType === 'MOT') {
   if (motMake && motModel) {
     makeModel = `${motMake} ${motModel}`;
   }
-} else if (record.searchType === 'VDI') {
-  const dataItems = record.responseData?.DataItems || {};
+} else if (record.searchType === 'Valuation') { 
+  const dataItems = record.responseData?.vehicleAndMotHistory?.DataItems?.ClassificationDetails?.Dvla || {};
+ 
+  console.log("DataItems =>", dataItems);
   const vdiMake = dataItems.Make;
   const vdiModel = dataItems.Model;
   if (vdiMake && vdiModel) {

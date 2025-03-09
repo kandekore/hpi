@@ -6,6 +6,7 @@
  import MOTResultDisplay from '../components/MOTResultDisplay';
  import VdiResultDisplay from '../components/VdiResultDisplay';
  import HpiSearchHistory from '../components/HpiSearchHistory';
+ import ValuationAggregatorDisplayHistory from '../components/ValuationAggregatorDisplayHistory';
  
  function formatTimestamp(ts) {
    if (!ts) return 'N/A';
@@ -110,12 +111,12 @@
          </>
        )}
  
-       {searchType === 'VDI' && (
+       {searchType === 'Valuation' && (
          <>
            
            {/* If you have partial logic for VDI, pass userProfile similarly */}
-           <VdiResultDisplay 
-             data={responseData} 
+           <ValuationAggregatorDisplayHistory 
+             valData={responseData} 
              userProfile={userProfile} 
            />
          </>

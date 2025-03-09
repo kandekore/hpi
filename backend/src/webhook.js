@@ -29,7 +29,7 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
       if (creditType === 'MOT') {
         user.motCredits += parseInt(quantity, 10);
       } else if (creditType === 'VDI') {
-        user.vdiCredits += parseInt(quantity, 10);
+        user.valuationCredits += parseInt(quantity, 10);
       } else if (creditType === 'HPI') {
         user.hpiCredits += parseInt(quantity, 10); // <--- handle HPI
       }

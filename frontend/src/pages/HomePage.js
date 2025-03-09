@@ -16,11 +16,11 @@ function HomePage() {
 
   const isLoggedIn = !!localStorage.getItem('authToken');
   const userProfile = profileData?.getUserProfile || null;
-  const hasVdiCredits = userProfile?.vdiCredits > 0;
+  const hasValuationCredits = userProfile?.valuationCredits > 0;
 
   const handleVDICheck = async () => {
     setAttemptedSearch(true);
-    if (!isLoggedIn || !hasVdiCredits) return;
+    if (!isLoggedIn || !hasValuationCredits) return;
     await vdiCheck({ variables: { reg } });
     await valuationCheck({ variables: { reg } });
   };
@@ -65,7 +65,7 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
               )}
 
               {/* If user attempts a search but is out of credits */}
-              {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.vdiCredits < 1 && (
+              {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.valuationCredits < 1 && (
                 <div className="alert alert-warning">
                   You have 0 VDI credits. Please{' '}
                   <a href="/credits" className="alert-link">purchase credits</a> to continue.
