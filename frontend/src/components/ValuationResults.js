@@ -87,7 +87,6 @@ export default function ValuationResults({ valuation, isSummary = false }) {
         <h3>Valuation Results</h3>
       </div>
       <div className="card-body">
-        <p><strong>Vehicle:</strong> {VehicleDescription || 'N/A'}</p>
         <div className="table-responsive">
           <table className="table table-bordered">
             <thead>

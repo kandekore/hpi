@@ -43,6 +43,8 @@ const vedRate = vehicleAndMotHistory?.DataItems?.VehicleStatus?.MotVed?.VedRate;
 
 const co2Value = vehicleAndMotHistory?.DataItems?.VehicleStatus?.MotVed?.VedCo2Emissions;
 
+const vinNo = vehicleAndMotHistory?.DataItems?.VehicleRegistration?.Vin;
+
 const techDataItems = vehicleAndMotHistory?.DataItems || {};
 
 const vehicleDetails = vehicleAndMotHistory?.DataItems.VehicleRegistration || {};
@@ -91,8 +93,11 @@ const motApi = vehicleAndMotHistory?.DataItems.MotHistory || {};
         />
       </div>
       <div className="mt-5" id="ownershipAndIdentitySection">
-      <OwnershipAndIdentity dataItems={vdiCheckFull?.DataItems || {}} />
+      <OwnershipAndIdentity dataItems={vdiCheckFull?.DataItems || {}} vinNo={vinNo}/>
       </div>
+
+<div className="mt-5" id="co2Section"><VedCo2Emissions co2Value={co2Value} vedRate={vedRate} />
+</div>
       {/* Detailed Panels (linked from AtAGlance) */}
       <div className="mt-5" id="financeSection">
         <OutstandingFinance dataItems={dataItems} />
@@ -112,12 +117,6 @@ const motApi = vehicleAndMotHistory?.DataItems.MotHistory || {};
       <MotResultDisplay motCheck={motTaxStatus} />
       </div>
 
-      <div className="mt-5" id="valuationSection">
-        <ValuationResults valuation={valuation} />
-      </div>
-
-      
-
       <div className="mt-5" id="scrappedSection">
         <ScrappedInfo dataItems={dataItems} />
       </div>
@@ -128,11 +127,11 @@ const motApi = vehicleAndMotHistory?.DataItems.MotHistory || {};
         <ImportedInfo dataItems={dataItems} />
       </div>
     
-<div className="mt-5" id="vedSection">
-<VehicleTaxRates vedRate={vedRate} />
-</div>
-<div className="mt-5" id="co2Section"><VedCo2Emissions co2Value={co2Value} />
-</div>
+      <div className="mt-5" id="valuationSection">
+        <ValuationResults valuation={valuation} />
+      </div>
+
+
 <div className="mt-5" id="techSection"><TechnicalDetails dataItems={techDataItems} />
 </div>
     </div>
