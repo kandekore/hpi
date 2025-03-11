@@ -7,7 +7,9 @@ function Layout({ children }) {
   // If the current path is "/hpi", we'll skip the Bootstrap container wrapper
   const isHpiRoute = location.pathname === '/hpi';
   const isHomeRoute = location.pathname === '/';
-  const isFullWidth = isHomeRoute || isHpiRoute;
+  const isMotRoute = location.pathname === '/mot';
+  const isValuationRoute = location.pathname === '/valuation';
+  const isFullWidth = isHomeRoute || isHpiRoute || isMotRoute || isValuationRoute;
 
   return (
     <div className="d-flex flex-column min-vh-100">
