@@ -2,12 +2,20 @@
 const { gql } = require('apollo-server-express');
 
 const typeDefs = gql`
+  scalar JSON
+
   type User {
     id: ID!
     email: String!
+    username: String
+    phone: String
+    userIntention: String
+    isVerified: Boolean
+    termsAccepted: Boolean
+
     motCredits: Int
     valuationCredits: Int
-    hpiCredits: Int  
+    hpiCredits: Int
     freeMotChecksUsed: Int
     searchHistory: [SearchRecord]
   }
@@ -20,17 +28,15 @@ const typeDefs = gql`
     responseData: JSON
   }
 
-type Transaction {
-  id: ID!
-  userId: ID!
-  transactionId: String
-  creditsPurchased: Int
-  creditType: String
-  amountPaid: Float
-  timestamp: String
-}
-
-  scalar JSON
+  type Transaction {
+    id: ID!
+    userId: ID!
+    transactionId: String
+    creditsPurchased: Int
+    creditType: String
+    amountPaid: Float
+    timestamp: String
+  }
 
   type Query {
     getSearchById(id: ID!): SearchRecord
@@ -43,23 +49,25 @@ type Transaction {
     valuation(reg: String!): JSON
     motCheckPaid(reg: String!): JSON
     hpiCheck(reg: String!): JSON
-    
-
   }
 
-type Mutation {
-      
-  payMOTCredit: User     
+  type Mutation {
+    payMOTCredit: User
 
-  register(email: String!, password: String!): String
-  login(email: String!, password: String!): String
-  createCreditPurchaseSession(creditType: String!, quantity: Int!): String
-  finalizeCreditPurchase(creditType: String!, quantity: Int!): User
-}
+      register(
+    email: String!
+    password: String!
+    username: String
+    phone: String
+    userIntention: String
+    termsAccepted: Boolean!
+  ): String
 
-  
+    login(email: String!, password: String!): String
+
+    createCreditPurchaseSession(creditType: String!, quantity: Int!): String
+    finalizeCreditPurchase(creditType: String!, quantity: Int!): User
+  }
 `;
-
-
 
 module.exports = typeDefs;

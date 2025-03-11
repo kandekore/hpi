@@ -2,10 +2,26 @@
 import { gql } from '@apollo/client';
 
 export const REGISTER = gql`
-  mutation Register($email: String!, $password: String!) {
-    register(email: $email, password: $password)
+  mutation Register(
+    $email: String!
+    $password: String!
+    $username: String
+    $phone: String
+    $userIntention: String
+    $termsAccepted: Boolean!
+  ) {
+    register(
+      email: $email
+      password: $password
+      username: $username
+      phone: $phone
+      userIntention: $userIntention
+      termsAccepted: $termsAccepted
+    )
   }
 `;
+
+
 
 export const LOGIN = gql`
   mutation Login($email: String!, $password: String!) {
@@ -38,3 +54,4 @@ export const PAY_MOT_CREDIT = gql`
     }
   }
 `;
+
