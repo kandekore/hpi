@@ -39,7 +39,8 @@ export default function MainPricing({
   };
 
   return (
-    <div style={{ position: 'relative', marginTop: '2rem' }}>
+    <div style={{ position: 'relative', paddingTop: '3rem', paddingBottom: '3rem',backgroundColor: '#003366' }}>
+    
       {/* SubPricing modal => appears if subProduct != null */}
       {subProduct && (
         <SubPricing
@@ -51,15 +52,13 @@ export default function MainPricing({
 
       )}
 
-      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#003366' }}>
-        Our Main Products
-      </h2>
+  
 
       {/* 3-product container (tiered) */}
-      <div style={styles.tieredContainer}>
+      <div style={styles.tieredContainer} className='tier'>
         
         {/* LEFT: MOT panel */}
-        <div style={{ ...styles.sidePanel, marginTop: '50px' }}>
+        <div style={{ ...styles.sidePanel, marginTop: '10px' }}>
           <h3 style={styles.title}>MOT Full History</h3>
           <p style={styles.subheading}>3 Searches</p>
           <p style={styles.price}>FREE</p>
@@ -80,8 +79,8 @@ export default function MainPricing({
 
         {/* CENTER: VDI Full Lookup (primary) */}
         <div style={styles.centerPanel}>
-          <h3 style={{ ...styles.title, color: '#003366', fontSize: '1.5rem' }}>
-            VDI Full Lookup
+          <h3 style={{ ...styles.title, color: '#003366'}}>
+            VDI / HPI Full Lookup
           </h3>
           <p style={styles.subheading}>1 Search</p>
           <p style={styles.price}>£9.99</p>
@@ -108,7 +107,7 @@ export default function MainPricing({
         </div>
 
         {/* RIGHT: Vehicle Valuation */}
-        <div style={{ ...styles.sidePanel, marginTop: '50px' }}>
+        <div style={{ ...styles.sidePanel, marginTop: '10px' }}>
           <h3 style={styles.title}>Vehicle Valuation</h3>
           <p style={styles.subheading}>1 Search</p>
           <p style={styles.price}>£4.99</p>
@@ -141,11 +140,12 @@ const styles = {
     justifyContent: 'center',
     gap: '1rem',
     position: 'relative',
+    backgroundColor: '#003366',
   },
   sidePanel: {
-    flex: '0 0 260px',
+    flex: '0 0 300px',
     // remove fixed height => auto adjusts
-    border: '2px solid #ccc',
+    border: '5px solid #ccc',
     borderRadius: '25px',
     backgroundColor: '#f9f9f9',
     padding: '1rem',
@@ -155,21 +155,22 @@ const styles = {
     boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   },
   centerPanel: {
-    flex: '0 0 300px',
-    border: '2px solid #003366',
+    flex: '0 0 400px',
+    border: '2px solidrgb(89, 90, 92)',
     borderRadius: '25px',
     backgroundColor: '#fdfdfd',
     padding: '1rem',
     textAlign: 'center',
     position: 'relative',
     // Overlap effect:
-    top: '-40px',
+    top: '-10px',
     zIndex: 2,
     boxShadow: '0 6px 12px rgba(0,0,0,0.3)',
   },
   title: {
     marginBottom: '1rem',
-    fontSize: '1.2rem',
+    fontSize: '2rem',
+    lineHeight: '2.3',
     color: '#003366',
   },
   subheading: {
@@ -178,7 +179,9 @@ const styles = {
   },
   price: {
     fontWeight: 'bold',
-    fontSize: '1.3rem',
+    color: '#003366',
+    fontSize: '2rem',
+    lineHeight: '2.3',
     margin: '0.5rem 0',
   },
   dataTitle: {
@@ -213,4 +216,7 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
+tier: {
+  padding: '60px 0px!important;'
+},
 };

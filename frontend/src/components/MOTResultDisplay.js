@@ -73,18 +73,18 @@ export default function MOTResultDisplay({ motCheck }) {
   const alertClass = isMotValid ? 'alert alert-success' : 'alert alert-danger';
 
   return (
-    <>
-    <style>
-      {`.card-header {
-    background-color: #003366;
-    border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color);
-    color: #fff;
-    margin-bottom: 0;
-    padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
-    text-align: center;
-}`}
-    </style>
+   
     <div className="card mb-4" id="motHistorySection">
+    <style>
+    {`.card-header {
+  background-color: #003366;
+  border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color);
+  color: #fff;
+  margin-bottom: 0;
+  padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
+  text-align: center;
+}`}
+  </style>
       <div className="card-header">
         <h3>MOT History &amp; Tax Status</h3>
       </div>
@@ -120,8 +120,8 @@ export default function MOTResultDisplay({ motCheck }) {
 
         {/* Next MOT Due */}
         <div className="mb-4">
-          <h4>Latest MOT Expiry:{' '}
-          {NextMotDueDate ? formatDate(NextMotDueDate) : 'N/A'}</h4>
+          <strong>Latest MOT Expiry:</strong>{' '}
+          {NextMotDueDate ? formatDate(NextMotDueDate) : 'N/A'}
         </div>
 
         {/* Show summary of how many records in the MOT history */}
@@ -211,6 +211,6 @@ export default function MOTResultDisplay({ motCheck }) {
         )}
       </div>
     </div>
-    </>
+    
   );
 }

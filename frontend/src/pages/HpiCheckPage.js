@@ -71,9 +71,10 @@ export default function HpiCheckPage() {
         .hero-content {
           flex: 1;
           padding: 2rem;
+          text-align: center;
         }
         .plate-container {
-          width: 40%;
+          width: 55%;
           height: 200px;
           margin: 2rem auto;
           display: flex;

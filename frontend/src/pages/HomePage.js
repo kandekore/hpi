@@ -4,7 +4,11 @@ import { GET_USER_PROFILE } from '../graphql/queries';
 import { useNavigate } from 'react-router-dom';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
 import MainPricing from '../components/MainPricing';
-import drkbgd from '../images/backgrd.jpg';
+import drkbgd from '../images/drkbgd.jpg';
+
+// This is the *new* background image for our flexible plans section.
+// Replace 'flexible_plans_bg.jpg' with your actual file if needed:
+import flexiblePlansBg from '../images/happyuser.jpg'; // '../images/flexible_plans_bg.jpg';
 
 export default function HomePage() {
   const [reg, setReg] = useState('');
@@ -14,27 +18,27 @@ export default function HomePage() {
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // For MOT, check if free searches used up:
+  // MOT checks
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
   const hasFreeMotLeft = freeMotChecksUsed < 3;
 
-  // For Valuation credits:
+  // Valuation credits
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
 
-  // For VDI => if you track VDI separately:
+  // VDI or HPI credits
   const hasVdiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
   const navigate = useNavigate();
 
+  // Registration input
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
-    // Limit input to 8 chars
     if (val.length <= 8) {
       setReg(val);
     }
   };
 
-  // MOT handler
+  // Handle MOT check
   const handleClickMOT = () => {
     setErrorMsg('');
     if (!reg) {
@@ -61,6 +65,7 @@ export default function HomePage() {
     }
   };
 
+  // Purchase session
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
   const handlePurchase = async (product, quantity) => {
@@ -68,11 +73,14 @@ export default function HomePage() {
       Valuation: 'VALUATION',
       VDI: 'VDI',
       MOT: 'MOT',
+      HPI: 'VDI' // If you treat "Full HPI" the same as "VDI"
     };
     const creditType = productMap[product] || 'VDI';
 
     try {
-      const { data } = await createSession({ variables: { creditType, quantity } });
+      const { data } = await createSession({
+        variables: { creditType, quantity },
+      });
       if (data.createCreditPurchaseSession) {
         window.location.href = data.createCreditPurchaseSession;
       }
@@ -81,6 +89,7 @@ export default function HomePage() {
     }
   };
 
+  // Valuation check
   const handleClickValuation = () => {
     setErrorMsg('');
     if (!reg) {
@@ -98,6 +107,7 @@ export default function HomePage() {
     navigate(`/valuation?reg=${reg}`);
   };
 
+  // VDI/HPI check
   const handleClickVDI = () => {
     setErrorMsg('');
     if (!reg) {
@@ -118,40 +128,40 @@ export default function HomePage() {
   return (
     <>
       <style>{`
-        /* Hero background, not full viewport height anymore */
-        .hero {
+        body, html {
+          margin: 0;
+          padding: 0;
+          font-family: 'Helvetica Neue', sans-serif;
+        }
+        .section-fullwidth {
           width: 100%;
-          background: url(${drkbgd}) center top repeat-y;
-          padding: 3rem 0;
-          /* Removed min-height: 100vh for a more compact form area */
         }
-
-        .hero-content {
-          max-width: 1200px;
-          margin: 0 auto;
+        /* HERO SECTION */
+        .hero {
+          background: url(${drkbgd}) center top no-repeat;
+          background-size: cover;
+          padding: 3rem 1rem;
+          color: #fff;
           text-align: center;
-          padding: 2rem;
         }
-
-        .hero h1 {
+        .hero-title {
+          font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
         }
-
-        .hero p {
+        .hero-subtitle {
+          font-size: 1.2rem;
           margin-bottom: 2rem;
         }
-
-        /* Plate container & input styling */
-        .plate-container {
-          margin: 0 auto;
+           .plate-container {
+          width: 70%;
+          height: 200px;
+          margin: 2rem auto;
           display: flex;
           align-items: stretch;
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
-          max-width: 600px;
-          height: 150px;
         }
         .plate-blue {
           background-color: #003399;
@@ -159,23 +169,24 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 110px;
-          font-size: 2.5rem;
+          width: 130px;
+          font-size: 4.5rem;
           font-weight: bold;
+          padding: 5px;
         }
         .plate-input {
           flex: 1;
-          background-color: #ffde46;
+          background-color: #FFDE46;
           color: #000;
           font-weight: bold;
-          font-size: 3rem;
+          font-size: 7rem;
           border: none;
           text-transform: uppercase;
           padding: 0 1rem;
           outline: none;
+          line-height: 1;
+          padding-left: 10%;
         }
-
-        /* Button group side-by-side on desktop, stacked on mobile */
         .button-group {
           display: flex;
           justify-content: center;
@@ -187,11 +198,12 @@ export default function HomePage() {
           background-color: #1560bd;
           color: #fff;
           font-weight: 600;
-          border: none;
+          border: #fff solid 2px;
           border-radius: 25px;
           padding: 10px 25px;
           cursor: pointer;
-          font-size: 1.3rem;
+          font-size: 1.1rem;
+          width: 22%;
         }
         .action-button:hover {
           background-color: #0d4f9c;
@@ -200,9 +212,7 @@ export default function HomePage() {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
         @media (max-width: 768px) {
-          /* Plate smaller on mobile */
           .plate-container {
             max-width: 100%;
             height: 120px;
@@ -212,21 +222,145 @@ export default function HomePage() {
             font-size: 2rem;
           }
           .plate-input {
-            font-size: 2.4rem;
+            font-size: 2rem;
           }
         }
+        /* WHY CHECK WITH US */
+        .why-check-section {
+          background: #f4f4f4;
+          padding: 4rem 1rem;
+        }
+        .why-check-heading {
+          font-size: 2rem;
+          margin-bottom: 2rem;
+          text-align: center;
+          font-weight: 700;
+        }
+        .why-check-items {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 2rem;
+          justify-content: center;
+        }
+        .why-check-card {
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+          padding: 2rem;
+          flex: 1 1 300px;
+          max-width: 350px;
+          text-align: center;
+        }
+        .why-check-card i {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+          color: #1560bd;
+        }
+
+        /* FLEXIBLE PLANS SECTION */
+        .flexible-plans-section {
+          background: url(${flexiblePlansBg}) center center no-repeat;
+          background-size: cover;
+          min-height: 350px;
+          padding: 3rem 1rem;
+          position: relative;
+          display: flex;
+          align-items: center; 
+        }
+        .flexible-plans-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          width: 100%;
+          display: flex;
+          align-items: center;
+        }
+        .flexible-plans-box {
+           background: #003366;
+    color: #fff;
+    padding: 2rem;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 550px;
+    border: #fff solid 5px;
+}
+        }
+        .flexible-plans-box h3 {
+          margin-top: 0;
+          font-weight: 700;
+        }
+
+        /* TAB SECTION */
+        .report-tabs-section {
+          background: #fff;
+          padding: 4rem 1rem;
+        }
+        .report-tabs-heading {
+          font-size: 2rem;
+          margin-bottom: 3rem;
+          text-align: center;
+          font-weight: 700;
+        }
+        .nav-tabs .nav-link {
+          border: none;
+          border-radius: 0;
+          color: #666;
+        }
+        .nav-tabs .nav-link.active {
+          color: #1560bd;
+          border-bottom: 2px solid #1560bd;
+        }
+        .tab-content .tab-pane {
+          margin-top: 2rem;
+          max-width: 1000px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        /* FAQ SECTION */
+        .faq-section {
+          background: #f9f9f9;
+          padding: 4rem 1rem;
+        }
+        .faq-heading {
+          font-size: 2rem;
+          margin-bottom: 2rem;
+          text-align: center;
+          font-weight: 700;
+        }
+        .accordion-button:focus {
+          box-shadow: none;
+        }
+
+        /* BOTTOM BRAND MENTION */
+        .vdi-brand-section {
+          background: #fff;
+          padding: 3rem 1rem;
+        }
+        .vdi-brand-content {
+          max-width: 900px;
+          margin: 0 auto;
+          text-align: center;
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+          ul#myTab {
+    font-size: x-large;
+    font-weight: 600;
+}
       `}</style>
 
-      {/* HERO SECTION WITH FORM */}
-      <div className="hero">
-        <div className="hero-content">
-          <h1>All-In-One Vehicle Check</h1>
-          <p>
-            Enter your vehicle registration below, then pick from 
-            <strong> Free MOT History</strong>, <strong>Simple Valuation</strong>, 
-            or a <strong>Full VDI (Vehicle Data &amp; History) Check</strong>. 
-          </p>
+      {/* HERO SECTION */}
+      <div className="hero section-fullwidth">
+        <h1 className="hero-title">Your One-Stop Vehicle Check</h1>
+        <p className="hero-subtitle">
+          Free MOT History, Simple Valuation, Full HPI &amp; Comprehensive VDI 
+          — All in One Place
+        </p>
 
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
@@ -268,165 +402,297 @@ export default function HomePage() {
         onPurchase={(product, quantity) => handlePurchase(product, quantity)}
       />
 
-      {/* CONTENT SECTION - Features & Benefits */}
-      <div className="container my-5">
-        <h2 className="mb-4 text-center">Why Choose Our Vehicle Checks?</h2>
-
-        <p className="lead">
-          We pride ourselves on delivering quick, accurate, and 
-          comprehensive vehicle information. Whether you need to confirm
-          a vehicle’s MOT history for free, want an instant valuation, 
-          or require our full VDI check, our service is designed to 
-          make you feel confident about your next vehicle purchase. 
-        </p>
-
-        <div className="alert alert-info my-4" role="alert">
-          <strong>VDI Check</strong> is our leading consumer brand for vehicle history 
-          and provenance. The data we provide is securely sourced from top-tier 
-          providers, including the Association of British Insurers, the Police National Computer, 
-          VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA. 
-          We aggregate all of this into one convenient, modern API, giving you everything you need 
-          in a single report.
+      {/* WHY CHECK WITH US */}
+      <div className="why-check-section section-fullwidth">
+        <h2 className="why-check-heading">Why Check Your Vehicle With Us?</h2>
+        <div className="why-check-items">
+          <div className="why-check-card">
+            <i className="bi bi-clock-history"></i>
+            <h4>Instant Information</h4>
+            <p>
+              Our streamlined system retrieves your vehicle’s details 
+              within seconds, so you’re never left waiting.
+            </p>
+          </div>
+          <div className="why-check-card">
+            <i className="bi bi-shield-check"></i>
+            <h4>Accurate &amp; Reliable</h4>
+            <p>
+              We partner with leading data providers to ensure every 
+              detail you get is correct and up-to-date.
+            </p>
+          </div>
+          <div className="why-check-card">
+            <i className="bi bi-cash-stack"></i>
+            <h4>Save Money</h4>
+            <p>
+              Identify hidden issues or outstanding finance before you buy, 
+              preventing expensive surprises down the line.
+            </p>
+          </div>
+          {/* Removed the "Tailored to You" card here */}
         </div>
+      </div>
 
-        {/* ACCORDION FOR MORE DETAILS */}
-        <div className="accordion" id="vehicleCheckAccordion">
-          {/* Why check a vehicle */}
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="headingOne">
-              <button
-                className="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseOne"
-                aria-expanded="false"
-                aria-controls="collapseOne"
-              >
-                Why Should I Check a Vehicle Before Buying?
-              </button>
-            </h2>
-            <div
-              id="collapseOne"
-              className="accordion-collapse collapse"
-              aria-labelledby="headingOne"
-              data-bs-parent="#vehicleCheckAccordion"
-            >
-              <div className="accordion-body">
-                <p>
-                  Buying a used car can be a big investment. A quick look 
-                  at a vehicle doesn’t always reveal hidden issues such as 
-                  outstanding finance, previous write-offs, or even if it 
-                  was reported stolen. By checking these details in advance, 
-                  you protect yourself from unexpected losses and ensure 
-                  you’re paying a fair price.
-                </p>
-                <ul>
-                  <li><i className="bi bi-check-circle me-2"></i> Avoid purchasing a car with unpaid finance</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Steer clear of stolen or clocked vehicles</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Confirm mileage accuracy</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Validate it has a legitimate V5C (logbook)</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* What's included in the checks */}
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="headingTwo">
-              <button
-                className="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseTwo"
-                aria-expanded="false"
-                aria-controls="collapseTwo"
-              >
-                What’s Included in Our Full VDI Check?
-              </button>
-            </h2>
-            <div
-              id="collapseTwo"
-              className="accordion-collapse collapse"
-              aria-labelledby="headingTwo"
-              data-bs-parent="#vehicleCheckAccordion"
-            >
-              <div className="accordion-body">
-                <p>
-                  Our <strong>Full VDI Check</strong> goes beyond basic details 
-                  to give you an in-depth report about the vehicle’s past:
-                </p>
-                <ul>
-                  <li><i className="bi bi-check-circle me-2"></i> Outstanding Finance or Loans</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Stolen Vehicle Status (Police National Computer)</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Insurance Write-off Records</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Mileage Discrepancies</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Number of Previous Owners &amp; Keeper Changes</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Plate Transfers, Scrappage Checks &amp; Import/Export Status</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Vehicle Identification Number (VIN) Match</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Technical Data &amp; Emissions Standards</li>
-                  <li><i className="bi bi-check-circle me-2"></i> …and so much more!</li>
-                </ul>
-                <p>
-                  All of this data is pulled together in seconds, giving you peace of mind and 
-                  saving you from potential pitfalls.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Free MOT + Valuation Info */}
-          <div className="accordion-item">
-            <h2 className="accordion-header" id="headingThree">
-              <button
-                className="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseThree"
-                aria-expanded="false"
-                aria-controls="collapseThree"
-              >
-                Free MOT &amp; Valuation Searches
-              </button>
-            </h2>
-            <div
-              id="collapseThree"
-              className="accordion-collapse collapse"
-              aria-labelledby="headingThree"
-              data-bs-parent="#vehicleCheckAccordion"
-            >
-              <div className="accordion-body">
-                <p>
-                  We know it’s important to have easy access to core checks. That’s why 
-                  every user gets <strong>free MOT searches</strong> and a 
-                  <strong> simple valuation check</strong> option to ensure the basics 
-                  are covered without any hidden fees.
-                </p>
-                <ul>
-                  <li><i className="bi bi-check-circle me-2"></i> Up to 3 free MOT checks</li>
-                  <li><i className="bi bi-check-circle me-2"></i> Instant market valuation so you never overpay</li>
-                </ul>
-                <p>
-                  Once you’ve confirmed these essentials, you can upgrade to a full 
-                  VDI check anytime for maximum detail. 
-                </p>
-              </div>
-            </div>
+      {/* NEW FLEXIBLE PLANS SECTION */}
+      <div className="flexible-plans-section section-fullwidth">
+        <div className="flexible-plans-container">
+          <div className="flexible-plans-box">
+            <h3>Flexible Plans & Extra Features</h3>
+            <p>
+              We understand that everyone has different needs when it 
+              comes to vehicle checks. That's why we offer a range of 
+              options, from free MOT checks and quick valuations to 
+              more comprehensive HPI or VDI reports. You can purchase 
+              a single search for peace of mind or opt for a multi-check 
+              bundle if you're comparing several cars at once.
+            </p>
+            <p>
+              All historical searches remain stored in your personal 
+              dashboard, accessible anytime you log in. Whether you’re 
+              confirming service records on a new purchase or revisiting 
+              data from months ago, your report details are always at 
+              your fingertips.
+            </p>
+            <p>
+              Take advantage of our affordable one-off checks or 
+              save with bulk credits—either way, you’ll have reliable 
+              vehicle insights whenever you need them.
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Possible final prompt or CTA */}
-        <div className="mt-5 text-center">
-          <h3>Ready to Buy Your Next Car with Confidence?</h3>
-          <p className="mb-4">
-            Use our free MOT check, grab a quick valuation, or get the 
-            ultimate peace of mind with our Full VDI check.
-          </p>
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      {/* REPORT TABS SECTION */}
+      <div className="report-tabs-section section-fullwidth">
+        <h2 className="report-tabs-heading">Our Reports</h2>
+
+        <ul className="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+          <li className="nav-item" role="presentation">
+            <button
+              className="nav-link active"
+              id="mot-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#mot"
+              type="button"
+              role="tab"
+              aria-controls="mot"
+              aria-selected="true"
+            >
+              Free MOT Check
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              className="nav-link"
+              id="valuation-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#valuation"
+              type="button"
+              role="tab"
+              aria-controls="valuation"
+              aria-selected="false"
+            >
+              Simple Valuation
+            </button>
+          </li>
+          <li className="nav-item" role="presentation">
+            <button
+              className="nav-link"
+              id="vdi-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#vdi"
+              type="button"
+              role="tab"
+              aria-controls="vdi"
+              aria-selected="false"
+            >
+              Full VDI Check
+            </button>
+          </li>
+        </ul>
+
+        <div className="tab-content" id="myTabContent">
+          {/* Free MOT Tab */}
+          <div
+            className="tab-pane fade show active"
+            id="mot"
+            role="tabpanel"
+            aria-labelledby="mot-tab"
           >
-            Get Started
-          </button>
+            <p>
+              Take advantage of up to three <strong>Free MOT Checks</strong> per 
+              user! Instantly see past test results, recorded mileages, 
+              and advisories to ensure your potential car has been 
+              well-maintained.
+            </p>
+            <ul>
+              <li>Up to 3 free checks per account</li>
+              <li>View MOT history &amp; mileage records</li>
+              <li>Check for recurring advisories</li>
+              <li>Identify signs of poor maintenance</li>
+            </ul>
+          </div>
+
+          {/* Simple Valuation Tab */}
+          <div
+            className="tab-pane fade"
+            id="valuation"
+            role="tabpanel"
+            aria-labelledby="valuation-tab"
+          >
+            <p>
+              Get a quick market estimate of your car’s value. Our 
+              <strong> Simple Valuation</strong> tool leverages extensive 
+              market data to tell you if the asking price is fair.
+            </p>
+            <ul>
+              <li>Immediate valuation report</li>
+              <li>Up-to-date pricing from real market data</li>
+              <li>Avoid overpaying for your next car</li>
+            </ul>
+          </div>
+
+          {/* Full HPI Check Tab */}
+          
+
+          {/* Full VDI Check Tab */}
+          <div
+            className="tab-pane fade"
+            id="vdi"
+            role="tabpanel"
+            aria-labelledby="vdi-tab"
+          >
+            <p>
+              Our most comprehensive offering, the <strong>Full VDI Check</strong>, 
+              uncovers all aspects of a vehicle’s past — from outstanding finance 
+              and theft records to plate changes, keeper history, technical 
+              specs, and more. 
+            </p>
+            <ul>
+              <li>Finance checks &amp; stolen vehicle status</li>
+              <li>Insurance write-offs, import/export info</li>
+              <li>Mileage verification &amp; VIN match</li>
+              <li>Plate transfers &amp; keeper change history</li>
+              <li>Technical data &amp; emissions standards</li>
+            </ul>
+            <p>
+              This all-in-one check is perfect for absolute peace of mind 
+              before making your purchase.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ SECTION */}
+      <div className="faq-section section-fullwidth" id="faqs">
+        <h2 className="faq-heading">Frequently Asked Questions</h2>
+        <div className="container">
+          <div className="accordion" id="faqAccordion">
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="faqOne">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseOne"
+                  aria-expanded="false"
+                  aria-controls="collapseOne"
+                >
+                  Do I really need to check a used car before buying?
+                </button>
+              </h2>
+              <div
+                id="collapseOne"
+                className="accordion-collapse collapse"
+                aria-labelledby="faqOne"
+                data-bs-parent="#faqAccordion"
+              >
+                <div className="accordion-body">
+                  <p>
+                    Absolutely! Hidden issues like outstanding finance, stolen 
+                    status, or incorrect mileage can cost you thousands. A quick 
+                    check can prevent losing your money or ending up with a 
+                    vehicle that’s unsafe.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="faqTwo">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseTwo"
+                  aria-expanded="false"
+                  aria-controls="collapseTwo"
+                >
+                  How accurate are your valuations and reports?
+                </button>
+              </h2>
+              <div
+                id="collapseTwo"
+                className="accordion-collapse collapse"
+                aria-labelledby="faqTwo"
+                data-bs-parent="#faqAccordion"
+              >
+                <div className="accordion-body">
+                  <p>
+                    We pull data from multiple top-tier providers, ensuring your 
+                    vehicle’s records are accurate and up-to-date. Our valuation 
+                    tool references real market data, so you know exactly where 
+                    your car stands.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="faqThree">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseThree"
+                  aria-expanded="false"
+                  aria-controls="collapseThree"
+                >
+                  What if I need more than one check?
+                </button>
+              </h2>
+              <div
+                id="collapseThree"
+                className="accordion-collapse collapse"
+                aria-labelledby="faqThree"
+                data-bs-parent="#faqAccordion"
+              >
+                <div className="accordion-body">
+                  <p>
+                    We offer multi-check options at discounted rates, perfect if 
+                    you’re considering several cars at once. Simply purchase 
+                    a bundle of checks and apply them when you need.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM BRAND MENTION */}
+      <div className="vdi-brand-section section-fullwidth">
+        <div className="vdi-brand-content">
+          <p>
+            <strong>VDI Check</strong> is our leading consumer brand for vehicle 
+            history and provenance. The data we provide is securely sourced from 
+            top-tier providers, including the Association of British Insurers, the 
+            Police National Computer, VDI Valuations, Experian Automotive, major 
+            UK finance companies, VOSA / DVSA, and the DVLA. We aggregate all of 
+            this into one convenient, modern API, giving you everything you need 
+            in a single report.
+          </p>
         </div>
       </div>
     </>

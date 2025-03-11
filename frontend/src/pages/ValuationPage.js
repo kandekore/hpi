@@ -62,9 +62,10 @@ export default function ValuationPage() {
         }
         .hero-content {
           flex: 1; padding: 2rem;
+          text-align: center;
         }
         .plate-container {
-          width: 40%;
+          width: 55%;
           height: 200px;
           margin: 2rem auto;
           display: flex;
@@ -122,19 +123,22 @@ export default function ValuationPage() {
             font-size: 6.5rem; padding-left: 5%;
           }
         }
+        a.btn.btn-primary.btn-sm {
+    display: none!important;
+}
       `}</style>
 
       <div className="hero">
         <div className="hero-content">
           <h1>Valuation Check</h1>
-          <p>Enter your vehicle registration to retrieve its estimated valuation.</p>
+          <p>Enter your vehicle registration to retrieve its estimated retail, private sale, trade, auction and part exchange valuation.</p>
 
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
               type="text"
               className="plate-input"
-              placeholder="AB12CDE"
+              placeholder="AB12 CDE"
               value={reg}
               onChange={handleRegChange}
             />

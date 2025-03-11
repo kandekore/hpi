@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 
+// 1) Import the HOOK from react-to-print
+
+
 export default function MOTPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // read the ?reg= param
   const initialReg = searchParams.get('reg') || '';
-
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
@@ -18,14 +19,15 @@ export default function MOTPage() {
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  const [motCheck, { data: motData, loading: motLoading, error: motError }] = useLazyQuery(MOT_CHECK);
+  const [motCheck, { data: motData, loading: motLoading, error: motError }] =
+    useLazyQuery(MOT_CHECK);
   const hasResults = !!(motData && motData.motCheck);
 
-  // Auto-run once if there's an initialReg
+
+
   useEffect(() => {
     if (initialReg) {
       handleCheck();
-      // Immediately remove the param from URL
       navigate('/mot', { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,18 +54,16 @@ export default function MOTPage() {
           margin: 0;
           padding: 0;
         }
+        /* Removed min-height: 100vh to avoid forced full-height hero. */
         .hero {
           width: 100%;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
         }
         .hero-content {
-          flex: 1;
           padding: 2rem;
+          text-align: center;
         }
         .plate-container {
-          width: 40%;
+          width: 55%;
           height: 200px;
           margin: 2rem auto;
           display: flex;
@@ -133,60 +133,70 @@ export default function MOTPage() {
       `}</style>
 
       <div className="hero">
-        <div className="hero-content">
-          <h1>MOT Check</h1>
-          <p>Enter your vehicle registration to see its MOT history.</p>
+      <div className="hero-content">
+        <h1>MOT Check</h1>
+        <p>Enter your vehicle registration to see its full MOT history.</p>
 
-          <div className="plate-container">
-            <div className="plate-blue">GB</div>
-            <input
-              className="plate-input"
-              placeholder="AB12CDE"
-              value={reg}
-              onChange={handleRegChange}
-            />
-          </div>
+        <div className="plate-container">
+          <div className="plate-blue">GB</div>
+          <input
+            className="plate-input"
+            placeholder="AB12 CDE"
+            value={reg}
+            onChange={handleRegChange}
+          />
+        </div>
 
-          <div className="submit">
-            {hasResults ? (
-              <a
-                href="#"
-                style={{ fontSize: '2rem', textDecoration: 'underline' }}
-                onClick={() => window.location.reload()}
-              >
-                Make another search
-              </a>
-            ) : (
-              <button
-                className="plate-button"
-                onClick={handleCheck}
-                disabled={motLoading}
-              >
-                {motLoading ? 'Checking...' : 'Check MOT'}
-              </button>
-            )}
-          </div>
-
-          {attemptedSearch && !isLoggedIn && (
-            <div className="alert alert-info mt-2">
-              Please login or register to do a MOT check.
-            </div>
-          )}
-          {motError && (
-            <div className="alert alert-danger mt-2">
-              {motError.message}
-            </div>
+        <div className="submit">
+          {hasResults ? (
+            <a
+              href="#"
+              style={{ fontSize: '2rem', textDecoration: 'underline' }}
+              onClick={() => window.location.reload()}
+            >
+              Make another search
+            </a>
+          ) : (
+            <button
+              className="plate-button"
+              onClick={handleCheck}
+              disabled={motLoading}
+            >
+              {motLoading ? 'Checking...' : 'Check MOT'}
+            </button>
           )}
         </div>
 
-        {/* Show results if we have them */}
-        {motData && motData.motCheck && (
-          <MOTResultDisplay 
-            motCheck={motData.motCheck}
-            userProfile={userProfile}
-          />
+        {attemptedSearch && !isLoggedIn && (
+          <div className="alert alert-info mt-2">
+            Please login or register to do an MOT check.
+          </div>
+        )}
+        {motError && (
+          <div className="alert alert-danger mt-2">
+            {motError.message}
+          </div>
         )}
       </div>
-    </>
-  );
+
+      {/* Conditionally show results & "Print" button if we have data */}
+      {motData?.motCheck && (
+        <div className="container mb-5">
+          {/* 4) Standard button that calls handlePrint */}
+         
+          {/* 
+            5) The part we actually want to print, 
+            wrapped in a div with ref={printRef}
+          */}
+         
+            <MOTResultDisplay 
+              motCheck={motData.motCheck}
+              userProfile={userProfile}
+            />
+          </div>
+      
+      )}
+    </div>
+  </>
+);
 }

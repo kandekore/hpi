@@ -144,7 +144,11 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       }
       return record;
     },
-
+    async getSampleSearchById(_, { id }, ) {
+      const record = await SearchRecord.findById(id);
+      if (!record) throw new Error('No search record found for that ID');
+      return record;
+    },
     // 6) Full HPI Check with 4 batches
     async hpiCheck(_, { reg }, { user }) {
       if (!user) throw new Error('Not authenticated');

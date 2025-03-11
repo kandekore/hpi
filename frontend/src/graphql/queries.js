@@ -78,6 +78,17 @@ export const GET_SEARCH_BY_ID = gql`
   }
 `;
 
+export const GET_SAMPLE_SEARCH_BY_ID = gql`
+  query GetSampleSearchById($id: ID!) {
+    getSampleSearchById(id: $id) {
+      id
+      vehicleReg
+      searchType
+      timestamp
+      responseData
+    }
+  }
+`;
 export const HPI_CHECK = gql`
   query HpiCheck($reg: String!) {
     hpiCheck(reg: $reg)

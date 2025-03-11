@@ -34,6 +34,7 @@ type Transaction {
 
   type Query {
     getSearchById(id: ID!): SearchRecord
+    getSampleSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON
     getTransactions: [Transaction]
     getUserProfile: User
