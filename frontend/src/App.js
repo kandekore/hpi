@@ -24,6 +24,24 @@ function PrivateRoute({ children }) {
 function App() {
   return (
     <ApolloProvider client={client}>
+    <style>
+    {`
+      /* Force no margin/padding on html/body so the hero can occupy full width & top */
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        height: 100%;
+      }
+      /* If you’re using any default Bootstrap .container or .App classes,
+         make sure they don't add margin:
+         .App, .container {
+           margin: 0 !important;
+           padding: 0 !important;
+         }
+      */
+    `}
+  </style>
       <Router>
         <Layout>
           <Routes>

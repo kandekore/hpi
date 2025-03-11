@@ -1,5 +1,4 @@
-// src/components/VehicleTaxRates.js
-import React from 'react';
+// src/components/VehicleTaxRates.jsimport React from 'react';
 
 // A small helper component to render two circles for 6-month and 12-month
 function RateCircles({ title, sixMonth, twelveMonth }) {

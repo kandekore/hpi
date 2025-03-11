@@ -7,11 +7,11 @@ import {
   GET_TRANSACTIONS
 } from '../graphql/queries';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
+import MainPricing from '../components/MainPricing';
 
-/*************************************************************
- * parse +00:00 => Z, or numeric timestamps as epoch ms
- * Adds console logs to debug each step
- *************************************************************/
+// Remove import for formatTimestamp
+// import formatTimestamp from '../utils/formatTimestamp';
+
 function formatTimestamp(ts) {
   if (!ts) {
     console.log("formatTimestamp => no timestamp provided");
@@ -55,13 +55,11 @@ function formatTimestamp(ts) {
 }
 
 function CreditManagementPage() {
-  // 1) State for credits
   const [motCredits, setMotCredits] = useState(0);
   const [valuationCredits, setValuationCredits] = useState(0);
-  const [hpiCredits, setHpiCredits] = useState(0); // <-- NEW
+  const [hpiCredits, setHpiCredits] = useState(0);
   const [freeMotChecksUsed, setFreeMotChecksUsed] = useState(0);
 
-  // 2) Fetch user profile
   const {
     data: profileData,
     loading: profileLoading,
@@ -69,24 +67,20 @@ function CreditManagementPage() {
     refetch: refetchProfile
   } = useQuery(GET_USER_PROFILE);
 
-  // 3) Once profileData is loaded or updated, sync to state
   useEffect(() => {
     if (profileData && profileData.getUserProfile) {
       const { motCredits, valuationCredits, freeMotChecksUsed, hpiCredits } = profileData.getUserProfile;
       setMotCredits(motCredits);
       setValuationCredits(valuationCredits);
       setFreeMotChecksUsed(freeMotChecksUsed);
-      setHpiCredits(hpiCredits || 0); // fallback if undefined
+      setHpiCredits(hpiCredits || 0);
     }
   }, [profileData]);
 
-  // 4) Create credit purchase session mutation
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
-  // 5) Tab state
   const [activeTab, setActiveTab] = useState('credits');
 
-  // 6) Search History and Transactions queries, skipped unless that tab is active
   const {
     data: historyData,
     loading: historyLoading,
@@ -105,12 +99,10 @@ function CreditManagementPage() {
     fetchPolicy: 'network-only'
   });
 
-  // 7) Handler to create purchase session
   const handlePurchase = async (creditType, quantity) => {
     try {
       const { data } = await createSession({ variables: { creditType, quantity }});
       if (data.createCreditPurchaseSession) {
-        // redirect to Stripe
         window.location.href = data.createCreditPurchaseSession;
       }
     } catch (err) {
@@ -118,7 +110,6 @@ function CreditManagementPage() {
     }
   };
 
-  // 8) Handle loading/error states
   if (profileLoading) {
     return (
       <div className="text-center my-4">
@@ -132,11 +123,9 @@ function CreditManagementPage() {
     return <div className="alert alert-danger">Error: {profileError.message}</div>;
   }
 
-  // 9) Render the UI using the state for credits
   return (
     <div className="container my-4">
       <h1 className="mb-4">Account</h1>
-      {/* Nav tabs */}
       <ul className="nav nav-tabs">
         <li className="nav-item">
           <button
@@ -165,117 +154,17 @@ function CreditManagementPage() {
       </ul>
 
       <div className="tab-content py-3">
-        {/* TAB 1: CREDITS */}
         {activeTab === 'credits' && (
           <div>
-            <div className="card mb-4">
-              <div className="card-body">
-                <h5 className="card-title">User Profile</h5>
-                <p className="card-text">
-                  <strong>MOT Credits:</strong> {motCredits}
-                </p>
-                <p className="card-text">
-                  <strong>Valuation Credits:</strong> {valuationCredits}
-                </p>
-                <p className="card-text">
-                  <strong>HPI Credits:</strong> {hpiCredits}
-                </p>
-                <p className="card-text">
-                  <strong>Free MOT Checks Used:</strong> {freeMotChecksUsed} / 3
-                </p>
-              </div>
-            </div>
-
-            <h2>Purchase MOT Credits</h2>
-            <div className="row">
-              {[
-                { quantity: 10, price: '£1.50' },
-                { quantity: 20, price: '£2.00' },
-                { quantity: 50, price: '£4.00' },
-                { quantity: 100, price: '£7.50' },
-              ].map((pkg) => (
-                <div key={pkg.quantity} className="col-md-3 mb-3">
-                  <div className="card text-center h-100">
-                    <div className="card-header">MOT Credits</div>
-                    <div className="card-body">
-                      <h5 className="card-title">{pkg.quantity} Credits</h5>
-                      <p className="card-text">{pkg.price}</p>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handlePurchase('MOT', pkg.quantity)}
-                      >
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <h2 className="mt-5">Purchase Valuation Credits</h2>
-            <div className="row">
-              {[
-                { quantity: 1, price: '£6.99' },
-                { quantity: 10, price: '£60' },
-                { quantity: 20, price: '£100' },
-                { quantity: 50, price: '£200' },
-                { quantity: 100, price: '£350' },
-              ].map((pkg) => (
-                <div key={pkg.quantity} className="col-md-3 mb-3">
-                  <div className="card text-center h-100">
-                    <div className="card-header">Valuation Credits</div>
-                    <div className="card-body">
-                      <h5 className="card-title">{pkg.quantity} Checks</h5>
-                      <p className="card-text">{pkg.price}</p>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handlePurchase('VALUATION', pkg.quantity)}
-                      >
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* 30% Higher Price Than VDI */}
-            <h2 className="mt-5">Purchase Full HPI Credits</h2>
-            <div className="row">
-              {[
-                { quantity: 1, price: '£9.09' },   // ~30% higher than £6.99
-                { quantity: 10, price: '£78.00' }, // ~30% higher than £60
-                { quantity: 20, price: '£130.00' },// ~30% higher than £100
-                { quantity: 50, price: '£260.00' },// ~30% higher than £200
-                { quantity: 100, price: '£455.00' },// ~30% higher than £350
-              ].map((pkg) => (
-                <div key={pkg.quantity} className="col-md-3 mb-3">
-                  <div className="card text-center h-100">
-                    <div className="card-header">HPI Credits</div>
-                    <div className="card-body">
-                      <h5 className="card-title">{pkg.quantity} Checks</h5>
-                      <p className="card-text">{pkg.price}</p>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handlePurchase('HPI', pkg.quantity)}
-                      >
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="card mt-4 border-secondary">
-              <div className="card-body text-center">
-                [Ad Banner]
-              </div>
-            </div>
+            {/* Example new pricing table replacing the old */}
+            <MainPricing
+              isLoggedIn={!!localStorage.getItem('authToken')}
+              hasUsedFreeMOT={freeMotChecksUsed >= 3}
+              onPurchase={(product, quantity) => handlePurchase(product, quantity)}
+            />
           </div>
         )}
 
-        {/* TAB 2: SEARCH HISTORY */}
         {activeTab === 'history' && (
           <div>
             <h2>Search History</h2>
@@ -291,7 +180,6 @@ function CreditManagementPage() {
                 Error: {historyError.message}
               </div>
             )}
-
             {historyData && historyData.getSearchHistory && (
               <div className="table-responsive">
                 <table className="table table-striped">
@@ -306,66 +194,13 @@ function CreditManagementPage() {
                   </thead>
                   <tbody>
                     {historyData.getSearchHistory.map((record) => {
-                      console.log("SearchRecord =>", record);
-
-                      // If record.timestamp is absent, try record.responseData?.timestamp
                       const rawTimestamp =
                         record.timestamp || record.responseData?.timestamp;
-                      console.log("rawTimestamp =>", rawTimestamp);
-
                       const dateStr = formatTimestamp(rawTimestamp);
-                      console.log("Final dateStr =>", dateStr);
 
-                      // // MOT vs VDI extraction
-                      // const dataItems = record.responseData?.DataItems || {};
-                      // const motMake = dataItems.VehicleDetails?.Make;
-                      // const motModel = dataItems.VehicleDetails?.Model;
-                      // const vdiMake = dataItems.Make;
-                      // const vdiModel = dataItems.Model;
-
+                      let makeModel = 'N/A';
+                      // your logic for extracting makeModel ...
                       
-
-                      // let makeModel = 'N/A';
-                      // if (motMake && motModel) {
-                      //   makeModel = `${motMake} ${motModel}`;
-                      // } else if (vdiMake && vdiModel) {
-                      //   makeModel = `${vdiMake} ${vdiModel}`;
-                      // } else if (dataItems.VehicleDescription) {
-                      //   makeModel = dataItems.VehicleDescription;
-                      // }
-                      // Pseudocode
-let makeModel = 'N/A';
-
-if (record.searchType === 'MOT') {
-  const dataItems = record.responseData?.DataItems || {};
-  const motMake = dataItems.VehicleDetails?.Make;
-  const motModel = dataItems.VehicleDetails?.Model;
-  if (motMake && motModel) {
-    makeModel = `${motMake} ${motModel}`;
-  }
-} else if (record.searchType === 'Valuation') { 
-  const dataItems = record.responseData?.vehicleAndMotHistory?.DataItems?.ClassificationDetails?.Dvla || {};
- 
-  console.log("DataItems =>", dataItems);
-  const vdiMake = dataItems.Make;
-  const vdiModel = dataItems.Model;
-  if (vdiMake && vdiModel) {
-    makeModel = `${vdiMake} ${vdiModel}`;
-  }
-} else if (record.searchType === 'HPI') {
-  // The aggregator structure
-  const hpiVdi = record.responseData?.vdiCheckFull?.DataItems || {};
-  // or use motTaxStatus if that’s simpler
-  const hpiMake = hpiVdi.Make || record.responseData?.motTaxStatus?.DataItems?.VehicleDetails?.Make;
-  const hpiModel = hpiVdi.Model || record.responseData?.motTaxStatus?.DataItems?.VehicleDetails?.Model;
-  if (hpiMake && hpiModel) {
-    makeModel = `${hpiMake} ${hpiModel}`;
-  }
-}
-
-
-                      console.log("Final makeModel =>", makeModel);
-
                       return (
                         <tr key={record.id}>
                           <td>{record.vehicleReg}</td>
@@ -373,10 +208,6 @@ if (record.searchType === 'MOT') {
                           <td>{dateStr}</td>
                           <td>{makeModel}</td>
                           <td>
-                            {/* 
-                              "View" button linking to /search/:id 
-                              You need a <Route path="/search/:id" element={<SearchDetailPage />} /> 
-                            */}
                             <Link
                               to={`/search/${record.id}`}
                               className="btn btn-sm btn-outline-primary"
@@ -394,7 +225,6 @@ if (record.searchType === 'MOT') {
           </div>
         )}
 
-        {/* TAB 3: TRANSACTIONS */}
         {activeTab === 'transactions' && (
           <div>
             <h2>Transactions</h2>
@@ -410,7 +240,6 @@ if (record.searchType === 'MOT') {
                 Error: {transactionsError.message}
               </div>
             )}
-
             {transactionsData && transactionsData.getTransactions && (
               <div className="table-responsive">
                 <table className="table table-striped">
@@ -425,11 +254,9 @@ if (record.searchType === 'MOT') {
                   </thead>
                   <tbody>
                     {transactionsData.getTransactions.map((tx) => {
-                      const rawTimestamp = tx.timestamp || tx.responseData?.timestamp;
-                      console.log('rawTimestamp =>', rawTimestamp);
-
-                      const dateStri = formatTimestamp(rawTimestamp);
-                      console.log('Final dateStr =>', dateStri);
+                      const rawTimestamp =
+                        tx.timestamp || tx.responseData?.timestamp;
+                      const dateStr = formatTimestamp(rawTimestamp);
 
                       return (
                         <tr key={tx.id}>
@@ -437,7 +264,7 @@ if (record.searchType === 'MOT') {
                           <td>{tx.creditsPurchased}</td>
                           <td>{tx.creditType}</td>
                           <td>£{(tx.amountPaid / 100).toFixed(2)}</td>
-                          <td>{dateStri}</td>
+                          <td>{dateStr}</td>
                         </tr>
                       );
                     })}

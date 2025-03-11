@@ -9,7 +9,6 @@ export default function ValuationPage() {
 
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
-
   const isLoggedIn = !!localStorage.getItem('authToken');
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
 
@@ -18,85 +17,157 @@ export default function ValuationPage() {
     { data: valuationData, loading: valuationLoading, error: valuationError }
   ] = useLazyQuery(VALUATION_CHECK);
 
-  const handleValuationCheck = async () => {
-    setAttemptedSearch(true);
+  // If data is returned => show aggregator
+  const hasResults = !!(valuationData && valuationData.valuation);
 
+  const handleValuationCheck = () => {
+    setAttemptedSearch(true);
     if (!isLoggedIn) return;
     if (!hasValuationCredits) return;
+    fetchValuation({ variables: { reg } });
+  };
 
-    await fetchValuation({ variables: { reg } });
+  const handleRegChange = (e) => {
+    const inputVal = e.target.value.toUpperCase();
+    // If you want to limit to 8 chars:
+    if (inputVal.length <= 8) {
+      setReg(inputVal);
+    }
   };
 
   return (
-    <div className="container my-4">
-      <h1 className="mb-4">Valuation Check</h1>
-
+    <>
       <style>{`
-        /* Inline for demo; ideally move to your .css */
-        .uk-reg-form {
-          background-color: #FFDE46; 
-          border: 2px solid #000; 
-          border-radius: 4px;
-          padding: 1rem;
-          color: #000;
-          font-weight: bold;
-          max-width: 500px;
-          margin: 0 auto; 
+        html, body {
+          margin: 0;
+          padding: 0;
         }
-        .uk-reg-input {
+        .hero {
           width: 100%;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .hero-content {
+          flex: 1;
+          padding: 2rem;
+        }
+
+        .plate-container {
+          width: 40%;
+          height: 200px;
+          margin: 2rem auto;
+          display: flex;
+          align-items: stretch;
+          border: 2px solid #000;
+          border-radius: 25px;
+          overflow: hidden;
+        }
+
+        .plate-blue {
+          background-color: #003399;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 130px;
+          font-size: 4.5rem;
+          font-weight: bold;
+          padding: 5px;
+        }
+
+        .plate-input {
+          flex: 1;
           background-color: #FFDE46;
-          border: 1px solid #000;
           color: #000;
           font-weight: bold;
+          font-size: 7rem;
+          border: none;
           text-transform: uppercase;
-          padding: 0.5rem;
-          margin-bottom: 1rem;
-          border-radius: 4px;
+          padding: 0 1rem;
+          outline: none;
+          line-height: 1;
+          padding-left: 10%;
         }
-        .uk-reg-button {
-          display: block;
-          width: 100%;
+
+        .submit {
+          text-align: center;
+        }
+
+        .plate-button {
+          display: inline-block;
+          margin-top: 1rem;
           background-color: #1560BD;
           color: #fff;
           font-weight: bold;
-          padding: 0.5rem;
+          padding: 10px 25px;
           border: none;
-          border-radius: 4px;
-          text-align: center;
-          margin-bottom: 1rem;
+          border-radius: 25px;
           cursor: pointer;
+          font-size: 3.5rem;
         }
-        .uk-reg-button:disabled {
+        .plate-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
+
+        @media (max-width: 768px) {
+          .plate-container {
+            width: 100%;
+            height: 150px;
+            margin: 1rem auto;
+          }
+          .plate-blue {
+            width: 80px;
+            font-size: 3rem;
+          }
+          .plate-input {
+            font-size: 6.5rem;
+            padding-left: 5%;
+          }
+        }
       `}</style>
 
-      {/* Card optional, or remove card + style the form directly */}
-      <div className="card mb-4">
-        <div className="card-body">
-          <div className="uk-reg-form">
-            <h5>Enter Vehicle Registration</h5>
+      <div className="hero">
+        <div className="hero-content">
+          <h1>Valuation Check</h1>
+          <p>
+            Enter your vehicle registration to retrieve its estimated valuation data. 
+            Make sure you have enough Valuation Credits!
+          </p>
 
+          <div className="plate-container">
+            <div className="plate-blue">GB</div>
             <input
               type="text"
-              className="uk-reg-input"
+              className="plate-input"
               placeholder="AB12CDE"
               value={reg}
-              onChange={(e) => setReg(e.target.value.toUpperCase())}
+              onChange={handleRegChange}
             />
-
-            <button
-              className="uk-reg-button"
-              onClick={handleValuationCheck}
-              disabled={valuationLoading}
-            >
-              {valuationLoading ? 'Checking...' : 'Check Valuation'}
-            </button>
           </div>
 
-          {/* Error if not logged in, or no credits */}
+          <div className="submit">
+            {hasResults ? (
+              <a
+                href="#"
+                style={{ fontSize: '2rem', textDecoration: 'underline' }}
+                onClick={() => window.location.reload()}
+              >
+                Make another search
+              </a>
+            ) : (
+              <button
+                className="plate-button"
+                onClick={handleValuationCheck}
+                disabled={valuationLoading}
+              >
+                {valuationLoading ? 'Checking...' : 'Check Valuation'}
+              </button>
+            )}
+          </div>
+
+          {/* Alerts if needed */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do a Valuation check.
@@ -113,12 +184,12 @@ export default function ValuationPage() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* If data => pass aggregator to <ValuationAggregatorDisplay> */}
-      {valuationData && valuationData.valuation && (
-        <ValuationAggregatorDisplay valData={valuationData.valuation} />
-      )}
-    </div>
+        {/* If data => pass aggregator to <ValuationAggregatorDisplay> */}
+        {valuationData && valuationData.valuation && (
+          <ValuationAggregatorDisplay valData={valuationData.valuation} />
+        )}
+      </div>
+    </>
   );
 }

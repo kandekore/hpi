@@ -1,8 +1,12 @@
 // src/components/Layout.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 function Layout({ children }) {
+  const location = useLocation();
+  // If the current path is "/hpi", we'll skip the Bootstrap container wrapper
+  const isHpiRoute = location.pathname === '/hpi';
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <header>
@@ -26,9 +30,11 @@ function Layout({ children }) {
               data-bs-target="#navbarNav" 
               aria-controls="navbarNav" 
               aria-expanded="false" 
-              aria-label="Toggle navigation">
+              aria-label="Toggle navigation"
+            >
               <span className="navbar-toggler-icon"></span>
             </button>
+            
             <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
               <ul className="navbar-nav">
                 <li className="nav-item">
@@ -38,11 +44,11 @@ function Layout({ children }) {
                   <Link className="nav-link" to="/valuation">Valuation</Link>
                 </li>
                 <li className="nav-item">
-                <Link className="nav-link" to="/mot">MOT Check</Link>
-              </li>
-              <li className="nav-item">
-              <a className="nav-link" href="/hpi">Full HPI Check</a>
-            </li>
+                  <Link className="nav-link" to="/mot">MOT Check</Link>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link" href="/hpi">Full HPI Check</a>
+                </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/credits">Credits</Link>
                 </li>
@@ -56,7 +62,8 @@ function Layout({ children }) {
                       onClick={() => { 
                         localStorage.removeItem('authToken'); 
                         window.location.href = '/';
-                      }}>
+                      }}
+                    >
                       Logout
                     </button>
                   </li>
@@ -76,7 +83,12 @@ function Layout({ children }) {
         </nav>
       </header>
       
-      <main className="flex-grow-1 container py-4">
+      {/* 
+        If we are on /hpi, we remove the Bootstrap container and padding 
+        so the page can go full width (for the hero image).
+        Otherwise, we keep "container py-4" for normal pages.
+      */}
+      <main className={isHpiRoute ? "flex-grow-1 p-0" : "flex-grow-1 container py-4"}>
         {children}
       </main>
       

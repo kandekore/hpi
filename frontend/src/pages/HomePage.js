@@ -1,23 +1,37 @@
 // src/pages/HomePage.js
+
 import React, { useState } from 'react';
-import { useLazyQuery, useQuery } from '@apollo/client';
-import { GET_USER_PROFILE, VDI_CHECK, VALUATION_CHECK } from '../graphql/queries';
+import { useLazyQuery, useQuery, useMutation } from '@apollo/client';
+import {
+  GET_USER_PROFILE,
+  VDI_CHECK,
+  VALUATION_CHECK,
+} from '../graphql/queries';
+import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
+
 import VdiResultDisplay from '../components/VdiResultDisplay';
 import ValuationResultDisplay from '../components/ValuationResultDisplay';
+import MainPricing from '../components/MainPricing';
 
 function HomePage() {
   const [reg, setReg] = useState('');
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
+  // 1) Queries & Mutations
   const { data: profileData, loading: profileLoading } = useQuery(GET_USER_PROFILE);
   const [vdiCheck, { data: vdiData, loading: vdiLoading, error: vdiError }] = useLazyQuery(VDI_CHECK);
-  const [valuationCheck, { data: valuationData, loading: valuationLoading, error: valuationError }] = 
+  const [valuationCheck, { data: valuationData, loading: valuationLoading, error: valuationError }] =
     useLazyQuery(VALUATION_CHECK);
 
+  const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
+
+  // 2) Auth & user credits
   const isLoggedIn = !!localStorage.getItem('authToken');
   const userProfile = profileData?.getUserProfile || null;
   const hasValuationCredits = userProfile?.valuationCredits > 0;
+  const hasUsedFreeMOT = (userProfile?.freeMotChecksUsed ?? 0) >= 3;
 
+  // 3) VDI & Valuation check logic
   const handleVDICheck = async () => {
     setAttemptedSearch(true);
     if (!isLoggedIn || !hasValuationCredits) return;
@@ -25,25 +39,41 @@ function HomePage() {
     await valuationCheck({ variables: { reg } });
   };
 
-  // Extract some fields from VDI data
-// In HomePage.js
-const imageList = vdiData?.vdiCheck?.DataItems?.VehicleImages?.ImageDetailsList;
-const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
+  // 4) Purchase function for MainPricing
+  const handlePurchase = async (product, quantity) => {
+    // map "Valuation" => "VALUATION", "VDI" => "VDI", "MOT" => "MOT"
+    const productMap = {
+      'Valuation': 'VALUATION',
+      'VDI': 'VDI',
+      'MOT': 'MOT',
+    };
+    const creditType = productMap[product] || 'VDI';
 
+    try {
+      const { data } = await createSession({ variables: { creditType, quantity }});
+      if (data.createCreditPurchaseSession) {
+        // redirect to Stripe
+        window.location.href = data.createCreditPurchaseSession;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 5) Extract fields from VDI data
+  const imageList = vdiData?.vdiCheck?.DataItems?.VehicleImages?.ImageDetailsList;
+  const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
   const isWrittenOff = vdiData?.vdiCheck?.DataItems?.WrittenOff || false;
   const isStolen = vdiData?.vdiCheck?.DataItems?.Stolen || false;
   const yearOfManufacture = vdiData?.vdiCheck?.DataItems?.YearOfManufacture || 'N/A';
 
-  // Extract some fields from Valuation data
+  // 6) Extract from Valuation data
   const vehicleDescription = valuationData?.valuation?.DataItems?.VehicleDescription || 'N/A';
   const valuationList = valuationData?.valuation?.DataItems?.ValuationList || {};
   const dealerForecourt = valuationList['Dealer forecourt'] || 'N/A';
   const tradeRetail = valuationList['Trade Retail'] || 'N/A';
   const privateAverage = valuationList['Private Average'] || 'N/A';
   const partExchange = valuationList['Part Exchange'] || 'N/A';
-
-  // Hardcode finance
-  const finance = 'No';
 
   return (
     <div>
@@ -56,10 +86,10 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
                 Enter your vehicle registration for a comprehensive check (including valuation).
               </p>
 
-              {/* If user attempts a search but isn't logged in, show message */}
+              {/* If user attempts a search but isn't logged in */}
               {attemptedSearch && !isLoggedIn && (
                 <div className="alert alert-info">
-                  Please <a href="/login" className="alert-link">login</a> or 
+                  Please <a href="/login" className="alert-link">login</a> or
                   <a href="/register" className="alert-link"> register</a> to perform VDI checks.
                 </div>
               )}
@@ -99,20 +129,13 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
                   {valuationError.message}
                 </div>
               )}
-            </div><h1>Your Comprehensive Vehicle History Solution</h1>
+            </div>
+            <h1>Your Comprehensive Vehicle History Solution</h1>
             <p>
-              Welcome to our Car History Check service, the easiest way to get peace of
-              mind before purchasing a used car. Here, we combine MOT records, vehicle
-              data intelligence (VDI) checks, and more, to give you a complete snapshot
-              of a car’s background. Wondering if that dream car has outstanding finance
-              or hidden damage? Our reports reveal all the crucial details so you can
-              buy with confidence.
+              Welcome to our Car History Check service ...
             </p>
             <p>
-              Whether you’re looking for a simple MOT history or an in-depth VDI check,
-              we’re here to make sure you never drive away with a risky purchase.
-              Explore our services below and see how we can help you make smarter
-              decisions when shopping for your next vehicle.
+              Whether you’re looking for a simple MOT history or an in-depth VDI check ...
             </p>
           </div>
         </div>
@@ -137,7 +160,7 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
       {(vdiData?.vdiCheck || valuationData?.valuation) && (
         <div className="card mt-4">
           <div className="row g-0">
-            {/* 1/3 for image => col-md-4 */}
+            {/* 1/3 for image => col-md-8. (Your comment says 1/3, but code says col-md-8) */}
             <div className="col-md-8">
               <img
                 src={vehicleImageUrl}
@@ -147,7 +170,7 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
               />
             </div>
 
-            {/* 2/3 => col-md-8 for summary */}
+            {/* 2/3 => col-md-4 for summary */}
             <div className="col-md-4">
               <div className="card-body">
                 <h5 className="card-title mb-3">Vehicle Summary</h5>
@@ -205,7 +228,6 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
           </div>
           <div className="card-body">
             <VdiResultDisplay data={vdiData.vdiCheck} />
-            {/* <pre>{JSON.stringify(vdiData.vdiCheck, null, 2)}</pre> */}
           </div>
         </div>
       )}
@@ -218,7 +240,6 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
           </div>
           <div className="card-body">
             <ValuationResultDisplay data={valuationData.valuation} isFreeSearch={false} />
-            {/* <pre>{JSON.stringify(valuationData.valuation, null, 2)}</pre> */}
           </div>
         </div>
       )}
@@ -229,6 +250,13 @@ const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
           [Ad Banner]
         </div>
       </div>
+
+      {/* Pricing Table => user can buy. If user isn't logged in => show a login message or let them proceed => they must login. */}
+      <MainPricing
+        isLoggedIn={isLoggedIn}
+        hasUsedFreeMOT={hasUsedFreeMOT}
+        onPurchase={handlePurchase}
+      />
     </div>
   );
 }
