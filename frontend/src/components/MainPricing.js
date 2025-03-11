@@ -43,10 +43,12 @@ export default function MainPricing({
       {/* SubPricing modal => appears if subProduct != null */}
       {subProduct && (
         <SubPricing
-          product={subProduct}
-          onClose={() => setSubProduct(null)}
-          onPurchase={onPurchase}
-        />
+  product={subProduct}
+  isLoggedIn={isLoggedIn} // <— pass it here
+  onClose={() => setSubProduct(null)}
+  onPurchase={onPurchase}
+/>
+
       )}
 
       <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#003366' }}>

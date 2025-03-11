@@ -99,16 +99,26 @@ function CreditManagementPage() {
     fetchPolicy: 'network-only'
   });
 
-  const handlePurchase = async (creditType, quantity) => {
-    try {
-      const { data } = await createSession({ variables: { creditType, quantity }});
-      if (data.createCreditPurchaseSession) {
-        window.location.href = data.createCreditPurchaseSession;
-      }
-    } catch (err) {
-      console.error(err);
-    }
+ // Combine the logic with productMap => { 'Valuation': 'VALUATION', ... }
+
+const handlePurchase = async (product, quantity) => {
+  const productMap = {
+    'Valuation': 'VALUATION',
+    'VDI': 'VDI',
+    'MOT': 'MOT',
   };
+  const creditType = productMap[product] || 'VDI';
+
+  try {
+    const { data } = await createSession({ variables: { creditType, quantity }});
+    if (data.createCreditPurchaseSession) {
+      window.location.href = data.createCreditPurchaseSession;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   if (profileLoading) {
     return (
@@ -154,16 +164,35 @@ function CreditManagementPage() {
       </ul>
 
       <div className="tab-content py-3">
-        {activeTab === 'credits' && (
-          <div>
-            {/* Example new pricing table replacing the old */}
-            <MainPricing
-              isLoggedIn={!!localStorage.getItem('authToken')}
-              hasUsedFreeMOT={freeMotChecksUsed >= 3}
-              onPurchase={(product, quantity) => handlePurchase(product, quantity)}
-            />
+      {activeTab === 'credits' && (
+        <div>
+          <div className="card mb-4">
+            <div className="card-body">
+              <h5 className="card-title">User Profile</h5>
+              <p className="card-text">
+                <strong>MOT Credits:</strong> {motCredits}
+              </p>
+              <p className="card-text">
+                <strong>Valuation Credits:</strong> {valuationCredits}
+              </p>
+              <p className="card-text">
+                <strong>HPI Credits:</strong> {hpiCredits}
+              </p>
+              <p className="card-text">
+                <strong>Free MOT Checks Used:</strong> {freeMotChecksUsed} / 3
+              </p>
+            </div>
           </div>
-        )}
+      
+          {/* The new pricing table */}
+          <MainPricing
+            isLoggedIn={!!localStorage.getItem('authToken')}
+            hasUsedFreeMOT={freeMotChecksUsed >= 3}
+            onPurchase={(product, quantity) => handlePurchase(product, quantity)}
+          />
+        </div>
+      )}
+      
 
         {activeTab === 'history' && (
           <div>

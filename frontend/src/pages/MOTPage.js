@@ -1,30 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 
 export default function MOTPage() {
-  const [reg, setReg] = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // read the ?reg= param
+  const initialReg = searchParams.get('reg') || '';
+
+  const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // For the main MOT check
   const [motCheck, { data: motData, loading: motLoading, error: motError }] = useLazyQuery(MOT_CHECK);
-
   const hasResults = !!(motData && motData.motCheck);
+
+  // Auto-run once if there's an initialReg
+  useEffect(() => {
+    if (initialReg) {
+      handleCheck();
+      // Immediately remove the param from URL
+      navigate('/mot', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCheck = async () => {
     setAttemptedSearch(true);
     if (!isLoggedIn) return;
+    if (!reg) return;
     await motCheck({ variables: { reg } });
   };
 
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
-    // If you want to limit to 8 chars:
     if (val.length <= 8) {
       setReg(val);
     }
@@ -47,7 +62,6 @@ export default function MOTPage() {
           flex: 1;
           padding: 2rem;
         }
-
         .plate-container {
           width: 40%;
           height: 200px;
@@ -82,7 +96,6 @@ export default function MOTPage() {
           line-height: 1;
           padding-left: 10%;
         }
-
         .submit {
           text-align: center;
         }
@@ -102,7 +115,6 @@ export default function MOTPage() {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
         @media (max-width: 768px) {
           .plate-container {
             width: 100%;
@@ -123,10 +135,7 @@ export default function MOTPage() {
       <div className="hero">
         <div className="hero-content">
           <h1>MOT Check</h1>
-          <p>
-            Enter your vehicle registration to see its MOT history
-            and whether it’s up to date.
-          </p>
+          <p>Enter your vehicle registration to see its MOT history.</p>
 
           <div className="plate-container">
             <div className="plate-blue">GB</div>
@@ -158,7 +167,6 @@ export default function MOTPage() {
             )}
           </div>
 
-          {/* If user not logged in */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do a MOT check.

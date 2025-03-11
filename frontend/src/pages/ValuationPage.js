@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, VALUATION_CHECK } from '../graphql/queries';
 import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
 
 export default function ValuationPage() {
-  const [reg, setReg] = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialReg = searchParams.get('reg') || '';
+
+  const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
   const { data: profileData } = useQuery(GET_USER_PROFILE);
@@ -12,24 +17,31 @@ export default function ValuationPage() {
   const isLoggedIn = !!localStorage.getItem('authToken');
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
 
-  const [
-    fetchValuation,
-    { data: valuationData, loading: valuationLoading, error: valuationError }
-  ] = useLazyQuery(VALUATION_CHECK);
+  const [fetchValuation, { data: valuationData, loading: valuationLoading, error: valuationError }] 
+    = useLazyQuery(VALUATION_CHECK);
 
-  // If data is returned => show aggregator
-  const hasResults = !!(valuationData && valuationData.valuation);
+  const hasResults = !!(valuationData?.valuation);
+
+  useEffect(() => {
+    if (initialReg) {
+      handleValuationCheck();
+      // remove param
+      navigate('/valuation', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleValuationCheck = () => {
     setAttemptedSearch(true);
     if (!isLoggedIn) return;
     if (!hasValuationCredits) return;
+    if (!reg) return;
+
     fetchValuation({ variables: { reg } });
   };
 
   const handleRegChange = (e) => {
     const inputVal = e.target.value.toUpperCase();
-    // If you want to limit to 8 chars:
     if (inputVal.length <= 8) {
       setReg(inputVal);
     }
@@ -49,10 +61,8 @@ export default function ValuationPage() {
           flex-direction: column;
         }
         .hero-content {
-          flex: 1;
-          padding: 2rem;
+          flex: 1; padding: 2rem;
         }
-
         .plate-container {
           width: 40%;
           height: 200px;
@@ -63,19 +73,15 @@ export default function ValuationPage() {
           border-radius: 25px;
           overflow: hidden;
         }
-
         .plate-blue {
           background-color: #003399;
           color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
           width: 130px;
           font-size: 4.5rem;
           font-weight: bold;
           padding: 5px;
         }
-
         .plate-input {
           flex: 1;
           background-color: #FFDE46;
@@ -89,11 +95,7 @@ export default function ValuationPage() {
           line-height: 1;
           padding-left: 10%;
         }
-
-        .submit {
-          text-align: center;
-        }
-
+        .submit { text-align: center; }
         .plate-button {
           display: inline-block;
           margin-top: 1rem;
@@ -107,23 +109,17 @@ export default function ValuationPage() {
           font-size: 3.5rem;
         }
         .plate-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
+          opacity: 0.6; cursor: not-allowed;
         }
-
         @media (max-width: 768px) {
           .plate-container {
-            width: 100%;
-            height: 150px;
-            margin: 1rem auto;
+            width: 100%; height: 150px; margin: 1rem auto;
           }
           .plate-blue {
-            width: 80px;
-            font-size: 3rem;
+            width: 80px; font-size: 3rem;
           }
           .plate-input {
-            font-size: 6.5rem;
-            padding-left: 5%;
+            font-size: 6.5rem; padding-left: 5%;
           }
         }
       `}</style>
@@ -131,10 +127,7 @@ export default function ValuationPage() {
       <div className="hero">
         <div className="hero-content">
           <h1>Valuation Check</h1>
-          <p>
-            Enter your vehicle registration to retrieve its estimated valuation data. 
-            Make sure you have enough Valuation Credits!
-          </p>
+          <p>Enter your vehicle registration to retrieve its estimated valuation.</p>
 
           <div className="plate-container">
             <div className="plate-blue">GB</div>
@@ -167,7 +160,6 @@ export default function ValuationPage() {
             )}
           </div>
 
-          {/* Alerts if needed */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do a Valuation check.
@@ -175,7 +167,7 @@ export default function ValuationPage() {
           )}
           {attemptedSearch && isLoggedIn && !hasValuationCredits && (
             <div className="alert alert-danger mt-2">
-              You have no Valuation Credits left. Please purchase more.
+              You have no Valuation credits left. Please purchase more.
             </div>
           )}
           {valuationError && (
@@ -185,8 +177,8 @@ export default function ValuationPage() {
           )}
         </div>
 
-        {/* If data => pass aggregator to <ValuationAggregatorDisplay> */}
-        {valuationData && valuationData.valuation && (
+        {/* If data => pass aggregator */}
+        {valuationData?.valuation && (
           <ValuationAggregatorDisplay valData={valuationData.valuation} />
         )}
       </div>

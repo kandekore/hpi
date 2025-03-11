@@ -1,33 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // import
 import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
 import HpiResultDisplay from '../components/HpiResultDisplay';
-
-/*
-  If your drkbgd.jpg is inside src/images, you'll import it like this.
-  Adjust the relative path as needed (if HpiCheckPage is in /src/pages, 
-  then ../images might be correct).
-*/
 import drkbgd from '../images/backgrd.jpg';
 
 export default function HpiCheckPage() {
-  const [reg, setReg] = useState('');
+  // 1) Grab ?reg= from URL
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialReg = searchParams.get('reg') || '';
+
+  // 2) State
+  const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
-  // If you're checking for credits:
+  // 3) User info
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
   const hasHpiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
+  // 4) HPI lazy query
   const [fetchHpi, { loading, error, data: queryData }] = useLazyQuery(HPI_CHECK);
 
-  // Once data is returned, we show "Make another search"
+  // 5) Check if we have results
   const hasResults = !!(queryData && queryData.hpiCheck);
 
+  // 6) Auto-run once if there's an initialReg
+  useEffect(() => {
+    if (initialReg) {
+      handleSearch();
+      // remove ?reg= from URL
+      navigate('/hpi', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 7) handleSearch logic
   const handleSearch = () => {
     setAttemptedSearch(true);
-
     if (!reg) return;
     if (!isLoggedIn) return;
     if (!hasHpiCredits) return;
@@ -35,7 +47,7 @@ export default function HpiCheckPage() {
     fetchHpi({ variables: { reg } });
   };
 
-  // Limit input to 8 characters
+  // 8) handleRegChange
   const handleRegChange = (e) => {
     const inputVal = e.target.value.toUpperCase();
     if (inputVal.length <= 8) {
@@ -45,29 +57,21 @@ export default function HpiCheckPage() {
 
   return (
     <>
-      {/* Remove default browser margin so hero is truly full-width */}
       <style>{`
         html, body {
-          margin: 0;
-          padding: 0;
+          margin: 0; padding: 0;
         }
-        /* The hero container (full screen width, top) */
         .hero {
           width: 100%;
-          min-height: 100vh; /* fill vertical space as well */
-          /* background: url(${drkbgd}) center top repeat-y; */
-        
-          /* optional: if you want some spacing for the content: */
+          min-height: 100vh;
+          /* e.g. background: url(${drkbgd}) center top repeat-y; */
           display: flex;
           flex-direction: column;
         }
-        /* The content within the hero, so text isn't flush against the edges */
         .hero-content {
-          flex: 1; /* push content to fill available space if you like */
-          padding: 2rem; /* adjust to suit spacing needs */
+          flex: 1;
+          padding: 2rem;
         }
-
-        /* Plate container (same as your code) */
         .plate-container {
           width: 40%;
           height: 200px;
@@ -78,7 +82,6 @@ export default function HpiCheckPage() {
           border-radius: 25px;
           overflow: hidden;
         }
-
         .plate-blue {
           background-color: #003399;
           color: #fff;
@@ -90,7 +93,6 @@ export default function HpiCheckPage() {
           font-weight: bold;
           padding: 5px;
         }
-
         .plate-input {
           flex: 1;
           background-color: #FFDE46;
@@ -104,11 +106,9 @@ export default function HpiCheckPage() {
           line-height: 1;
           padding-left: 10%;
         }
-
         .submit {
           text-align: center;
         }
-
         .plate-button {
           display: inline-block;
           margin-top: 1rem;
@@ -125,8 +125,6 @@ export default function HpiCheckPage() {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
-        /* Responsive / Mobile styles */
         @media (max-width: 768px) {
           .plate-container {
             width: 100%;
@@ -134,8 +132,7 @@ export default function HpiCheckPage() {
             margin: 1rem auto;
           }
           .plate-blue {
-            width: 80px;
-            font-size: 3rem;
+            width: 80px; font-size: 3rem;
           }
           .plate-input {
             font-size: 6.5rem;
@@ -144,19 +141,14 @@ export default function HpiCheckPage() {
         }
       `}</style>
 
-      {/* Hero wrapper */}
       <div className="hero">
-        {/* Content area inside the hero */}
         <div className="hero-content">
-
           <h1>Full HPI Check</h1>
           <p>
-            A Full HPI Check combines multiple data sources—finance records,
-            outstanding finance, stolen checks, accident history, mileage anomalies,
-            plus VED and MOT data, all in one report.
+            A Full HPI Check combines multiple data sources — 
+            finance records, stolen checks, accidents, mileage anomalies, etc.
           </p>
 
-          {/* The big plate (unchanged) */}
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
@@ -209,13 +201,12 @@ export default function HpiCheckPage() {
               Error: {error.message}
             </div>
           )}
-
-          {/* If data => show result */}
-         
         </div>
-        <div> {queryData && queryData.hpiCheck && (
+
+        {/* If data => show result */}
+        {queryData?.hpiCheck && (
           <HpiResultDisplay hpiData={queryData.hpiCheck} />
-        )}</div>
+        )}
       </div>
     </>
   );

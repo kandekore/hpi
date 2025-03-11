@@ -1,264 +1,262 @@
 // src/pages/HomePage.js
-
 import React, { useState } from 'react';
-import { useLazyQuery, useQuery, useMutation } from '@apollo/client';
-import {
-  GET_USER_PROFILE,
-  VDI_CHECK,
-  VALUATION_CHECK,
-} from '../graphql/queries';
-import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
+import { useQuery } from '@apollo/client';
+import { GET_USER_PROFILE } from '../graphql/queries';
+import { useNavigate } from 'react-router-dom';
 
-import VdiResultDisplay from '../components/VdiResultDisplay';
-import ValuationResultDisplay from '../components/ValuationResultDisplay';
-import MainPricing from '../components/MainPricing';
+// If you have a background image:
+import drkbgd from '../images/backgrd.jpg';
 
-function HomePage() {
+export default function HomePage() {
   const [reg, setReg] = useState('');
-  const [attemptedSearch, setAttemptedSearch] = useState(false);
-
-  // 1) Queries & Mutations
-  const { data: profileData, loading: profileLoading } = useQuery(GET_USER_PROFILE);
-  const [vdiCheck, { data: vdiData, loading: vdiLoading, error: vdiError }] = useLazyQuery(VDI_CHECK);
-  const [valuationCheck, { data: valuationData, loading: valuationLoading, error: valuationError }] =
-    useLazyQuery(VALUATION_CHECK);
-
-  const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
-
-  // 2) Auth & user credits
-  const isLoggedIn = !!localStorage.getItem('authToken');
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
-  const hasValuationCredits = userProfile?.valuationCredits > 0;
-  const hasUsedFreeMOT = (userProfile?.freeMotChecksUsed ?? 0) >= 3;
+  const isLoggedIn = !!localStorage.getItem('authToken');
+  
+  // For MOT, check if free searches used up:
+  const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
+  const hasFreeMotLeft = freeMotChecksUsed < 3;
 
-  // 3) VDI & Valuation check logic
-  const handleVDICheck = async () => {
-    setAttemptedSearch(true);
-    if (!isLoggedIn || !hasValuationCredits) return;
-    await vdiCheck({ variables: { reg } });
-    await valuationCheck({ variables: { reg } });
-  };
+  // For Valuation credits:
+  const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
 
-  // 4) Purchase function for MainPricing
-  const handlePurchase = async (product, quantity) => {
-    // map "Valuation" => "VALUATION", "VDI" => "VDI", "MOT" => "MOT"
-    const productMap = {
-      'Valuation': 'VALUATION',
-      'VDI': 'VDI',
-      'MOT': 'MOT',
-    };
-    const creditType = productMap[product] || 'VDI';
+  // For VDI => in your logic, it might be userProfile?.valuationCredits also 
+  // or hpiCredits? or a separate "vdiCredits"? 
+  // Some apps treat VDI the same as "valuationCredits"? 
+  // But if you have a separate "VDI credits," do that here:
+  const hasVdiCredits = (userProfile?.hpiCredits?? 0)> 0
+  // Or if you share them with Valuation, adapt as needed
 
-    try {
-      const { data } = await createSession({ variables: { creditType, quantity }});
-      if (data.createCreditPurchaseSession) {
-        // redirect to Stripe
-        window.location.href = data.createCreditPurchaseSession;
-      }
-    } catch (err) {
-      console.error(err);
+  const navigate = useNavigate();
+
+  // Limit the input to 8 chars
+  const handleRegChange = (e) => {
+    const val = e.target.value.toUpperCase();
+    if (val.length <= 8) {
+      setReg(val);
     }
   };
 
-  // 5) Extract fields from VDI data
-  const imageList = vdiData?.vdiCheck?.DataItems?.VehicleImages?.ImageDetailsList;
-  const vehicleImageUrl = imageList?.[0]?.ImageUrl || '/placeholder-vehicle.jpg';
-  const isWrittenOff = vdiData?.vdiCheck?.DataItems?.WrittenOff || false;
-  const isStolen = vdiData?.vdiCheck?.DataItems?.Stolen || false;
-  const yearOfManufacture = vdiData?.vdiCheck?.DataItems?.YearOfManufacture || 'N/A';
+  // Common check => if not logged in => show error
+  // else if no credits => show error
+  // else => navigate
+// In HomePage.js (or wherever you handle the “MOT History” button):
+const handleClickMOT = () => {
+  setErrorMsg('');
 
-  // 6) Extract from Valuation data
-  const vehicleDescription = valuationData?.valuation?.DataItems?.VehicleDescription || 'N/A';
-  const valuationList = valuationData?.valuation?.DataItems?.ValuationList || {};
-  const dealerForecourt = valuationList['Dealer forecourt'] || 'N/A';
-  const tradeRetail = valuationList['Trade Retail'] || 'N/A';
-  const privateAverage = valuationList['Private Average'] || 'N/A';
-  const partExchange = valuationList['Part Exchange'] || 'N/A';
+  if (!reg) {
+    setErrorMsg('Please enter a valid registration.');
+    return;
+  }
+
+  if (!isLoggedIn) {
+    setErrorMsg('Please login or register to do an MOT check.');
+    return;
+  }
+
+  // userProfile might be undefined if not loaded. So check userProfile first:
+  if (!userProfile) {
+    setErrorMsg('Unable to fetch your profile. Please try again later.');
+    return;
+  }
+
+  // We combine free check logic + purchased credit logic:
+  const freeMotChecksUsed = userProfile.freeMotChecksUsed ?? 0;
+  const motCredits = userProfile.motCredits ?? 0;
+
+  if (freeMotChecksUsed < 3 || motCredits > 0) {
+    // They have either free checks left or purchased credits
+    navigate(`/mot?reg=${reg}`);
+  } else {
+    // No free checks and no purchased credits
+    setErrorMsg('You have no MOT checks remaining. Please purchase MOT credits or wait for more free checks.');
+  }
+};
+
+  const handleClickValuation = () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      setErrorMsg('Please login or register to do a Valuation check.');
+      return;
+    }
+    if (!hasValuationCredits) {
+      setErrorMsg('You have no Valuation credits left. Please purchase more.');
+      return;
+    }
+    navigate(`/valuation?reg=${reg}`);
+  };
+
+  const handleClickVDI = () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      setErrorMsg('Please login or register to do a VDI check.');
+      return;
+    }
+    if (!hasVdiCredits) {
+      setErrorMsg('You have no VDI credits left. Please purchase more.');
+      return;
+    }
+    navigate(`/hpi?reg=${reg}`);
+  };
 
   return (
-    <div>
-      <div className="row align-items-start">
-        <div className="col-md-8">
-          <div className="card mb-4">
-            <div className="card-body">
-              <h2 className="card-title">Vehicle Data Check (VDI)</h2>
-              <p className="card-text">
-                Enter your vehicle registration for a comprehensive check (including valuation).
-              </p>
+    <>
+      <style>{`
+        /* Full width / height hero with background image repeated or covered: */
+        html, body {
+          margin: 0;
+          padding: 0;
+        }
+        .hero {
+          width: 100%;
+          min-height: 100vh;
+          background: url(${drkbgd}) center top repeat-y; 
+          /* or background-size: cover; if you want a full image that doesn't tile */
+          display: flex;
+          flex-direction: column;
+        }
+        .hero-content {
+          flex: 1;
+          padding: 2rem;
+        }
 
-              {/* If user attempts a search but isn't logged in */}
-              {attemptedSearch && !isLoggedIn && (
-                <div className="alert alert-info">
-                  Please <a href="/login" className="alert-link">login</a> or
-                  <a href="/register" className="alert-link"> register</a> to perform VDI checks.
-                </div>
-              )}
+        .plate-container {
+          width: 40%;
+          height: 200px;
+          margin: 2rem auto;
+          display: flex;
+          align-items: stretch;
+          border: 2px solid #000;
+          border-radius: 25px;
+          overflow: hidden;
+        }
+        .plate-blue {
+          background-color: #003399;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 130px;
+          font-size: 4.5rem;
+          font-weight: bold;
+          padding: 5px;
+        }
+        .plate-input {
+          flex: 1;
+          background-color: #FFDE46;
+          color: #000;
+          font-weight: bold;
+          font-size: 7rem;
+          border: none;
+          text-transform: uppercase;
+          padding: 0 1rem;
+          outline: none;
+          line-height: 1;
+          padding-left: 10%;
+        }
 
-              {/* If user attempts a search but is out of credits */}
-              {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.valuationCredits < 1 && (
-                <div className="alert alert-warning">
-                  You have 0 VDI credits. Please{' '}
-                  <a href="/credits" className="alert-link">purchase credits</a> to continue.
-                </div>
-              )}
+        .submit {
+          text-align: center;
+        }
 
-              <div className="input-group mt-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter Vehicle Registration"
-                  value={reg}
-                  onChange={(e) => setReg(e.target.value)}
-                />
-                <button
-                  className="btn btn-primary"
-                  onClick={handleVDICheck}
-                  disabled={vdiLoading || valuationLoading}
-                >
-                  {(vdiLoading || valuationLoading) ? 'Checking...' : 'Check VDI & Valuation'}
-                </button>
-              </div>
+        .button-group {
+          display: flex;
+          justify-content: center;
+          gap: 1rem;
+        }
 
-              {vdiError && (
-                <div className="alert alert-danger mt-3">
-                  {vdiError.message}
-                </div>
-              )}
-              {valuationError && (
-                <div className="alert alert-danger mt-3">
-                  {valuationError.message}
-                </div>
-              )}
-            </div>
-            <h1>Your Comprehensive Vehicle History Solution</h1>
-            <p>
-              Welcome to our Car History Check service ...
-            </p>
-            <p>
-              Whether you’re looking for a simple MOT history or an in-depth VDI check ...
-            </p>
+        .action-button {
+          background-color: #1560BD;
+          color: #fff;
+          font-weight: bold;
+          border: none;
+          border-radius: 25px;
+          padding: 10px 25px;
+          cursor: pointer;
+          font-size: 2rem;
+        }
+
+        .action-button:hover {
+          background-color: #0d4f9c;
+        }
+
+        .action-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        /* If you'd like a smaller input on mobile */
+        @media (max-width: 768px) {
+          .plate-container {
+            width: 100%;
+            height: 150px;
+            margin: 1rem auto;
+          }
+          .plate-blue {
+            width: 80px;
+            font-size: 3rem;
+          }
+          .plate-input {
+            font-size: 6.5rem;
+            padding-left: 5%;
+          }
+          .action-button {
+            font-size: 1.5rem;
+          }
+        }
+      `}</style>
+
+      <div className="hero">
+        <div className="hero-content">
+          <h1>All-In-One Vehicle Check</h1>
+          <p>
+            Enter your vehicle registration below, then pick from 
+            MOT History, Valuation, or Full VDI Check. 
+          </p>
+
+          {/* Big plate */}
+          <div className="plate-container">
+            <div className="plate-blue">GB</div>
+            <input
+              type="text"
+              className="plate-input"
+              placeholder="AB12CDE"
+              value={reg}
+              onChange={handleRegChange}
+            />
           </div>
-        </div>
 
-        {/* Right 1/3: CTA for MOT */}
-        <div className="col-md-4">
-          <div className="card text-center mb-4">
-            <div className="card-body">
-              <h3 className="card-title">Get a Free MOT Check</h3>
-              <p className="card-text">
-                We offer 3 free MOT checks to every user, but you must be signed in.
-              </p>
-              <a href="/mot" className="btn btn-success">
-                Check Now!
-              </a>
-            </div>
+          {/* Buttons side by side */}
+          <div className="button-group">
+            <button className="action-button" onClick={handleClickMOT}>
+              MOT History
+            </button>
+            <button className="action-button" onClick={handleClickValuation}>
+              Valuation
+            </button>
+            <button className="action-button" onClick={handleClickVDI}>
+              Full VDI
+            </button>
           </div>
+
+          {/* Show error if needed */}
+          {errorMsg && (
+            <div className="alert alert-danger mt-3" style={{ maxWidth: '600px', margin: '0 auto' }}>
+              {errorMsg}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* If we have either VDI data or Valuation data, show the summary card */}
-      {(vdiData?.vdiCheck || valuationData?.valuation) && (
-        <div className="card mt-4">
-          <div className="row g-0">
-            {/* 1/3 for image => col-md-8. (Your comment says 1/3, but code says col-md-8) */}
-            <div className="col-md-8">
-              <img
-                src={vehicleImageUrl}
-                alt="Vehicle"
-                className="img-fluid h-100 w-100 rounded-start"
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-
-            {/* 2/3 => col-md-4 for summary */}
-            <div className="col-md-4">
-              <div className="card-body">
-                <h5 className="card-title mb-3">Vehicle Summary</h5>
-                <table className="table table-borderless mb-0">
-                  <tbody>
-                    <tr>
-                      <th>Vehicle Description</th>
-                      <td>{vehicleDescription}</td>
-                    </tr>
-                    <tr>
-                      <th>Year of Manufacture</th>
-                      <td>{yearOfManufacture}</td>
-                    </tr>
-                    <tr>
-                      <th>Dealer Forecourt</th>
-                      <td>{dealerForecourt}</td>
-                    </tr>
-                    <tr>
-                      <th>Trade Retail</th>
-                      <td>{tradeRetail}</td>
-                    </tr>
-                    <tr>
-                      <th>Private Average</th>
-                      <td>{privateAverage}</td>
-                    </tr>
-                    <tr>
-                      <th>Part Exchange</th>
-                      <td>{partExchange}</td>
-                    </tr>
-                    <tr>
-                      <th>Finance</th>
-                      <td>No</td>
-                    </tr>
-                    <tr>
-                      <th>Written Off</th>
-                      <td>{isWrittenOff ? 'Yes' : 'No'}</td>
-                    </tr>
-                    <tr>
-                      <th>Stolen</th>
-                      <td>{isStolen ? 'Yes' : 'No'}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* FULL-WIDTH SECTION FOR VDI RESULTS (if any) */}
-      {vdiData && vdiData.vdiCheck && (
-        <div className="card mt-4">
-          <div className="card-header">
-            <h3>VDI Check Results</h3>
-          </div>
-          <div className="card-body">
-            <VdiResultDisplay data={vdiData.vdiCheck} />
-          </div>
-        </div>
-      )}
-
-      {/* FULL-WIDTH SECTION FOR VALUATION RESULTS (if any) */}
-      {valuationData && valuationData.valuation && (
-        <div className="card mt-4">
-          <div className="card-header">
-            <h3>Valuation Results</h3>
-          </div>
-          <div className="card-body">
-            <ValuationResultDisplay data={valuationData.valuation} isFreeSearch={false} />
-          </div>
-        </div>
-      )}
-
-      {/* Example Ad Banner */}
-      <div className="card border-secondary mt-4">
-        <div className="card-body text-center">
-          [Ad Banner]
-        </div>
-      </div>
-
-      {/* Pricing Table => user can buy. If user isn't logged in => show a login message or let them proceed => they must login. */}
-      <MainPricing
-        isLoggedIn={isLoggedIn}
-        hasUsedFreeMOT={hasUsedFreeMOT}
-        onPurchase={handlePurchase}
-      />
-    </div>
+    </>
   );
 }
-
-export default HomePage;

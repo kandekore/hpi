@@ -6,6 +6,8 @@ function Layout({ children }) {
   const location = useLocation();
   // If the current path is "/hpi", we'll skip the Bootstrap container wrapper
   const isHpiRoute = location.pathname === '/hpi';
+  const isHomeRoute = location.pathname === '/';
+  const isFullWidth = isHomeRoute || isHpiRoute;
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -13,7 +15,6 @@ function Layout({ children }) {
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
           <div className="container">
             <Link className="navbar-brand" to="/">
-              {/* Replace with your actual logo image */}
               <img 
                 src="/logo-placeholder.png" 
                 alt="Logo" 
@@ -88,15 +89,16 @@ function Layout({ children }) {
         so the page can go full width (for the hero image).
         Otherwise, we keep "container py-4" for normal pages.
       */}
-      <main className={isHpiRoute ? "flex-grow-1 p-0" : "flex-grow-1 container py-4"}>
-        {children}
-      </main>
-      
-      <footer className="bg-light text-center text-dark py-3 mt-auto">
-        <div className="container">
-          <p className="mb-0">&copy; {new Date().getFullYear()} Your Company Name</p>
-        </div>
-      </footer>
+      <main className={isFullWidth ? "flex-grow-1 p-0" : "flex-grow-1 container py-4"}>
+      {children}
+    </main>
+    
+    <footer className="bg-light text-center text-dark py-3 mt-auto">
+      <div className="container">
+        <p className="mb-0">&copy; {new Date().getFullYear()} Your Company Name</p>
+      </div>
+    </footer>
+   
     </div>
   );
 }
