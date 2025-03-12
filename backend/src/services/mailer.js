@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendMail({ to, subject, html }) {
   const info = await transporter.sendMail({
-    from: '"My App" <no-reply@myapp.com>', // or use process.env.FROM_EMAIL
+    from: '"Vehicle Data Information" <verify@vehicledatainformation.co.uk>', // or use process.env.FROM_EMAIL
     to,
     subject,
     html,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../images/logo-500x110.png'; // Adjust path if necessary
+import logo from '../images/vdilogo600x119.jpg'; // Adjust path if necessary
 import ScrollToTopButton from './ScrollToTopButton';
 
 function Layout({ children }) {
@@ -11,7 +11,8 @@ function Layout({ children }) {
   const isHomeRoute = location.pathname === '/';
   const isMotRoute = location.pathname === '/mot';
   const isValuationRoute = location.pathname === '/valuation';
-  const isFullWidth = isHomeRoute || isHpiRoute || isMotRoute || isValuationRoute;
+  const isDashboardRoute = location.pathname === '/credits';
+  const isFullWidth = isHomeRoute || isHpiRoute || isMotRoute || isValuationRoute || isDashboardRoute;
 
   // Check if user is logged in
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -24,7 +25,7 @@ function Layout({ children }) {
         <nav 
           className="navbar navbar-expand-lg navbar-dark" 
           style={{
-            backgroundColor: '#003366',
+            backgroundColor: '#1560bd',
             minHeight: '150px',
             borderBottom: '5px solid #ffffff'
           }}

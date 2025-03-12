@@ -39,7 +39,7 @@ export default function MainPricing({
   };
 
   return (
-    <div style={{ position: 'relative', paddingTop: '3rem', paddingBottom: '3rem',backgroundColor: '#003366' }}>
+    <div style={{ position: 'relative', paddingTop: '3rem', paddingBottom: '3rem',backgroundColor: '#1560bd' }}>
     
       {/* SubPricing modal => appears if subProduct != null */}
       {subProduct && (
@@ -58,8 +58,8 @@ export default function MainPricing({
       <div style={styles.tieredContainer} className='tier'>
         
         {/* LEFT: MOT panel */}
-        <div style={{ ...styles.sidePanel, marginTop: '10px' }}>
-          <h3 style={styles.title}>MOT Full History</h3>
+        // <div style={styles.centerPanel}>
+          <h3 style={styles.title}>MOT<br></br>Full History</h3>
           <p style={styles.subheading}>3 Searches</p>
           <p style={styles.price}>FREE</p>
           <hr />
@@ -69,18 +69,41 @@ export default function MainPricing({
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
-            <li>Dates &amp; Test Number</li>
-            <li>Mileage</li>
-            <li>Advisory &amp; Failure Details</li>
+            <li className='feature'>Dates &amp; Test Number</li>
+            <li className='feature'>Mileage</li>
+            <li className='feature'>Advisory &amp; Failure Details</li>
           </ul>
           <hr />
           {renderMOTButton()}
         </div>
-
+        <div style={styles.centerPanel}>
+        <h3 style={styles.title}>Vehicle Valuation<br></br>+Full MOT History</h3>
+        <p style={styles.subheading}>1 Search</p>
+        <p style={styles.price}>£4.99</p>
+        <hr />
+        <p style={styles.subheading}>Bulk Buy</p>
+        <p>3 Searches – £12.49</p>
+        <p>10 Searches – £30.00</p>
+        <hr />
+        <p style={styles.dataTitle}>Data Includes:</p>
+        <ul style={styles.list}>
+        
+          <li className='feature'>Private Valuation</li>
+          <li className='feature'>Retail Valuation</li>
+          <li className='feature'>Trade Valuation</li>
+          <li>-</li>
+          <li style={styles.addon}><strong>MOT Full History
+        </strong></li>
+        </ul>
+        <hr />
+        <button onClick={() => handleBuy('Valuation')} style={styles.buyButton}>
+          Buy
+        </button>
+      </div>
         {/* CENTER: VDI Full Lookup (primary) */}
         <div style={styles.centerPanel}>
           <h3 style={{ ...styles.title, color: '#003366'}}>
-            VDI / HPI Full Lookup
+            Detailed Vehicle Data<br></br>& Full Vehicle History
           </h3>
           <p style={styles.subheading}>1 Search</p>
           <p style={styles.price}>£9.99</p>
@@ -91,14 +114,17 @@ export default function MainPricing({
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
-            <li>Outstanding Finance</li>
-            <li>Insurance Write Off</li>
-            <li>Ownership &amp; Car Identity</li>
-            <li>VIN Confirmation</li>
-            <li>Scrapped / Mileage Anomaly / Colour Change</li>
-            <li>Import Check / Emissions &amp; Tax Rates</li>
-            <li>Technical Details</li>
-            <li>Valuation &amp; Full MOT History</li>
+            <li className='feature'>Outstanding Finance</li>
+            <li className='feature'>Insurance Write Off</li>
+            <li className='feature'>Ownership &amp; Car Identity</li>
+            <li className='feature'>VIN Confirmation</li>
+            <li className='feature'>Scrapped / Mileage Anomaly / Colour Change</li>
+            <li className='feature'>Import Check / Emissions &amp; Tax Rates</li>
+            <li className='feature'>Technical Details</li>
+            <li>-</li>
+            <li style={styles.addon}><strong>Vehicle Valuation</strong></li>
+            <li style={styles.addon}><strong>MOT Full History
+        </strong></li>
           </ul>
           <hr />
           <button onClick={() => handleBuy('VDI')} style={styles.buyButton}>
@@ -107,26 +133,7 @@ export default function MainPricing({
         </div>
 
         {/* RIGHT: Vehicle Valuation */}
-        <div style={{ ...styles.sidePanel, marginTop: '10px' }}>
-          <h3 style={styles.title}>Vehicle Valuation</h3>
-          <p style={styles.subheading}>1 Search</p>
-          <p style={styles.price}>£4.99</p>
-          <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
-          <p>3 Searches – £12.49</p>
-          <p>10 Searches – £30.00</p>
-          <hr />
-          <p style={styles.dataTitle}>Data Includes:</p>
-          <ul style={styles.list}>
-            <li>Private Valuation</li>
-            <li>Retail Valuation</li>
-            <li>Trade Valuation</li>
-          </ul>
-          <hr />
-          <button onClick={() => handleBuy('Valuation')} style={styles.buyButton}>
-            Buy
-          </button>
-        </div>
+     
       </div>
     </div>
   );
@@ -134,13 +141,18 @@ export default function MainPricing({
 
 // Minimal inline styles – you can move to .css if you prefer
 const styles = {
+
+ addon: {
+    color:'#003366',
+    fontWeight:'600'
+},
   tieredContainer: {
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     gap: '1rem',
     position: 'relative',
-    backgroundColor: '#003366',
+    backgroundColor: '#1560bd',
   },
   sidePanel: {
     flex: '0 0 300px',
@@ -161,17 +173,18 @@ const styles = {
     backgroundColor: '#fdfdfd',
     padding: '1rem',
     textAlign: 'center',
-    position: 'relative',
+    position: 'top',
     // Overlap effect:
-    top: '-10px',
+    top: '0px',
     zIndex: 2,
     boxShadow: '0 6px 12px rgba(0,0,0,0.3)',
   },
   title: {
     marginBottom: '1rem',
     fontSize: '2rem',
-    lineHeight: '2.3',
+    lineHeight: '2.15rem',
     color: '#003366',
+    textShadow:'1px 1px #1560bf'
   },
   subheading: {
     marginBottom: '0.5rem',
@@ -190,11 +203,14 @@ const styles = {
     color: '#333',
   },
   list: {
-    textAlign: 'left',
+    listStyle: 'none',
+    padding: '3px',
+    textAlign: 'center',
+    
     margin: '0 auto',
     width: '85%',
     lineHeight: '1.4',
-    paddingLeft: '1.2rem',
+   
   },
   buyButton: {
     padding: '0.5rem 1.2rem',
@@ -217,6 +233,8 @@ const styles = {
     fontSize: '1rem',
   },
 tier: {
-  padding: '60px 0px!important;'
+  padding: '60px 0px!important;',
+  alignItems: 'flex-start !important;',
 },
+
 };

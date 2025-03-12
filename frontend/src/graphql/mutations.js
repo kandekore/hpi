@@ -21,6 +21,11 @@ export const REGISTER = gql`
   }
 `;
 
+export const RESEND_VERIFICATION = gql`
+  mutation ResendVerificationEmail($email: String!) {
+    resendVerificationEmail(email: $email)
+  }
+`;
 
 
 export const LOGIN = gql`
@@ -55,3 +60,14 @@ export const PAY_MOT_CREDIT = gql`
   }
 `;
 
+export const VERIFY_EMAIL = gql`
+  mutation VerifyEmail($token: String!) {
+    verifyEmail(token: $token)
+  }
+`;
+
+export const CHANGE_PASSWORD = gql`
+  mutation ChangePassword($currentPassword: String!, $newPassword: String!) {
+    changePassword(currentPassword: $currentPassword, newPassword: $newPassword)
+  }
+`;

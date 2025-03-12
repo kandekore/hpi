@@ -94,3 +94,4 @@ export const HPI_CHECK = gql`
     hpiCheck(reg: $reg)
   }
 `;
+

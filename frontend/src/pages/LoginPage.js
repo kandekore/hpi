@@ -1,8 +1,7 @@
-// src/pages/LoginPage.js
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from '../graphql/mutations';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,6 +14,7 @@ function LoginPage() {
     try {
       const { data } = await loginMutation({ variables: { email, password } });
       if (data.login) {
+        // Store token & redirect
         localStorage.setItem('authToken', data.login);
         const pendingReg = sessionStorage.getItem('pendingReg');
         if (pendingReg) {
@@ -26,6 +26,7 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
+      // The error from useMutation is handled below in {error && ...}
     }
   };
 
@@ -33,7 +34,25 @@ function LoginPage() {
     <div className="container my-4">
       <div className="card p-4 shadow-sm">
         <h1 className="card-title mb-4">Login</h1>
-        {error && <div className="alert alert-danger">{error.message}</div>}
+
+        {/* Main error (invalid credentials or any server error) */}
+        {error && (
+          <div className="alert alert-danger">
+            {error.message}
+          </div>
+        )}
+
+        {/* 
+          If the error is specifically "Please verify your email before logging in.",
+          show a link to resend verification. 
+        */}
+        {error?.message === 'Please verify your email before logging in.' && (
+          <div className="alert alert-info mt-2">
+            Didn’t receive the verification email?{' '}
+            <Link to="/resend-verification">Click here</Link> to resend it.
+          </div>
+        )}
+
         <form onSubmit={handleLogin}>
           <div className="mb-3">
             <input
@@ -53,14 +72,21 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+
+          <button 
+            type="submit"
+            className="btn btn-primary w-100"
+            disabled={loading}
+          >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
+
       <p className="mt-3 text-center">
         Don't have an account? <a href="/register">Register here</a>.
       </p>
+
       <div className="card mt-4 border rounded p-3 text-center">
         [Ad Banner]
       </div>

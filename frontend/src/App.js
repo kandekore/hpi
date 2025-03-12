@@ -13,7 +13,8 @@ import Layout from './components/Layout';
 import SearchDetailPage from './pages/SearchDetailPage';
 import HpiCheckPage from './pages/HpiCheckPage';
 import ExampleReportsPage from './pages/ExampleReportsPage';
-
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ResendVerificationPage from './pages/ResendVerificationPage';
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
 }
@@ -57,6 +58,9 @@ function App() {
             <Route path="/search/:id" element={<SearchDetailPage />} />
             <Route path="/hpi" element={<HpiCheckPage />} />
             <Route path="/sample" element={<ExampleReportsPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/resend-verification" element={<ResendVerificationPage />} />
+
             {/* Protected Route */}
             <Route 
               path="/credits"

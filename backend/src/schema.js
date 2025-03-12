@@ -64,6 +64,9 @@ const typeDefs = gql`
   ): String
 
     login(email: String!, password: String!): String
+  verifyEmail(token: String!): Boolean
+  resendVerificationEmail(email: String!): Boolean
+  changePassword(currentPassword: String!, newPassword: String!): Boolean
 
     createCreditPurchaseSession(creditType: String!, quantity: Int!): String
     finalizeCreditPurchase(creditType: String!, quantity: Int!): User
