@@ -1,80 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // import
 import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import HpiResultDisplay from '../components/HpiResultDisplay';
-import drkbgd from '../images/backgrd.jpg';
+import { useReactToPrint } from 'react-to-print';
 
-export default function HpiCheckPage() {
-  // 1) Grab ?reg= from URL
+import heroBg from '../images/drkbgd.jpg';
+
+export default function HPICheckPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialReg = searchParams.get('reg') || '';
-
-  // 2) State
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
-  // 3) User info
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
-  const hasHpiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
-  // 4) HPI lazy query
-  const [fetchHpi, { loading, error, data: queryData }] = useLazyQuery(HPI_CHECK);
+  const [hpiCheck, { data: hpiData, loading: hpiLoading, error: hpiError }] =
+    useLazyQuery(HPI_CHECK);
 
-  // 5) Check if we have results
-  const hasResults = !!(queryData && queryData.hpiCheck);
+  const hasResults = !!(hpiData && hpiData.hpiCheck);
 
-  // 6) Auto-run once if there's an initialReg
-  useEffect(() => {
+  // Print
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `HPI_Report_${reg}`,
+  });
+
+  React.useEffect(() => {
     if (initialReg) {
-      handleSearch();
-      // remove ?reg= from URL
+      handleCheck();
       navigate('/hpi', { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, []);
 
-  // 7) handleSearch logic
-  const handleSearch = () => {
-    setAttemptedSearch(true);
-    if (!reg) return;
-    if (!isLoggedIn) return;
-    if (!hasHpiCredits) return;
-
-    fetchHpi({ variables: { reg } });
+  const handleRegChange = (e) => {
+    const val = e.target.value.toUpperCase();
+    if (val.length <= 8) setReg(val);
   };
 
-  // 8) handleRegChange
-  const handleRegChange = (e) => {
-    const inputVal = e.target.value.toUpperCase();
-    if (inputVal.length <= 8) {
-      setReg(inputVal);
-    }
+  const handleCheck = async () => {
+    setAttemptedSearch(true);
+    if (!isLoggedIn) return;
+    if (!reg) return;
+    await hpiCheck({ variables: { reg } });
   };
 
   return (
     <>
       <style>{`
-        html, body {
-          margin: 0; padding: 0;
-        }
-        .hero {
+        .hpi-hero {
           width: 100%;
-          min-height: 100vh;
-          /* e.g. background: url(${drkbgd}) center top repeat-y; */
-          display: flex;
-          flex-direction: column;
-        }
-        .hero-content {
-          flex: 1;
-          padding: 2rem;
+          min-height: 50vh;
+          background: url(${heroBg}) center top no-repeat;
+          background-size: cover;
+          color: #fff;
           text-align: center;
+          padding: 3rem 1rem;
+        }
+        .hpi-hero h1 {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+          font-weight: 700;
+        }
+        .hpi-hero p {
+          font-size: 1.2rem;
+          margin-bottom: 2rem;
         }
         .plate-container {
-          width: 55%;
+          width: 70%;
           height: 200px;
           margin: 2rem auto;
           display: flex;
@@ -82,8 +80,7 @@ export default function HpiCheckPage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
-              max-width: 785px;
-
+          max-width: 785px;
         }
         .plate-blue {
           background-color: #003399;
@@ -109,53 +106,44 @@ export default function HpiCheckPage() {
           line-height: 1;
           padding-left: 10%;
         }
-        .submit {
-          text-align: center;
-        }
-        .plate-button {
-          display: inline-block;
-          margin-top: 1rem;
-          background-color: #1560BD;
-          color: #fff;
-          font-weight: bold;
-          padding: 10px 25px;
-          border: none;
-          border-radius: 25px;
-          cursor: pointer;
-          font-size: 3.5rem;
-        }
-        .plate-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
         @media (max-width: 768px) {
           .plate-container {
-             width: 100%;
+            width: 100%;
             height: 120px;
             margin: 1rem auto;
           }
           .plate-blue {
-            width: 80px; font-size: 3rem;
+            width: 80px;
+            font-size: 2.5rem;
           }
           .plate-input {
-            font-size: 3.5rem;
+            font-size: 3rem;
             padding-left: 5%;
           }
         }
+        .hpi-info-section {
+          background: #fff;
+          padding: 3rem 1rem;
+          margin-top: 2rem;
+        }
+        .hpi-info-section h2 {
+          text-align: center;
+          margin-bottom: 2rem;
+          font-weight: 700;
+        }
       `}</style>
 
-      <div className="hero">
-        <div className="hero-content">
-          <h1>Full HPI Check</h1>
-          <p>
-            A Full HPI Check combines multiple data sources — 
-            finance records, stolen checks, accidents, mileage anomalies, etc.
-          </p>
+      <div className="hpi-hero">
+        <h1>Full HPI Check</h1>
+        <p>
+          Access complete vehicle history: outstanding finance, insurance 
+          write-offs, theft records, and more.
+        </p>
 
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
-              type="text"
               className="plate-input"
               placeholder="AB12 CDE"
               value={reg}
@@ -163,53 +151,88 @@ export default function HpiCheckPage() {
             />
           </div>
 
-          <div className="submit">
+          <div className="text-center">
             {hasResults ? (
-              <a
-                href="#"
-                style={{ fontSize: '2rem', textDecoration: 'underline' }}
+              <button
                 onClick={() => window.location.reload()}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: '25px',
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
               >
-                Make another search
-              </a>
+                Search Again
+              </button>
             ) : (
               <button
-                className="plate-button"
-                onClick={handleSearch}
-                disabled={loading}
+                onClick={handleCheck}
+                disabled={hpiLoading}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: '25px',
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
               >
-                {loading ? 'Checking...' : 'Run HPI Check'}
+                {hpiLoading ? 'Checking...' : 'Check HPI'}
               </button>
             )}
           </div>
 
-          {/* Alerts if needed */}
-          {attemptedSearch && !reg && (
-            <div className="alert alert-warning mt-2">
-              Please enter a valid registration.
-            </div>
-          )}
-          {attemptedSearch && isLoggedIn && !hasHpiCredits && (
-            <div className="alert alert-danger mt-2">
-              You have no HPI Credits left. Please purchase more.
-            </div>
-          )}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
-              Please login or register to run an HPI check.
+              Please login or register to do a Full HPI check.
             </div>
           )}
-          {error && (
+          {hpiError && (
             <div className="alert alert-danger mt-2">
-              Error: {error.message}
+              {hpiError.message}
             </div>
           )}
         </div>
+      </div>
 
-        {/* If data => show result */}
-        {queryData?.hpiCheck && (
-          <HpiResultDisplay hpiData={queryData.hpiCheck} />
-        )}
+      {hpiData?.hpiCheck && (
+        <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
+          <div className="text-end mb-2">
+            <button className="btn btn-secondary" onClick={handlePrint}>
+              Print / Save
+            </button>
+          </div>
+          <div ref={printRef}>
+            <HpiResultDisplay hpiData={hpiData.hpiCheck} userProfile={userProfile} />
+          </div>
+        </div>
+      )}
+
+      {/* Additional Info */}
+      <div className="hpi-info-section">
+        <h2>Why Get a Full HPI Check?</h2>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <p>
+            A Full HPI Check ensures you don’t inherit someone else’s debt 
+            or risk owning a stolen vehicle. Verify finance status, previous 
+            accidents, theft records, and more—all in one detailed report.
+          </p>
+          <ul>
+            <li>Identify outstanding finance or hidden damage</li>
+            <li>Check for theft or insurance write-offs</li>
+            <li>Review the vehicle’s keeper history and VIN</li>
+          </ul>
+          <p>
+            Protect yourself before buying or selling a car, and gain 
+            total confidence with every transaction.
+          </p>
+        </div>
       </div>
     </>
   );

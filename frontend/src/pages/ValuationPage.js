@@ -1,71 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, VALUATION_CHECK } from '../graphql/queries';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
+import { useReactToPrint } from 'react-to-print';
+
+// Optional background
+import heroBg from '../images/drkbgd.jpg';
 
 export default function ValuationPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialReg = searchParams.get('reg') || '';
-
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
 
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
-  const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
 
-  const [fetchValuation, { data: valuationData, loading: valuationLoading, error: valuationError }] 
-    = useLazyQuery(VALUATION_CHECK);
+  const [valuationCheck, { data: valData, loading: valLoading, error: valError }] =
+    useLazyQuery(VALUATION_CHECK);
 
-  const hasResults = !!(valuationData?.valuation);
+  const hasResults = !!(valData && valData.valuation);
 
-  useEffect(() => {
+  // Print
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Valuation_Report_${reg}`,
+  });
+
+  React.useEffect(() => {
     if (initialReg) {
-      handleValuationCheck();
-      // remove param
+      handleCheck();
       navigate('/valuation', { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, []);
 
-  const handleValuationCheck = () => {
-    setAttemptedSearch(true);
-    if (!isLoggedIn) return;
-    if (!hasValuationCredits) return;
-    if (!reg) return;
-
-    fetchValuation({ variables: { reg } });
+  const handleRegChange = (e) => {
+    const val = e.target.value.toUpperCase();
+    if (val.length <= 8) setReg(val);
   };
 
-  const handleRegChange = (e) => {
-    const inputVal = e.target.value.toUpperCase();
-    if (inputVal.length <= 8) {
-      setReg(inputVal);
-    }
+  const handleCheck = async () => {
+    setAttemptedSearch(true);
+    if (!isLoggedIn) return;
+    if (!reg) return;
+    await valuationCheck({ variables: { reg } });
   };
 
   return (
     <>
       <style>{`
-        html, body {
-          margin: 0;
-          padding: 0;
-        }
-        .hero {
+        .valuation-hero {
           width: 100%;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-        }
-        .hero-content {
-          flex: 1; padding: 2rem;
+          min-height: 50vh;
+          background: url(${heroBg}) center top no-repeat;
+          background-size: cover;
+          color: #fff;
           text-align: center;
+          padding: 3rem 1rem;
+        }
+        .valuation-hero h1 {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+          font-weight: 700;
+        }
+        .valuation-hero p {
+          font-size: 1.2rem;
+          margin-bottom: 2rem;
         }
         .plate-container {
-          width: 55%;
+          width: 70%;
           height: 200px;
           margin: 2rem auto;
           display: flex;
@@ -73,13 +81,14 @@ export default function ValuationPage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
-              max-width: 785px;
-
+          max-width: 785px;
         }
         .plate-blue {
           background-color: #003399;
           color: #fff;
-          display: flex; align-items: center; justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           width: 130px;
           font-size: 4.5rem;
           font-weight: bold;
@@ -98,48 +107,41 @@ export default function ValuationPage() {
           line-height: 1;
           padding-left: 10%;
         }
-        .submit { text-align: center; }
-        .plate-button {
-          display: inline-block;
-          margin-top: 1rem;
-          background-color: #1560BD;
-          color: #fff;
-          font-weight: bold;
-          padding: 10px 25px;
-          border: none;
-          border-radius: 25px;
-          cursor: pointer;
-          font-size: 3.5rem;
-        }
-        .plate-button:disabled {
-          opacity: 0.6; cursor: not-allowed;
-        }
         @media (max-width: 768px) {
           .plate-container {
-            width: 100%; height: 150px; margin: 1rem auto;
+            width: 100%;
+            height: 120px;
+            margin: 1rem auto;
           }
           .plate-blue {
-            width: 80px; font-size: 3rem;
+            width: 80px;
+            font-size: 2.5rem;
           }
           .plate-input {
-            font-size: 3.5rem;
+            font-size: 3rem;
             padding-left: 5%;
           }
         }
-        a.btn.btn-primary.btn-sm {
-    display: none!important;
-}
+        .valuation-info-section {
+          background: #fff;
+          padding: 3rem 1rem;
+          margin-top: 2rem;
+        }
+        .valuation-info-section h2 {
+          text-align: center;
+          margin-bottom: 2rem;
+          font-weight: 700;
+        }
       `}</style>
 
-      <div className="hero">
-        <div className="hero-content">
-          <h1>Valuation Check</h1>
-          <p>Enter your vehicle registration to retrieve its estimated retail, private sale, trade, auction and part exchange valuation.</p>
+      <div className="valuation-hero">
+        <h1>Valuation Check</h1>
+        <p>Get an instant estimate of your vehicle’s market value.</p>
 
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
-              type="text"
               className="plate-input"
               placeholder="AB12 CDE"
               value={reg}
@@ -147,22 +149,39 @@ export default function ValuationPage() {
             />
           </div>
 
-          <div className="submit">
+          <div className="text-center">
             {hasResults ? (
-              <a
-                href="#"
-                style={{ fontSize: '2rem', textDecoration: 'underline' }}
+              <button
                 onClick={() => window.location.reload()}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: '25px',
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
               >
-                Make another search
-              </a>
+                Search Again
+              </button>
             ) : (
               <button
-                className="plate-button"
-                onClick={handleValuationCheck}
-                disabled={valuationLoading}
+                onClick={handleCheck}
+                disabled={valLoading}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: '25px',
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
               >
-                {valuationLoading ? 'Checking...' : 'Check Valuation'}
+                {valLoading ? 'Checking...' : 'Get Valuation'}
               </button>
             )}
           </div>
@@ -172,22 +191,46 @@ export default function ValuationPage() {
               Please login or register to do a Valuation check.
             </div>
           )}
-          {attemptedSearch && isLoggedIn && !hasValuationCredits && (
+          {valError && (
             <div className="alert alert-danger mt-2">
-              You have no Valuation credits left. Please purchase more.
-            </div>
-          )}
-          {valuationError && (
-            <div className="alert alert-danger mt-2">
-              {valuationError.message}
+              {valError.message}
             </div>
           )}
         </div>
+      </div>
 
-        {/* If data => pass aggregator */}
-        {valuationData?.valuation && (
-          <ValuationAggregatorDisplay valData={valuationData.valuation} />
-        )}
+      {valData?.valuation && (
+        <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
+          <div className="text-end mb-2">
+            <button className="btn btn-secondary" onClick={handlePrint}>
+              Print / Save
+            </button>
+          </div>
+          <div ref={printRef}>
+            <ValuationAggregatorDisplay valData={valData.valuation} userProfile={userProfile} />
+          </div>
+        </div>
+      )}
+
+      {/* Additional Info */}
+      <div className="valuation-info-section">
+        <h2>Why Get a Vehicle Valuation?</h2>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <p>
+            Knowing a car’s true market value helps you avoid overpaying 
+            or underselling. Our valuation tool analyzes current market 
+            data to give you a realistic price range for your vehicle.
+          </p>
+          <ul>
+            <li>Compare private vs. trade-in values</li>
+            <li>Understand local market demand</li>
+            <li>Negotiate from an informed position</li>
+          </ul>
+          <p>
+            Whether you’re buying, selling, or just curious, an accurate 
+            valuation empowers you to make the right financial decision.
+          </p>
+        </div>
       </div>
     </>
   );

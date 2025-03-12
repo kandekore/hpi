@@ -83,11 +83,7 @@ function Layout({ children }) {
                     Home
                   </Link>
                 </li>
-
-                {/* Only show these links if logged in */}
-                {isLoggedIn && (
-                  <>
-                    <li className="nav-item">
+                <li className="nav-item">
                       <Link className="nav-link text-white" to="/valuation">
                         Valuation
                       </Link>
@@ -102,6 +98,11 @@ function Layout({ children }) {
                         Full HPI Check
                       </Link>
                     </li>
+
+                {/* Only show these links if logged in */}
+                {isLoggedIn && (
+                  <>
+                    
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/credits">
                         Dashboard
