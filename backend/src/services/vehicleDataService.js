@@ -1,6 +1,7 @@
 // backend/src/services/vehicleDataService.js
 
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 const API_KEY = process.env.VEHICLE_DATA_API_KEY;
 const VDI_KEY = process.env.VEHICLE_DATA_VDI_KEY; // used for some calls
 
