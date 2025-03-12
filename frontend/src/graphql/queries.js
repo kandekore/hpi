@@ -10,6 +10,11 @@ export const GET_USER_PROFILE = gql`
       valuationCredits
       hpiCredits
       freeMotChecksUsed
+      userIntention
+      termsAccepted
+      isVerified
+      username
+      phone
     }
   }
 `;

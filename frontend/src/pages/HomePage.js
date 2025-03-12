@@ -1,26 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_USER_PROFILE } from '../graphql/queries';
 import { useNavigate } from 'react-router-dom';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
 import MainPricing from '../components/MainPricing';
 import drkbgd from '../images/drkbgd.jpg';
-
-// This is the *new* background image for our flexible plans section.
-// Replace 'flexible_plans_bg.jpg' with your actual file if needed:
-import flexiblePlansBg from '../images/happyuser.jpg'; // '../images/flexible_plans_bg.jpg';
+import flexiblePlansBg from '../images/happyuser.jpg';
 
 export default function HomePage() {
   const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // For the modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
+
+  const modalRef = useRef(null);
+
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // MOT checks
+  // Free MOT usage
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
-  const hasFreeMotLeft = freeMotChecksUsed < 3;
+  const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
+
+  // Paid credits
+  const motCredits = userProfile?.motCredits ?? 0;
+  const totalMot = freeMotLeft + motCredits; // total available MOT checks
 
   // Valuation credits
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
@@ -29,8 +38,9 @@ export default function HomePage() {
   const hasVdiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
   const navigate = useNavigate();
+  const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
-  // Registration input
+  // Handle reg input
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
     if (val.length <= 8) {
@@ -38,7 +48,29 @@ export default function HomePage() {
     }
   };
 
-  // Handle MOT check
+  // Show a modal confirming credit usage
+  const showCreditsModal = (creditsCount, searchType, navigateFn) => {
+    setModalMsg(
+      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+    );
+    setModalSearchType(searchType);
+    setShowModal(true);
+    setPendingSearchAction(() => navigateFn);
+  };
+
+  // Confirm search in modal
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) pendingSearchAction();
+    setShowModal(false);
+  };
+
+  // Cancel search in modal
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
+  };
+
+  // Handle MOT
   const handleClickMOT = () => {
     setErrorMsg('');
     if (!reg) {
@@ -54,10 +86,9 @@ export default function HomePage() {
       return;
     }
 
-    const freeMotChecksUsedLocal = userProfile.freeMotChecksUsed ?? 0;
-    const motCredits = userProfile.motCredits ?? 0;
-    if (freeMotChecksUsedLocal < 3 || motCredits > 0) {
-      navigate(`/mot?reg=${reg}`);
+    if (totalMot > 0) {
+      // free or paid available
+      showCreditsModal(totalMot, 'MOT', () => navigate(`/mot?reg=${reg}`));
     } else {
       setErrorMsg(
         'You have no MOT checks remaining. Please purchase credits or wait for more free checks.'
@@ -65,31 +96,7 @@ export default function HomePage() {
     }
   };
 
-  // Purchase session
-  const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
-
-  const handlePurchase = async (product, quantity) => {
-    const productMap = {
-      Valuation: 'VALUATION',
-      VDI: 'VDI',
-      MOT: 'MOT',
-      HPI: 'VDI' // If you treat "Full HPI" the same as "VDI"
-    };
-    const creditType = productMap[product] || 'VDI';
-
-    try {
-      const { data } = await createSession({
-        variables: { creditType, quantity },
-      });
-      if (data.createCreditPurchaseSession) {
-        window.location.href = data.createCreditPurchaseSession;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Valuation check
+  // Handle Valuation
   const handleClickValuation = () => {
     setErrorMsg('');
     if (!reg) {
@@ -104,10 +111,12 @@ export default function HomePage() {
       setErrorMsg('You have no Valuation credits left. Please purchase more.');
       return;
     }
-    navigate(`/valuation?reg=${reg}`);
+    showCreditsModal(userProfile.valuationCredits, 'Valuation', () =>
+      navigate(`/valuation?reg=${reg}`)
+    );
   };
 
-  // VDI/HPI check
+  // Handle VDI/HPI
   const handleClickVDI = () => {
     setErrorMsg('');
     if (!reg) {
@@ -122,7 +131,29 @@ export default function HomePage() {
       setErrorMsg('You have no VDI credits left. Please purchase more.');
       return;
     }
-    navigate(`/hpi?reg=${reg}`);
+    showCreditsModal(userProfile.hpiCredits, 'VDI', () =>
+      navigate(`/hpi?reg=${reg}`)
+    );
+  };
+
+  // Purchase session for buying credits
+  const handlePurchase = async (product, quantity) => {
+    const productMap = {
+      Valuation: 'VALUATION',
+      VDI: 'VDI',
+      MOT: 'MOT',
+      HPI: 'VDI',
+    };
+    const creditType = productMap[product] || 'VDI';
+
+    try {
+      const { data } = await createSession({ variables: { creditType, quantity }});
+      if (data.createCreditPurchaseSession) {
+        window.location.href = data.createCreditPurchaseSession;
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -153,7 +184,8 @@ export default function HomePage() {
           font-size: 1.2rem;
           margin-bottom: 2rem;
         }
-           .plate-container {
+
+        .plate-container {
           width: 70%;
           height: 200px;
           margin: 2rem auto;
@@ -162,6 +194,8 @@ export default function HomePage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
+              max-width: 785px;
+
         }
         .plate-blue {
           background-color: #003399;
@@ -187,6 +221,7 @@ export default function HomePage() {
           line-height: 1;
           padding-left: 10%;
         }
+
         .button-group {
           display: flex;
           justify-content: center;
@@ -203,7 +238,8 @@ export default function HomePage() {
           padding: 10px 25px;
           cursor: pointer;
           font-size: 1.1rem;
-          width: 22%;
+          width: 220px; /* fixed width so text doesn't wrap awkwardly */
+          text-align: center;
         }
         .action-button:hover {
           background-color: #0d4f9c;
@@ -212,20 +248,28 @@ export default function HomePage() {
           opacity: 0.6;
           cursor: not-allowed;
         }
+
+        /* MOBILE STYLES */
         @media (max-width: 768px) {
           .plate-container {
-            max-width: 100%;
+            width: 100%;
             height: 120px;
+            margin: 1rem auto;
           }
           .plate-blue {
             width: 80px;
             font-size: 2rem;
           }
           .plate-input {
-            font-size: 2rem;
+            font-size: 3.5rem;
+            padding-left: 5%;
+          }
+          .action-button {
+            width: 100% !important; 
+            margin: 0 auto;
           }
         }
-        /* WHY CHECK WITH US */
+ /* WHY CHECK WITH US */
         .why-check-section {
           background: #f4f4f4;
           padding: 4rem 1rem;
@@ -277,15 +321,14 @@ export default function HomePage() {
           align-items: center;
         }
         .flexible-plans-box {
-           background: #003366;
-    color: #fff;
-    padding: 2rem;
-    border-radius: 50px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 550px;
-    border: #fff solid 5px;
-}
+          background: #003366;
+          color: #fff;
+          padding: 2rem;
+          border-radius: 50px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          width: 100%;
+          max-width: 550px;
+          border: #fff solid 5px;
         }
         .flexible-plans-box h3 {
           margin-top: 0;
@@ -346,17 +389,62 @@ export default function HomePage() {
           font-size: 1rem;
           line-height: 1.6;
         }
-          ul#myTab {
-    font-size: x-large;
-    font-weight: 600;
-}
-      `}</style>
+        ul#myTab {
+          font-size: x-large;
+          font-weight: 600;
+        }
+
+        /* Modal override for demonstration if no bootstrap js is loaded */
+        .modal-backdrop.show {
+          opacity: 0.4;
+        }
+     `}</style>
+       
+
+      {/* MODAL */}
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          ref={modalRef}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '8px' }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCancelSearch}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>{modalMsg}</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-danger"
+                  onClick={handleCancelSearch}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-success"
+                  onClick={handleConfirmSearch}
+                >
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* HERO SECTION */}
       <div className="hero section-fullwidth">
         <h1 className="hero-title">Your One-Stop Vehicle Check</h1>
         <p className="hero-subtitle">
-          Free MOT History, Simple Valuation, Full HPI &amp; Comprehensive VDI 
+          Free MOT History, Simple Valuation, Full HPI &amp; Comprehensive VDI
           — All in One Place
         </p>
 
@@ -366,7 +454,7 @@ export default function HomePage() {
             <input
               type="text"
               className="plate-input"
-              placeholder="AB12CDE"
+              placeholder="AB12 CDE"
               value={reg}
               onChange={handleRegChange}
             />
@@ -397,7 +485,7 @@ export default function HomePage() {
 
       {/* PRICING SECTION */}
       <MainPricing
-        isLoggedIn={!!localStorage.getItem('authToken')}
+        isLoggedIn={isLoggedIn}
         hasUsedFreeMOT={freeMotChecksUsed >= 3}
         onPurchase={(product, quantity) => handlePurchase(product, quantity)}
       />
@@ -430,11 +518,10 @@ export default function HomePage() {
               preventing expensive surprises down the line.
             </p>
           </div>
-          {/* Removed the "Tailored to You" card here */}
         </div>
       </div>
 
-      {/* NEW FLEXIBLE PLANS SECTION */}
+      {/* FLEXIBLE PLANS SECTION */}
       <div className="flexible-plans-section section-fullwidth">
         <div className="flexible-plans-container">
           <div className="flexible-plans-box">
@@ -552,9 +639,6 @@ export default function HomePage() {
               <li>Avoid overpaying for your next car</li>
             </ul>
           </div>
-
-          {/* Full HPI Check Tab */}
-          
 
           {/* Full VDI Check Tab */}
           <div

@@ -82,6 +82,8 @@ export default function HpiCheckPage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
+              max-width: 785px;
+
         }
         .plate-blue {
           background-color: #003399;
@@ -128,15 +130,15 @@ export default function HpiCheckPage() {
         }
         @media (max-width: 768px) {
           .plate-container {
-            width: 100%;
-            height: 150px;
+             width: 100%;
+            height: 120px;
             margin: 1rem auto;
           }
           .plate-blue {
             width: 80px; font-size: 3rem;
           }
           .plate-input {
-            font-size: 6.5rem;
+            font-size: 3.5rem;
             padding-left: 5%;
           }
         }

@@ -1,32 +1,27 @@
-// src/components/MainPricing.js
-
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import SubPricing from './SubPricing';
 
 export default function MainPricing({
   isLoggedIn,
   hasUsedFreeMOT,
-  onPurchase // (product, quantity) => triggers Stripe
+  onPurchase,
 }) {
   const [subProduct, setSubProduct] = useState(null);
 
-  // Show sub table (modal) for the chosen product
+  // Access the current path
+  const location = useLocation();
+  const isCreditsPage = location.pathname === '/credits';
+
   const handleBuy = (productKey) => {
-    // e.g. "VDI", "Valuation", or "MOT"
     setSubProduct(productKey);
   };
 
-  // Example MOT button logic:
-  // If user is not logged in => "Register"
-  // If user is logged in but hasn't used free => "Register"
-  // If user is logged in and free used => "Buy"
   const renderMOTButton = () => {
     if (!isLoggedIn || !hasUsedFreeMOT) {
       return (
         <a href="/register" style={{ textDecoration: 'none' }}>
-          <button style={styles.registerButton}>
-            Register
-          </button>
+          <button style={styles.registerButton}>Register</button>
         </a>
       );
     } else {
@@ -38,28 +33,34 @@ export default function MainPricing({
     }
   };
 
+  // Decide panel width based on isCreditsPage
+  const panelFlex = isCreditsPage ? '0 0 300px' : '0 0 400px';
+  // Merge styles
+  const panelStyle = {
+    ...styles.panel,
+    flex: panelFlex,
+  };
+
   return (
-    <div style={{ position: 'relative', paddingTop: '3rem', paddingBottom: '3rem',backgroundColor: '#1560bd' }}>
-    
-      {/* SubPricing modal => appears if subProduct != null */}
+    <div style={styles.pricingWrapper}>
+      {/* Show sub pricing modal if selected */}
       {subProduct && (
         <SubPricing
-  product={subProduct}
-  isLoggedIn={isLoggedIn} // <— pass it here
-  onClose={() => setSubProduct(null)}
-  onPurchase={onPurchase}
-/>
-
+          product={subProduct}
+          isLoggedIn={isLoggedIn}
+          onClose={() => setSubProduct(null)}
+          onPurchase={onPurchase}
+        />
       )}
 
-  
-
-      {/* 3-product container (tiered) */}
-      <div style={styles.tieredContainer} className='tier'>
-        
-        {/* LEFT: MOT panel */}
-        // <div style={styles.centerPanel}>
-          <h3 style={styles.title}>MOT<br></br>Full History</h3>
+      <div style={styles.tieredContainer}>
+        {/* MOT Panel */}
+        <div style={panelStyle}>
+          <h3 style={styles.title}>
+            MOT
+            <br />
+            Full History
+          </h3>
           <p style={styles.subheading}>3 Searches</p>
           <p style={styles.price}>FREE</p>
           <hr />
@@ -69,41 +70,50 @@ export default function MainPricing({
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
-            <li className='feature'>Dates &amp; Test Number</li>
-            <li className='feature'>Mileage</li>
-            <li className='feature'>Advisory &amp; Failure Details</li>
+            <li>Dates &amp; Test Number</li>
+            <li>Mileage</li>
+            <li>Advisory &amp; Failure Details</li>
           </ul>
           <hr />
           {renderMOTButton()}
         </div>
-        <div style={styles.centerPanel}>
-        <h3 style={styles.title}>Vehicle Valuation<br></br>+Full MOT History</h3>
-        <p style={styles.subheading}>1 Search</p>
-        <p style={styles.price}>£4.99</p>
-        <hr />
-        <p style={styles.subheading}>Bulk Buy</p>
-        <p>3 Searches – £12.49</p>
-        <p>10 Searches – £30.00</p>
-        <hr />
-        <p style={styles.dataTitle}>Data Includes:</p>
-        <ul style={styles.list}>
-        
-          <li className='feature'>Private Valuation</li>
-          <li className='feature'>Retail Valuation</li>
-          <li className='feature'>Trade Valuation</li>
-          <li>-</li>
-          <li style={styles.addon}><strong>MOT Full History
-        </strong></li>
-        </ul>
-        <hr />
-        <button onClick={() => handleBuy('Valuation')} style={styles.buyButton}>
-          Buy
-        </button>
-      </div>
-        {/* CENTER: VDI Full Lookup (primary) */}
-        <div style={styles.centerPanel}>
-          <h3 style={{ ...styles.title, color: '#003366'}}>
-            Detailed Vehicle Data<br></br>& Full Vehicle History
+
+        {/* Valuation Panel */}
+        <div style={panelStyle}>
+          <h3 style={styles.title}>
+            Vehicle Valuation
+            <br />
+            + Full MOT History
+          </h3>
+          <p style={styles.subheading}>1 Search</p>
+          <p style={styles.price}>£4.99</p>
+          <hr />
+          <p style={styles.subheading}>Bulk Buy</p>
+          <p>3 Searches – £12.49</p>
+          <p>10 Searches – £30.00</p>
+          <hr />
+          <p style={styles.dataTitle}>Data Includes:</p>
+          <ul style={styles.list}>
+            <li>Private Valuation</li>
+            <li>Retail Valuation</li>
+            <li>Trade Valuation</li>
+            <li>-</li>
+            <li style={styles.addon}>
+              <strong>MOT Full History</strong>
+            </li>
+          </ul>
+          <hr />
+          <button onClick={() => handleBuy('Valuation')} style={styles.buyButton}>
+            Buy
+          </button>
+        </div>
+
+        {/* VDI Panel */}
+        <div style={panelStyle}>
+          <h3 style={{ ...styles.title, color: '#003366' }}>
+            Detailed Vehicle Data
+            <br />
+            &amp; Full Vehicle History
           </h3>
           <p style={styles.subheading}>1 Search</p>
           <p style={styles.price}>£9.99</p>
@@ -114,77 +124,61 @@ export default function MainPricing({
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
-            <li className='feature'>Outstanding Finance</li>
-            <li className='feature'>Insurance Write Off</li>
-            <li className='feature'>Ownership &amp; Car Identity</li>
-            <li className='feature'>VIN Confirmation</li>
-            <li className='feature'>Scrapped / Mileage Anomaly / Colour Change</li>
-            <li className='feature'>Import Check / Emissions &amp; Tax Rates</li>
-            <li className='feature'>Technical Details</li>
+            <li>Outstanding Finance</li>
+            <li>Insurance Write Off</li>
+            <li>Ownership &amp; Car Identity</li>
+            <li>VIN Confirmation</li>
+            <li>Scrapped / Mileage Anomaly / Colour Change</li>
+            <li>Import Check / Emissions &amp; Tax Rates</li>
+            <li>Technical Details</li>
             <li>-</li>
-            <li style={styles.addon}><strong>Vehicle Valuation</strong></li>
-            <li style={styles.addon}><strong>MOT Full History
-        </strong></li>
+            <li style={styles.addon}>
+              <strong>Vehicle Valuation</strong>
+            </li>
+            <li style={styles.addon}>
+              <strong>MOT Full History</strong>
+            </li>
           </ul>
           <hr />
           <button onClick={() => handleBuy('VDI')} style={styles.buyButton}>
             Buy
           </button>
         </div>
-
-        {/* RIGHT: Vehicle Valuation */}
-     
       </div>
     </div>
   );
 }
 
-// Minimal inline styles – you can move to .css if you prefer
 const styles = {
-
- addon: {
-    color:'#003366',
-    fontWeight:'600'
-},
+  pricingWrapper: {
+    position: 'relative',
+    paddingTop: '3rem',
+    paddingBottom: '3rem',
+    backgroundColor: '#1560bd',
+  },
   tieredContainer: {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
     gap: '1rem',
-    position: 'relative',
+    flexWrap: 'wrap',
     backgroundColor: '#1560bd',
   },
-  sidePanel: {
-    flex: '0 0 300px',
-    // remove fixed height => auto adjusts
-    border: '5px solid #ccc',
-    borderRadius: '25px',
-    backgroundColor: '#f9f9f9',
-    padding: '1rem',
-    textAlign: 'center',
-    position: 'relative',
-    zIndex: 1,
-    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-  },
-  centerPanel: {
-    flex: '0 0 400px',
-    border: '2px solidrgb(89, 90, 92)',
+  panel: {
+    border: '2px solid rgb(89, 90, 92)',
     borderRadius: '25px',
     backgroundColor: '#fdfdfd',
     padding: '1rem',
     textAlign: 'center',
-    position: 'top',
-    // Overlap effect:
-    top: '0px',
-    zIndex: 2,
-    boxShadow: '0 6px 12px rgba(0,0,0,0.3)',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    minWidth: '280px',
   },
   title: {
     marginBottom: '1rem',
     fontSize: '2rem',
     lineHeight: '2.15rem',
     color: '#003366',
-    textShadow:'1px 1px #1560bf'
+    textShadow: '1px 1px #1560bf',
   },
   subheading: {
     marginBottom: '0.5rem',
@@ -206,11 +200,13 @@ const styles = {
     listStyle: 'none',
     padding: '3px',
     textAlign: 'center',
-    
     margin: '0 auto',
     width: '85%',
     lineHeight: '1.4',
-   
+  },
+  addon: {
+    color: '#003366',
+    fontWeight: '600',
   },
   buyButton: {
     padding: '0.5rem 1.2rem',
@@ -232,9 +228,4 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
-tier: {
-  padding: '60px 0px!important;',
-  alignItems: 'flex-start !important;',
-},
-
 };

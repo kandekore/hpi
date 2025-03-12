@@ -73,6 +73,8 @@ export default function ValuationPage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
+              max-width: 785px;
+
         }
         .plate-blue {
           background-color: #003399;
@@ -120,7 +122,8 @@ export default function ValuationPage() {
             width: 80px; font-size: 3rem;
           }
           .plate-input {
-            font-size: 6.5rem; padding-left: 5%;
+            font-size: 3.5rem;
+            padding-left: 5%;
           }
         }
         a.btn.btn-primary.btn-sm {
