@@ -35,7 +35,8 @@ function Layout({ children }) {
         }
 
         .navbar-logo {
-          max-height: 110px;
+          /* max-height: 110px; */
+          width: 350px;
         }
 
         @media (max-width: 768px) {

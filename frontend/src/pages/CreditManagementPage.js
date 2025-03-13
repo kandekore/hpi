@@ -7,7 +7,7 @@ import {
   GET_TRANSACTIONS
 } from '../graphql/queries';
 import { CREATE_CREDIT_PURCHASE_SESSION, CHANGE_PASSWORD } from '../graphql/mutations';
-import MainPricing from '../components/MainPricing';
+import MainPricingDashboard from '../components/MainPricingDashboard';
 
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
@@ -304,7 +304,7 @@ export default function CreditManagementPage() {
 
               {/* FULL-WIDTH MAINPRICING SECTION */}
               <div className="pricing-fullwidth">
-                <MainPricing
+                <MainPricingDashboard
                   isLoggedIn={!!localStorage.getItem('authToken')}
                   hasUsedFreeMOT={freeMotChecksUsed >= 3}
                   onPurchase={(product, quantity) => handlePurchase(product, quantity)}
