@@ -1,6 +1,10 @@
 // backend/src/services/stripeService.js
-const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+import dotenv from 'dotenv';
+dotenv.config();
+import Stripe from 'stripe';
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20'});
+console.log('STRIPE_API_KEY:', process.env.STRIPE_SECRET_KEY);
+
 
 const PRICE_CONFIG = {
   MOT: {
@@ -21,7 +25,7 @@ const PRICE_CONFIG = {
 };
 
 
-module.exports = {
+export default {
   async createCheckoutSession(creditType, quantity, successUrl, cancelUrl, metadata) {
     // 1) Look up the price in cents for the given creditType & quantity
     const priceInCents = PRICE_CONFIG[creditType]?.[quantity];

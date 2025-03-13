@@ -1,5 +1,5 @@
 // models/User.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
@@ -19,4 +19,4 @@ const userSchema = new mongoose.Schema({
   searchHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SearchRecord' }]
 });
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

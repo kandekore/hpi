@@ -7,7 +7,7 @@ const VDI_KEY = process.env.VEHICLE_DATA_VDI_KEY; // used for some calls
 
 const BASE_URL = 'https://uk1.ukvehicledata.co.uk/api/datapackage';
 
-module.exports = {
+export default {
   // ==========================
   // 1) Existing or older calls
   // ==========================

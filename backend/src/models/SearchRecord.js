@@ -1,5 +1,6 @@
 // backend/src/models/SearchRecord.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 
 const searchRecordSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -14,4 +15,4 @@ const searchRecordSchema = new mongoose.Schema({
 });
 
 // Export the Mongoose model, not just the schema
-module.exports = mongoose.model('SearchRecord', searchRecordSchema);
+export default mongoose.model('SearchRecord', searchRecordSchema);

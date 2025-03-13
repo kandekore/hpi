@@ -1,10 +1,10 @@
 // backend/src/resolvers/userResolvers.js
-const User = require('../models/User');
-const { hashPassword, comparePasswords, createToken } = require('../services/auth');
-const { sendMail } = require('../services/mailer'); // hypothetical mailer service
-const crypto = require('crypto');
+import User from '../models/User.js';
+import { hashPassword, comparePasswords, createToken } from '../services/auth.js';
+import { sendMail }  from '../services/mailer.js'; // hypothetical mailer service
+import crypto from 'crypto';
 
-module.exports = {
+export default {
   Query: {
     async getUserProfile(_, __, { user }) {
       if (!user) throw new Error('Not authenticated');

@@ -1,5 +1,4 @@
-// services/mailer.js
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -11,14 +10,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendMail({ to, subject, html }) {
-  const info = await transporter.sendMail({
-    from: '"Vehicle Data Information" <verify@vehicledatainformation.co.uk>', // or use process.env.FROM_EMAIL
-    to,
-    subject,
-    html,
-  });
-  console.log('Message sent:', info.messageId);
+// Mark this function as async to use await inside
+export async function sendMail({ to, subject, html }) {
+  try {
+    const info = await transporter.sendMail({
+      from: '"Vehicle Data Information" <verify@vehicledatainformation.co.uk>', 
+      // or use something like process.env.FROM_EMAIL
+      to,
+      subject,
+      html,
+    });
+    console.log('Message sent:', info.messageId);
+    return info; // optionally return info if needed
+  } catch (err) {
+    console.error('Error sending mail:', err);
+    throw err; // rethrow or handle error as needed
+  }
 }
 
-module.exports = { sendMail };
+// Optional default export (e.g., if you want to import everything at once)
+export default { sendMail };

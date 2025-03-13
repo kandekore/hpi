@@ -1,8 +1,8 @@
-const userResolvers = require('./userResolvers');
-const searchResolvers = require('./searchResolvers');
-const paymentResolvers = require('./paymentResolvers');
+import userResolvers from './userResolvers.js';
+import searchResolvers from './searchResolvers.js';
+import paymentResolvers from './paymentResolvers.js';
 
-module.exports = {
+export default {
   Query: {
     ...userResolvers.Query,
     ...searchResolvers.Query,

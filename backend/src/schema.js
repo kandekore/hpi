@@ -1,5 +1,6 @@
 // backend/src/schema.js
-const { gql } = require('apollo-server-express');
+import { gql } from 'apollo-server-express';
+
 
 const typeDefs = gql`
   scalar JSON
@@ -73,4 +74,4 @@ const typeDefs = gql`
   }
 `;
 
-module.exports = typeDefs;
+export default typeDefs;

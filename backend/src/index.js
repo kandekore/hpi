@@ -1,14 +1,21 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import express from 'express';
-const { ApolloServer } = require('apollo-server-express');
-const mongoose = require('mongoose');
-const path = require('path');
-const cors = require('cors');
+// src/index.js
 
-const typeDefs = require('./schema');
-const resolvers = require('./resolvers');
-const { verifyToken } = require('./services/auth');
+import 'dotenv/config'; // or import dotenv from 'dotenv'; dotenv.config();
+import express from 'express';
+import { ApolloServer } from 'apollo-server-express';
+import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors';
+
+import typeDefs from './schema.js';
+import resolvers from './resolvers/index.js';
+import { verifyToken } from './services/auth.js';
+import webhookRoutes from './webhook.js';
+
+// Recreate __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
@@ -21,7 +28,7 @@ async function startServer() {
         'http://192.168.1.9:3000',
         'https://studio.apollographql.com',
         'http://192.168.1.9:4000',
-        'https://cdn2.vdicheck.com', 
+        'https://cdn2.vdicheck.com',
         'http://localhost:4000'
       ],
       credentials: true,
@@ -59,9 +66,8 @@ async function startServer() {
     process.exit(1);
   }
 
-  const webhookRoutes = require('./webhook'); // or wherever webhook.js is located
-app.use('/webhook', webhookRoutes);
-
+  // Use webhook routes
+  app.use('/webhook', webhookRoutes);
 
   // Serve React from /frontend/build
   app.use(express.static(path.join(__dirname, '../../frontend/build')));

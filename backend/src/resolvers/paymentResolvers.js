@@ -1,9 +1,9 @@
-const User = require('../models/User');
-const Transaction = require('../models/Transaction');
-const stripeService = require('../services/stripeService');
+import User from '../models/User.js';
+import Transaction from '../models/Transaction.js';
+import stripeService from '../services/stripeService.js';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-module.exports = {
+export default {
     Mutation: {
       async createCreditPurchaseSession(_, { creditType, quantity }, { user }) {
         if (!user) throw new Error('Not authenticated');
@@ -43,7 +43,7 @@ module.exports = {
   }
   };
 
-// module.exports = {
+// export default {
 //   Mutation: {
 //     async createCreditPurchaseSession(_, { creditType, quantity }, { user }) {
 //       if (!user) throw new Error('Not authenticated');

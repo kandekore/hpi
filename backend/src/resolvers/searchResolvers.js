@@ -1,7 +1,7 @@
 // backend/src/resolvers/searchResolvers.js
-const User = require('../models/User');
-const SearchRecord = require('../models/SearchRecord');
-const vehicleDataService = require('../services/vehicleDataService');
+import User from '../models/User.js';
+import SearchRecord from '../models/SearchRecord.js';
+import vehicleDataService from '../services/vehicleDataService.js';
 
 const FREE_MOT_CHECKS = 3;
 
@@ -26,7 +26,7 @@ async function fetchValuationBundle(reg) {
   };
 }
 
-module.exports = {
+export default {
   Query: {
     // 1) MOT Check
     async motCheck(_, { reg }, { user }) {
