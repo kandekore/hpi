@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import SubPricing from './SubPricing';
 
+
 export default function MainPricing({
   isLoggedIn,
   hasUsedFreeMOT,
@@ -61,10 +62,14 @@ export default function MainPricing({
             <br />
             Full History
           </h3>
-          <p style={styles.subheading}>3 Searches</p>
-          <p style={styles.price}>FREE</p>
+          <img src='/images/moticon.png' />
           <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
+          <p style={styles.subheading}>From*</p>
+          <p style={styles.price}>FREE</p>
+          <p style={styles.small}><br /></p>
+          <hr />
+         
+          <p>3  Searches – FREE*</p>
           <p>10 Searches – £1.50</p>
           <p>50 Searches – £4.00</p>
           <hr />
@@ -85,12 +90,15 @@ export default function MainPricing({
             <br />
             + Full MOT History
           </h3>
-          <p style={styles.subheading}>1 Search</p>
-          <p style={styles.price}>£4.99</p>
+          <img src='/images/valueicon.png' />
           <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
-          <p>3 Searches – £12.49</p>
-          <p>10 Searches – £30.00</p>
+          <p style={styles.subheading}>From*</p>
+          <p style={styles.price}>£2.99</p>
+          <p style={styles.small}>per search</p>
+          <hr />
+          <p>1 Search    –  £4.99</p>
+          <p>3 Searches  –  £12.49</p>
+          <p>10 Searches –  £29.99*</p>
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
@@ -115,12 +123,16 @@ export default function MainPricing({
             <br />
             &amp; Full Vehicle History
           </h3>
-          <p style={styles.subheading}>1 Search</p>
-          <p style={styles.price}>£9.99</p>
+          <img src='/images/reporticon.png' />
           <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
+          <p style={styles.subheading}>From*</p>
+          <p style={styles.price}>£5.99</p>
+          <p style={styles.small}>per search</p>
+          <hr />
+          
+          <p>1 Search – £9.49</p>
           <p>3 Searches – £22.49</p>
-          <p>10 Searches – £60.00</p>
+          <p>10 Searches – £59.99*</p>
           <hr />
           <p style={styles.dataTitle}>Data Includes:</p>
           <ul style={styles.list}>
@@ -174,14 +186,14 @@ const styles = {
     minWidth: '280px',
   },
   title: {
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
     fontSize: '2rem',
     lineHeight: '2.15rem',
     color: '#003366',
     textShadow: '1px 1px #1560bf',
   },
   subheading: {
-    marginBottom: '0.5rem',
+    marginBottom: '-20px',
     fontWeight: '600',
   },
   price: {
@@ -189,7 +201,6 @@ const styles = {
     color: '#003366',
     fontSize: '2rem',
     lineHeight: '2.3',
-    margin: '0.5rem 0',
   },
   dataTitle: {
     marginBottom: '0.5rem',
@@ -228,4 +239,8 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
+small: {
+  fontSize: '.875em',
+  marginTop: '-40px',
+},
 };

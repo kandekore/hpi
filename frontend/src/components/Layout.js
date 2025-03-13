@@ -173,8 +173,8 @@ function Layout({ children }) {
         `}</style>
         <div className="container">
           <p className="mb-0">
-            &copy; {new Date().getFullYear()} VDI Information -{' '}
-            <a href="https://hostdada.co.uk">Website Hosting</a> &amp; Maintenance By Host Dada
+            &copy; {new Date().getFullYear()} Vehicle Data Information{' '}
+            
           </p>
         </div>
       </footer>

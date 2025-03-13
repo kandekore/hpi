@@ -56,53 +56,60 @@ export default function MainPricing({
       <div style={styles.tieredContainer}>
         {/* MOT Panel */}
         <div style={panelStyle}>
-          <h3 style={styles.title}>
-            MOT
-            <br />
-            Full History
-          </h3>
-          <p style={styles.subheading}>3 Searches</p>
-          <p style={styles.price}>FREE</p>
-          <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
-          <p>10 Searches – £1.50</p>
-          <p>50 Searches – £4.00</p>
-          <hr />
-          <p style={styles.dataTitle}>Data Includes:</p>
-          <ul style={styles.list}>
-            <li>Dates &amp; Test Number</li>
-            <li>Mileage</li>
-            <li>Advisory &amp; Failure Details</li>
-          </ul>
-          <hr />
+        <h3 style={styles.title}>
+        MOT
+        <br />
+        Full History
+      </h3>
+      <img src='/images/moticon.png' />
+      <hr />
+      <p style={styles.subheading}>From*</p>
+      <p style={styles.price}>FREE</p>
+      <p style={styles.small}><br /></p>
+      <hr />
+     
+      <p>3  Searches – FREE*</p>
+      <p>10 Searches – £1.50</p>
+      <p>50 Searches – £4.00</p>
+      <hr />
+      <p style={styles.dataTitle}>Data Includes:</p>
+      <ul style={styles.list}>
+        <li>Dates &amp; Test Number</li>
+        <li>Mileage</li>
+        <li>Advisory &amp; Failure Details</li>
+      </ul>
+      <hr />
           <button onClick={() => handleBuy('MOT')} style={styles.buyButton}>Buy</button>
         </div>
 
         {/* Valuation Panel */}
         <div style={panelStyle}>
-          <h3 style={styles.title}>
-            Vehicle Valuation
-            <br />
-            + Full MOT History
-          </h3>
-          <p style={styles.subheading}>1 Search</p>
-          <p style={styles.price}>£4.99</p>
-          <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
-          <p>3 Searches – £12.49</p>
-          <p>10 Searches – £30.00</p>
-          <hr />
-          <p style={styles.dataTitle}>Data Includes:</p>
-          <ul style={styles.list}>
-            <li>Private Valuation</li>
-            <li>Retail Valuation</li>
-            <li>Trade Valuation</li>
-            <li>-</li>
-            <li style={styles.addon}>
-              <strong>MOT Full History</strong>
-            </li>
-          </ul>
-          <hr />
+        <h3 style={styles.title}>
+        Vehicle Valuation
+        <br />
+        + Full MOT History
+      </h3>
+      <img src='/images/valueicon.png' />
+      <hr />
+      <p style={styles.subheading}>From*</p>
+      <p style={styles.price}>£2.99</p>
+      <p style={styles.small}>per search</p>
+      <hr />
+      <p>1 Search    –  £4.99</p>
+      <p>3 Searches  –  £12.49</p>
+      <p>10 Searches –  £29.99*</p>
+      <hr />
+      <p style={styles.dataTitle}>Data Includes:</p>
+      <ul style={styles.list}>
+        <li>Private Valuation</li>
+        <li>Retail Valuation</li>
+        <li>Trade Valuation</li>
+        <li>-</li>
+        <li style={styles.addon}>
+          <strong>MOT Full History</strong>
+        </li>
+      </ul>
+      <hr />
           <button onClick={() => handleBuy('Valuation')} style={styles.buyButton}>
             Buy
           </button>
@@ -110,36 +117,40 @@ export default function MainPricing({
 
         {/* VDI Panel */}
         <div style={panelStyle}>
-          <h3 style={{ ...styles.title, color: '#003366' }}>
-            Detailed Vehicle Data
-            <br />
-            &amp; Full Vehicle History
-          </h3>
-          <p style={styles.subheading}>1 Search</p>
-          <p style={styles.price}>£9.99</p>
-          <hr />
-          <p style={styles.subheading}>Bulk Buy</p>
-          <p>3 Searches – £22.49</p>
-          <p>10 Searches – £60.00</p>
-          <hr />
-          <p style={styles.dataTitle}>Data Includes:</p>
-          <ul style={styles.list}>
-            <li>Outstanding Finance</li>
-            <li>Insurance Write Off</li>
-            <li>Ownership &amp; Car Identity</li>
-            <li>VIN Confirmation</li>
-            <li>Scrapped / Mileage Anomaly / Colour Change</li>
-            <li>Import Check / Emissions &amp; Tax Rates</li>
-            <li>Technical Details</li>
-            <li>-</li>
-            <li style={styles.addon}>
-              <strong>Vehicle Valuation</strong>
-            </li>
-            <li style={styles.addon}>
-              <strong>MOT Full History</strong>
-            </li>
-          </ul>
-          <hr />
+        <h3 style={{ ...styles.title, color: '#003366' }}>
+        Detailed Vehicle Data
+        <br />
+        &amp; Full Vehicle History
+      </h3>
+      <img src='/images/reporticon.png' />
+      <hr />
+      <p style={styles.subheading}>From*</p>
+      <p style={styles.price}>£5.99</p>
+      <p style={styles.small}>per search</p>
+      <hr />
+      
+      <p>1 Search – £9.49</p>
+      <p>3 Searches – £22.49</p>
+      <p>10 Searches – £59.99*</p>
+      <hr />
+      <p style={styles.dataTitle}>Data Includes:</p>
+      <ul style={styles.list}>
+        <li>Outstanding Finance</li>
+        <li>Insurance Write Off</li>
+        <li>Ownership &amp; Car Identity</li>
+        <li>VIN Confirmation</li>
+        <li>Scrapped / Mileage Anomaly / Colour Change</li>
+        <li>Import Check / Emissions &amp; Tax Rates</li>
+        <li>Technical Details</li>
+        <li>-</li>
+        <li style={styles.addon}>
+          <strong>Vehicle Valuation</strong>
+        </li>
+        <li style={styles.addon}>
+          <strong>MOT Full History</strong>
+        </li>
+      </ul>
+      <hr />
           <button onClick={() => handleBuy('VDI')} style={styles.buyButton}>
             Buy
           </button>
@@ -181,7 +192,7 @@ const styles = {
     textShadow: '1px 1px #1560bf',
   },
   subheading: {
-    marginBottom: '0.5rem',
+    marginBottom: '-20px',
     fontWeight: '600',
   },
   price: {
@@ -189,7 +200,6 @@ const styles = {
     color: '#003366',
     fontSize: '2rem',
     lineHeight: '2.3',
-    margin: '0.5rem 0',
   },
   dataTitle: {
     marginBottom: '0.5rem',
@@ -228,4 +238,8 @@ const styles = {
     cursor: 'pointer',
     fontSize: '1rem',
   },
+  small: {
+  fontSize: '.875em',
+  marginTop: '-40px',
+},
 };

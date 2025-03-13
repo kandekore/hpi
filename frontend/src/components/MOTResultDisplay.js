@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 dayjs.extend(customParseFormat);
 
 export default function MOTResultDisplay({ motCheck }) {
+  console.log('MOTResultDisplay => motCheck =>', motCheck);
   // 1) Handle null or missing data
   if (!motCheck) {
     return (

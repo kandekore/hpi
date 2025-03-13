@@ -183,6 +183,7 @@ export default function HomePage() {
         .hero-subtitle {
           font-size: 1.2rem;
           margin-bottom: 2rem;
+          font-weight: 600;
         }
 
         .plate-container {
@@ -194,8 +195,7 @@ export default function HomePage() {
           border: 2px solid #000;
           border-radius: 25px;
           overflow: hidden;
-              max-width: 785px;
-
+          max-width: 785px;
         }
         .plate-blue {
           background-color: #003399;
@@ -238,7 +238,7 @@ export default function HomePage() {
           padding: 10px 25px;
           cursor: pointer;
           font-size: 1.1rem;
-          width: 220px; /* fixed width so text doesn't wrap awkwardly */
+          width: 240px; /* fixed width so text doesn't wrap awkwardly */
           text-align: center;
         }
         .action-button:hover {
@@ -254,7 +254,7 @@ export default function HomePage() {
           .plate-container {
             width: 100%;
             height: 120px;
-            margin: 1rem auto;
+            margin: 2rem auto;
           }
           .plate-blue {
             width: 80px;
@@ -303,7 +303,32 @@ export default function HomePage() {
           color: #1560bd;
         }
 
-        /* FLEXIBLE PLANS SECTION */
+        /* YELLOW SECTION STYLES */
+        .why-vehicle-check {
+          background-color: #FFDE46;
+          padding: 3rem 1rem;
+        }
+        .why-vehicle-check h2 {
+          text-align: center;
+          font-weight: 700;
+          margin-bottom: 2rem;
+        }
+        .why-vehicle-check .content {
+          max-width: 1100px;
+          margin: 0 auto;
+          line-height: 1.6;
+        }
+        .why-vehicle-check ul {
+          padding-left: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        .why-vehicle-check li {
+          margin-bottom: 0.5rem;
+        }
+
+        /* WHY CHECK WITH US, PLANS, TABS, FAQ, BRAND, ETC. REMAIN UNCHANGED */
+
+           /* FLEXIBLE PLANS SECTION */
         .flexible-plans-section {
           background: url(${flexiblePlansBg}) center center no-repeat;
           background-size: cover;
@@ -394,12 +419,15 @@ export default function HomePage() {
           font-weight: 600;
         }
 
-        /* Modal override for demonstration if no bootstrap js is loaded */
         .modal-backdrop.show {
           opacity: 0.4;
         }
-     `}</style>
-       
+        .yellow {
+          color: #ffde45;
+          text-shadow: 1px 1px #000;
+          margin-bottom: -15px;
+        }
+      `}</style>
 
       {/* MODAL */}
       {showModal && (
@@ -422,16 +450,10 @@ export default function HomePage() {
                 <p>{modalMsg}</p>
               </div>
               <div className="modal-footer">
-                <button
-                  className="btn btn-danger"
-                  onClick={handleCancelSearch}
-                >
+                <button className="btn btn-danger" onClick={handleCancelSearch}>
                   Cancel
                 </button>
-                <button
-                  className="btn btn-success"
-                  onClick={handleConfirmSearch}
-                >
+                <button className="btn btn-success" onClick={handleConfirmSearch}>
                   Proceed
                 </button>
               </div>
@@ -442,13 +464,15 @@ export default function HomePage() {
 
       {/* HERO SECTION */}
       <div className="hero section-fullwidth">
-        <h1 className="hero-title">Your One-Stop Vehicle Check</h1>
+        <h1 className="hero-title">Your One-Stop Vehicle Check Location</h1>
         <p className="hero-subtitle">
-          Free MOT History, Simple Valuation, Full HPI &amp; Comprehensive VDI
+          FREE MOT History, Vehicle Valuations &amp; Full HPI/VDI style Vehicle History Data
           — All in One Place
         </p>
 
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <p className="hero-subtitle yellow">Enter Your Registration</p>
+
+        <div style={{ maxWidth: '1200px', margin: '-30px auto' }}>
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
@@ -460,15 +484,17 @@ export default function HomePage() {
             />
           </div>
 
+          <p className="hero-subtitle yellow">Choose a Search Type</p>
+
           <div className="button-group">
             <button className="action-button" onClick={handleClickMOT}>
-              MOT History
+              Full MOT History
             </button>
             <button className="action-button" onClick={handleClickValuation}>
-              Valuation
+              Vehicle Valuation
             </button>
             <button className="action-button" onClick={handleClickVDI}>
-              Full VDI
+              Detailed Vehicle Data
             </button>
           </div>
 
@@ -489,6 +515,76 @@ export default function HomePage() {
         hasUsedFreeMOT={freeMotChecksUsed >= 3}
         onPurchase={(product, quantity) => handlePurchase(product, quantity)}
       />
+
+      {/* NEW YELLOW SECTION: "Why do I need to get a vehicle check?" */}
+      <div className="why-vehicle-check section-fullwidth">
+        <h2>Why Check a Vehicle’s History?</h2>
+        <div className="content">
+          <p>
+            Buying a second-hand car can be tricky—you can’t always tell its past 
+            just by looking. Running a vehicle history check helps you avoid 
+            nasty surprises and gives you confidence before buying.
+          </p>
+         
+          <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">1 in 3</h4>
+                <p class="card-text">vehicles has some hidden history</p>
+              </div>
+            </div>
+        
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">74</h4>
+                <p class="card-text">stolen cars are identified daily</p>
+              </div>
+            </div>
+        
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">1,771</h4>
+                <p class="card-text">insurance write-offs occur each day</p>
+              </div>
+            </div>
+          </div>
+        
+          <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center mt-3">
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">1 in 3</h4>
+                <p class="card-text">has outstanding finance</p>
+              </div>
+            </div>
+        
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">£11k</h4>
+                <p class="card-text">average finance amount on a car</p>
+              </div>
+            </div>
+        
+            <div class="col">
+              <div class="card shadow h-100 text-center p-3">
+                <h4 class="card-title mb-2">1 in 16</h4>
+                <p class="card-text">shows a mileage discrepancy</p>
+              </div>
+            </div><p className='small'>Statistics based on cars checked by HPI® Ltd in 2017.</p>
+          </div><div>
+          <p>
+            Whether it’s <strong>outstanding finance</strong>, 
+            an <strong>insurance write-off</strong>, or even 
+            a <strong>stolen vehicle</strong>, our checks uncover critical 
+            details you need to know. We also validate for <strong>mileage anomalies </strong> 
+             to ensure you’re not inheriting a car that's already been round the clock. 
+          </p>
+          <p>
+            Make an informed decision with a comprehensive report—because 
+            peace of mind is invaluable when you’re spending thousands 
+            on a used car.
+          </p></div>
+        </div>
+      </div>
 
       {/* WHY CHECK WITH US */}
       <div className="why-check-section section-fullwidth">
@@ -525,12 +621,12 @@ export default function HomePage() {
       <div className="flexible-plans-section section-fullwidth">
         <div className="flexible-plans-container">
           <div className="flexible-plans-box">
-            <h3>Flexible Plans & Extra Features</h3>
+            <h3>Flexible Plans &amp; Extra Features</h3>
             <p>
               We understand that everyone has different needs when it 
               comes to vehicle checks. That's why we offer a range of 
               options, from free MOT checks and quick valuations to 
-              more comprehensive HPI or VDI reports. You can purchase 
+              more comprehensive HPI or VDI style reports. You can purchase 
               a single search for peace of mind or opt for a multi-check 
               bundle if you're comparing several cars at once.
             </p>
@@ -648,7 +744,7 @@ export default function HomePage() {
             aria-labelledby="vdi-tab"
           >
             <p>
-              Our most comprehensive offering, the <strong>Full VDI Check</strong>, 
+              Our most comprehensive offering, the <strong>Full Vehicle Data Information </strong> check, 
               uncovers all aspects of a vehicle’s past — from outstanding finance 
               and theft records to plate changes, keeper history, technical 
               specs, and more. 
@@ -769,13 +865,7 @@ export default function HomePage() {
       <div className="vdi-brand-section section-fullwidth">
         <div className="vdi-brand-content">
           <p>
-            <strong>VDI Check</strong> is our leading consumer brand for vehicle 
-            history and provenance. The data we provide is securely sourced from 
-            top-tier providers, including the Association of British Insurers, the 
-            Police National Computer, VDI Valuations, Experian Automotive, major 
-            UK finance companies, VOSA / DVSA, and the DVLA. We aggregate all of 
-            this into one convenient, modern API, giving you everything you need 
-            in a single report.
+          All <stong>Vehicle Data Information</stong> reports are built using secure data from leading sources, including the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA.
           </p>
         </div>
       </div>
