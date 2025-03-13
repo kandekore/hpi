@@ -87,7 +87,7 @@ export default function MOTResultDisplay({ motCheck }) {
 }`}
   </style>
       <div className="card-header">
-        <h3>MOT History &amp; Tax Status</h3>
+        <h3>MOT History</h3>
       </div>
 
       <div className="card-body">
@@ -137,77 +137,98 @@ export default function MOTResultDisplay({ motCheck }) {
           </div>
         ) : (
           <div className="row g-3">
-            {recordList.map((record, idx) => {
-              const {
-                TestDate,
-                ExpiryDate,
-                TestResult,
-                TestNumber,
-                OdometerReading,
-                AdvisoryNoticeList,
-                FailureReasonList,
-              } = record;
-
-              // If pass with advisories => "Pass (With Advisories)"
-              let displayResult = TestResult;
-              if (
-                TestResult === 'Pass' &&
-                AdvisoryNoticeList?.length > 0
-              ) {
-                displayResult = 'Pass (With Advisories)';
+          {recordList.map((record, idx) => {
+            const {
+              TestDate,
+              ExpiryDate,
+              TestResult,
+              TestNumber,
+              OdometerReading,
+              AdvisoryNoticeList,
+              FailureReasonList,
+            } = record;
+          
+            // If pass with advisories => "Pass (With Advisories)"
+            let displayResult = TestResult;
+            if (TestResult === 'Pass' && AdvisoryNoticeList?.length > 0) {
+              displayResult = 'Pass (Advisories)';
+            }
+          
+            // Existing function for border color classes
+            function getRecordBorderClass(r) {
+              if (r.TestResult === 'Fail') {
+                return 'border-danger text-danger';
               }
-
-              const recordClass = getRecordBorderClass(record);
-              const testDateFormatted = formatDate(TestDate);
-              const expiryDateFormatted = formatDate(ExpiryDate);
-
-              return (
-                <div className="col-12" key={idx}>
-                  <div className={`card ${recordClass} mb-2`}>
-                    {/* Card header => date + result + test number */}
-                    <div className="card-header d-flex justify-content-between">
-                      <strong>
-                        {testDateFormatted} - {displayResult}
-                      </strong>
-                      <span>Test #{TestNumber}</span>
-                    </div>
-                    <div className="card-body">
-                      {/* Odometer & Expiry */}
-                      <p>
-                        <strong>Odometer:</strong>{' '}
-                        {OdometerReading?.toLocaleString() ?? 'N/A'} mi
-                        <br />
-                        <strong>Expiry Date:</strong> {expiryDateFormatted}
-                      </p>
-
-                      {/* Advisories */}
-                      {AdvisoryNoticeList && AdvisoryNoticeList.length > 0 && (
-                        <div className="mb-2">
-                          <strong>Advisories:</strong>
-                          <ul className="mb-0">
-                            {AdvisoryNoticeList.map((advice, i) => (
-                              <li key={i}>{advice}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {/* Failures */}
-                      {FailureReasonList && FailureReasonList.length > 0 && (
-                        <div>
-                          <strong>Failures:</strong>
-                          <ul className="mb-0">
-                            {FailureReasonList.map((fail, i) => (
-                              <li key={i}>{fail}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+              if (r.TestResult === 'Pass' && r.AdvisoryNoticeList?.length > 0) {
+                return 'border-primary text-primary';
+              }
+              return 'border-success text-success'; // Pass, no advisories
+            }
+          
+            // **New** function to pick a header background color
+            function getHeaderBgClass(r) {
+              if (r.TestResult === 'Fail') {
+                return 'bg-danger text-white';
+              }
+              if (r.TestResult === 'Pass' && r.AdvisoryNoticeList?.length > 0) {
+                return 'bg-primary text-white';
+              }
+              return 'bg-success text-white';
+            }
+          
+            const recordClass = getRecordBorderClass(record);
+            const headerBgClass = getHeaderBgClass(record);
+          
+            // Format date
+            const testDateFormatted = formatDate(TestDate);
+            const expiryDateFormatted = formatDate(ExpiryDate);
+          
+            return (
+              <div className="col-12" key={idx}>
+                {/* Combine the border classes with standard 'card' & margin */}
+                <div className={`card ${recordClass} mb-2`}>
+                  {/* The header also gets a dynamic color */}
+                  <div className={`card-header d-flex justify-content-between ${headerBgClass}`}>
+                    <strong>
+                      {testDateFormatted} - {displayResult}
+                    </strong>
+                    <span>Test #{TestNumber}</span>
+                  </div>
+                  <div className="card-body">
+                    <p>
+                      <strong>Odometer:</strong>{' '}
+                      {OdometerReading?.toLocaleString() ?? 'N/A'} mi
+                      <br />
+                      <strong>Expiry Date:</strong> {expiryDateFormatted}
+                    </p>
+          
+                    {AdvisoryNoticeList && AdvisoryNoticeList.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Advisories:</strong>
+                        <ul className="mb-0">
+                          {AdvisoryNoticeList.map((advice, i) => (
+                            <li key={i}>{advice}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+          
+                    {FailureReasonList && FailureReasonList.length > 0 && (
+                      <div>
+                        <strong>Failures:</strong>
+                        <ul className="mb-0">
+                          {FailureReasonList.map((fail, i) => (
+                            <li key={i}>{fail}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            );
+          })}
+          
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import { useReactToPrint } from 'react-to-print';
+import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
 
 // You can import a background if you want, or reuse your drkbgd.jpg
 import heroBg from '../images/drkbgd.jpg';
@@ -206,11 +207,15 @@ export default function MOTPage() {
       {motData?.motCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div className="text-end mb-2">
-            <button className="btn btn-secondary" onClick={handlePrint}>
-              Print / Save
-            </button>
+            
           </div>
-          <div ref={printRef}>
+           <div>
+           <VehicleDetailsMOT
+                dataItems={motData.motCheck}
+                userProfile={userProfile}
+                // so the child can read MileageRecordList
+              /></div> 
+         <div>
             <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
           </div>
         </div>
