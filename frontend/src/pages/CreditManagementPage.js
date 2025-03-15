@@ -6,11 +6,15 @@ import {
   GET_SEARCH_HISTORY,
   GET_TRANSACTIONS
 } from '../graphql/queries';
-import { CREATE_CREDIT_PURCHASE_SESSION, CHANGE_PASSWORD } from '../graphql/mutations';
+import {
+  CREATE_CREDIT_PURCHASE_SESSION,
+  CHANGE_PASSWORD
+} from '../graphql/mutations';
 import MainPricingDashboard from '../components/MainPricingDashboard';
 
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
+  // If purely digits => parse as integer (epoch ms)
   if (/^\d+$/.test(ts)) {
     const ms = Number(ts);
     if (!isNaN(ms)) {
@@ -21,6 +25,7 @@ function formatTimestamp(ts) {
     }
     return 'N/A';
   }
+  // Otherwise handle potential ISO with +00:00
   let trimmed = ts.trim();
   if (trimmed.endsWith('+00:00')) {
     trimmed = trimmed.replace('+00:00', 'Z');
@@ -32,6 +37,7 @@ function formatTimestamp(ts) {
   return d.toLocaleString();
 }
 
+// Get a make/model for each record, with fallback logic
 function getMakeModel(record) {
   const { searchType, responseData } = record;
   if (!responseData) return 'N/A';
@@ -57,7 +63,7 @@ function getMakeModel(record) {
 }
 
 export default function CreditManagementPage() {
-  // On mount, set body background to #1560bf
+  // 1) Body background on mount/unmount
   useEffect(() => {
     document.body.style.backgroundColor = '#1560bf';
     return () => {
@@ -65,22 +71,26 @@ export default function CreditManagementPage() {
     };
   }, []);
 
+  // 2) Tab state
   const [activeTab, setActiveTab] = useState('credits');
 
+  // 3) States for credits (updated in real-time from profile data)
   const [motCredits, setMotCredits] = useState(0);
   const [valuationCredits, setValuationCredits] = useState(0);
   const [hpiCredits, setHpiCredits] = useState(0);
   const [freeMotChecksUsed, setFreeMotChecksUsed] = useState(0);
 
+  // 4) Basic profile info (email, phone, etc.)
   const [profileInfo, setProfileInfo] = useState(null);
 
-  // For password changes
+  // 5) Password change states
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passError, setPassError] = useState('');
   const [passSuccess, setPassSuccess] = useState('');
 
+  // 6) GraphQL queries
   const {
     data: profileData,
     loading: profileLoading,
@@ -105,11 +115,12 @@ export default function CreditManagementPage() {
     fetchPolicy: 'network-only'
   });
 
+  // 7) Mutations
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
   const [changePasswordMutation, { loading: cpLoading, error: cpError }] =
     useMutation(CHANGE_PASSWORD);
 
-  // Populate user data
+  // 8) Populate user data into our states
   useEffect(() => {
     if (profileData?.getUserProfile) {
       const user = profileData.getUserProfile;
@@ -117,6 +128,7 @@ export default function CreditManagementPage() {
       setValuationCredits(user.valuationCredits);
       setHpiCredits(user.hpiCredits || 0);
       setFreeMotChecksUsed(user.freeMotChecksUsed);
+
       setProfileInfo({
         email: user.email,
         username: user.username || '',
@@ -126,14 +138,12 @@ export default function CreditManagementPage() {
     }
   }, [profileData]);
 
-  console.log("Profile Data", profileData);
-  console.log("Profile Info", profileInfo)
-
+  // 9) Possibly format date for "Date Registered"
   const dateRegistered = profileInfo?.createdAt
     ? formatTimestamp(profileInfo.createdAt)
     : 'N/A';
 
-  // Purchase logic
+  // 10) Purchase logic
   const handlePurchase = async (product, quantity) => {
     const productMap = {
       Valuation: 'VALUATION',
@@ -142,8 +152,11 @@ export default function CreditManagementPage() {
     };
     const creditType = productMap[product] || 'VDI';
     try {
-      const { data } = await createSession({ variables: { creditType, quantity } });
+      const { data } = await createSession({
+        variables: { creditType, quantity }
+      });
       if (data.createCreditPurchaseSession) {
+        // Direct user to payment
         window.location.href = data.createCreditPurchaseSession;
       }
     } catch (err) {
@@ -151,7 +164,7 @@ export default function CreditManagementPage() {
     }
   };
 
-  // Change password logic
+  // 11) Change password logic
   const handleChangePassword = async () => {
     setPassError('');
     setPassSuccess('');
@@ -180,6 +193,7 @@ export default function CreditManagementPage() {
     }
   };
 
+  // 12) Loading / error states for profile
   if (profileLoading) {
     return (
       <div className="text-center my-4">
@@ -190,31 +204,33 @@ export default function CreditManagementPage() {
     );
   }
   if (profileError) {
-    return <div className="alert alert-danger">Error: {profileError.message}</div>;
+    return (
+      <div className="alert alert-danger">
+        Error: {profileError.message}
+      </div>
+    );
   }
 
   return (
     <>
-      {/* Inlined style to handle the tab colors & container backgrounds */}
       <style>{`
         .nav-tabs {
-          background-color: #1560bd !important; /* entire tab bar is #1560bd by default */
+          background-color: #1560bd !important; /* entire tab bar is #1560bd */
           border: none !important;
         }
         .nav-tabs .nav-link {
           color: #fff !important; 
-          background-color: #1560bd !important; /* inactive tab is #1560bd */
+          background-color: #1560bd !important; 
           border: none !important;
-          margin-right: 2px; /* small gap */
+          margin-right: 2px;
         }
         .nav-tabs .nav-link:hover {
-          background-color: #1282d2 !important; /* slight hover effect */
+          background-color: #1282d2 !important;
         }
         .nav-tabs .nav-link.active {
-          background-color: #003366 !important; /* active tab is #003366 */
+          background-color: #003366 !important;
           border-bottom: 3px solid #fff !important;
         }
-        /* Make the tab content background white */
         .tab-content {
           background: #fff;
           border: 1px solid #ddd;
@@ -222,28 +238,56 @@ export default function CreditManagementPage() {
           padding: 2rem;
           border-radius: 0 0 5px 5px;
         }
-        /* Remove container background so we see the page background (#1560bf) behind the tabs */
         .dashboard-container {
-          background: none; 
+          background: none;
         }
-        /* Full-width for MainPricing area */
         .pricing-fullwidth {
           width: 100%;
-          margin-left: -15px; 
-          margin-right: -15px; 
+          margin-left: -15px;
+          margin-right: -15px;
         }
-         
         @media (min-width: 576px) {
-          /* On small+ breakpoints, or you can do further logic to truly go edge to edge if you have row/col classes */
           .pricing-fullwidth {
             margin-left: 0;
             margin-right: 0;
           }
         }
+
+        /* Mobile-friendly table approach for search history & transactions */
+        @media (max-width: 767px) {
+          /* Hide table headers */
+          .table thead {
+            display: none;
+          }
+          .table-responsive td:not(:first-child) {
+            border-top: 0;
+          }
+          .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 0.5rem;
+            background-color: #fff;
+          }
+          /* Each cell => label + value approach */
+          .table td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0.6rem;
+          }
+          .table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            margin-right: 1rem;
+          }
+        }
       `}</style>
 
       <div className="container my-4 dashboard-container">
-        <h1 className="mb-4" style={{ color: '#fff' }}>User Dashboard</h1>
+        <h1 className="mb-4" style={{ color: '#fff' }}>
+          User Dashboard
+        </h1>
 
         <ul className="nav nav-tabs">
           <li className="nav-item">
@@ -281,7 +325,7 @@ export default function CreditManagementPage() {
         </ul>
 
         <div className="tab-content py-3">
-          {/* CREDITS TAB */}
+          {/* 1) Credits Tab */}
           {activeTab === 'credits' && (
             <div className="tab-pane active">
               <div className="card mb-4">
@@ -302,7 +346,6 @@ export default function CreditManagementPage() {
                 </div>
               </div>
 
-              {/* FULL-WIDTH MAINPRICING SECTION */}
               <div className="pricing-fullwidth">
                 <MainPricingDashboard
                   isLoggedIn={!!localStorage.getItem('authToken')}
@@ -313,10 +356,10 @@ export default function CreditManagementPage() {
             </div>
           )}
 
-          {/* HISTORY TAB */}
+          {/* 2) Search History Tab */}
           {activeTab === 'history' && (
             <div className="tab-pane active">
-              <h2>Search History</h2>
+              <h2 style={{ color: '#fff' }}>Search History</h2>
               {historyLoading && (
                 <div className="text-center my-3">
                   <div className="spinner-border" role="status">
@@ -325,7 +368,9 @@ export default function CreditManagementPage() {
                 </div>
               )}
               {historyError && (
-                <div className="alert alert-danger">Error: {historyError.message}</div>
+                <div className="alert alert-danger">
+                  Error: {historyError.message}
+                </div>
               )}
               {historyData?.getSearchHistory && (
                 <div className="table-responsive">
@@ -348,11 +393,11 @@ export default function CreditManagementPage() {
 
                         return (
                           <tr key={record.id}>
-                            <td>{record.vehicleReg}</td>
-                            <td>{record.searchType}</td>
-                            <td>{dateStr}</td>
-                            <td>{makeModel}</td>
-                            <td>
+                            <td data-label="Vehicle Reg">{record.vehicleReg}</td>
+                            <td data-label="Search Type">{record.searchType}</td>
+                            <td data-label="Date">{dateStr}</td>
+                            <td data-label="Make &amp; Model">{makeModel}</td>
+                            <td data-label="Action">
                               <Link
                                 to={`/search/${record.id}`}
                                 className="btn btn-sm btn-outline-primary"
@@ -370,10 +415,10 @@ export default function CreditManagementPage() {
             </div>
           )}
 
-          {/* TRANSACTIONS TAB */}
+          {/* 3) Transactions Tab */}
           {activeTab === 'transactions' && (
             <div className="tab-pane active">
-              <h2>Transactions</h2>
+              <h2 style={{ color: '#fff' }}>Transactions</h2>
               {transactionsLoading && (
                 <div className="text-center my-3">
                   <div className="spinner-border" role="status">
@@ -382,7 +427,9 @@ export default function CreditManagementPage() {
                 </div>
               )}
               {transactionsError && (
-                <div className="alert alert-danger">Error: {transactionsError.message}</div>
+                <div className="alert alert-danger">
+                  Error: {transactionsError.message}
+                </div>
               )}
               {transactionsData?.getTransactions && (
                 <div className="table-responsive">
@@ -403,11 +450,13 @@ export default function CreditManagementPage() {
                         const dateStr = formatTimestamp(rawTimestamp);
                         return (
                           <tr key={tx.id}>
-                            <td>{tx.transactionId}</td>
-                            <td>{tx.creditsPurchased}</td>
-                            <td>{tx.creditType}</td>
-                            <td>£{(tx.amountPaid / 100).toFixed(2)}</td>
-                            <td>{dateStr}</td>
+                            <td data-label="Transaction ID">{tx.transactionId}</td>
+                            <td data-label="Credits Purchased">{tx.creditsPurchased}</td>
+                            <td data-label="Credit Type">{tx.creditType}</td>
+                            <td data-label="Amount Paid">
+                              £{(tx.amountPaid / 100).toFixed(2)}
+                            </td>
+                            <td data-label="Date">{dateStr}</td>
                           </tr>
                         );
                       })}
@@ -418,7 +467,7 @@ export default function CreditManagementPage() {
             </div>
           )}
 
-          {/* PROFILE TAB */}
+          {/* 4) Profile Tab */}
           {activeTab === 'profile' && (
             <div className="tab-pane active">
               <h2 className="text-dark">Your Profile</h2>
@@ -495,7 +544,6 @@ export default function CreditManagementPage() {
               )}
             </div>
           )}
-          
         </div>
       </div>
     </>
