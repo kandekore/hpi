@@ -174,16 +174,20 @@ export default function HomePage() {
           padding: 3rem 1rem;
           color: #fff;
           text-align: center;
+        
         }
         .hero-title {
           font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
+            text-shadow: 2px 2px #003366;
         }
         .hero-subtitle {
           font-size: 1.2rem;
           margin-bottom: 2rem;
           font-weight: 600;
+          text-shadow: 1px 1px #003366;
+        
         }
 
         .plate-container {

@@ -85,18 +85,19 @@ function Layout({ children }) {
                   </Link>
                 </li>
                 <li className="nav-item">
+                <Link className="nav-link text-white" to="/mot">
+                  MOT Check
+                </Link>
+              </li>
+                <li className="nav-item">
                       <Link className="nav-link text-white" to="/valuation">
                         Valuation
                       </Link>
                     </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/mot">
-                        MOT Check
-                      </Link>
-                    </li>
+                   
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/hpi">
-                        Full HPI Check
+                      Full Vehicle History
                       </Link>
                     </li>
 

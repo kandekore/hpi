@@ -5,39 +5,46 @@ import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import { useReactToPrint } from 'react-to-print';
 import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
-
-// You can import a background if you want, or reuse your drkbgd.jpg
-import heroBg from '../images/drkbgd.jpg';
+import heroBg from '../images/mot-head.jpg'; // Your background image
 
 export default function MOTPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // 1) Registration input
   const initialReg = searchParams.get('reg') || '';
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Query user
+  // 2) Query user for credit logic
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // Lazy query for MOT
+  // 3) Calculate free vs. paid credits
+  const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
+  const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
+  const motCredits = userProfile?.motCredits ?? 0;
+  const totalMot = freeMotLeft + motCredits; // total available MOT checks
+
+  // 4) Lazy query for MOT
   const [motCheck, { data: motData, loading: motLoading, error: motError }] =
     useLazyQuery(MOT_CHECK);
 
   const hasResults = !!(motData && motData.motCheck);
 
-  // For printing
+  // 5) For printing
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `MOT_Report_${reg}`,
   });
 
-  // If there's a ?reg= param, auto-check once
+  // 6) If there's ?reg= param, auto-check once
   React.useEffect(() => {
     if (initialReg) {
-      handleCheck();
+      handleMOTCheck();
       navigate('/mot', { replace: true });
     }
     // eslint-disable-next-line
@@ -45,14 +52,77 @@ export default function MOTPage() {
 
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
-    if (val.length <= 8) setReg(val);
+    if (val.length <= 8) {
+      setReg(val);
+    }
   };
 
-  const handleCheck = async () => {
+  ////////////////////////////////////////////////
+  // BEGIN: Modal logic (copy from HomePage pattern)
+  ////////////////////////////////////////////////
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
+  const modalRef = useRef(null);
+
+  // show the credit usage modal
+  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+    setModalMsg(
+      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+    );
+    setModalSearchType(searchType);
+    setShowModal(true);
+    setPendingSearchAction(() => actionFn);
+  };
+
+  // user confirmed => run the action
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) {
+      pendingSearchAction();
+    }
+    setShowModal(false);
+  };
+
+  // user canceled
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
+  };
+  ////////////////////////////////////////////////
+  // END: Modal logic
+  ////////////////////////////////////////////////
+
+  // 7) Our "Check MOT" logic
+  const handleMOTCheck = async () => {
     setAttemptedSearch(true);
-    if (!isLoggedIn) return;
-    if (!reg) return;
-    await motCheck({ variables: { reg } });
+    setErrorMsg('');
+
+    // Basic checks
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      setErrorMsg('Please login or register to do an MOT check.');
+      return;
+    }
+    if (!userProfile) {
+      setErrorMsg('Unable to fetch your profile. Please try again later.');
+      return;
+    }
+
+    // If credits exist => show the confirm modal
+    if (totalMot > 0) {
+      // pass an action that calls the actual motCheck query
+      showCreditsModal(totalMot, 'MOT', () =>
+        motCheck({ variables: { reg } })
+      );
+    } else {
+      setErrorMsg(
+        'You have no MOT checks remaining. Please purchase credits or wait for more free checks.'
+      );
+    }
   };
 
   return (
@@ -71,10 +141,14 @@ export default function MOTPage() {
           font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
+          color: #003366;
+          text-shadow: 2px 2px #ffde45;
         }
         .mot-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
+          color: #000;
+          text-shadow: 1px 1px #ffde45;
         }
         .plate-container {
           width: 70%;
@@ -139,6 +213,40 @@ export default function MOTPage() {
         }
       `}</style>
 
+      {/* MODAL => same pattern as HomePage */}
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          ref={modalRef}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '8px' }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCancelSearch}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>{modalMsg}</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-danger" onClick={handleCancelSearch}>
+                  Cancel
+                </button>
+                <button className="btn btn-success" onClick={handleConfirmSearch}>
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HERO SECTION */}
       <div className="mot-hero">
         <h1>MOT Check</h1>
         <p>Instantly retrieve your vehicle’s MOT history and advisories.</p>
@@ -173,7 +281,7 @@ export default function MOTPage() {
               </button>
             ) : (
               <button
-                onClick={handleCheck}
+                onClick={handleMOTCheck}
                 disabled={motLoading}
                 style={{
                   fontSize: '1.2rem',
@@ -191,9 +299,15 @@ export default function MOTPage() {
             )}
           </div>
 
+          {/* If user not logged in or no reg => info, or error => show it */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do an MOT check.
+            </div>
+          )}
+          {errorMsg && (
+            <div className="alert alert-danger mt-2">
+              {errorMsg}
             </div>
           )}
           {motError && (
@@ -204,18 +318,18 @@ export default function MOTPage() {
         </div>
       </div>
 
+      {/* RESULT: only show if we have data */}
       {motData?.motCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div className="text-end mb-2">
-            
+            <button className="btn btn-secondary" onClick={handlePrint}>
+              Print / Save
+            </button>
           </div>
-           <div>
-           <VehicleDetailsMOT
-                dataItems={motData.motCheck}
-                userProfile={userProfile}
-                // so the child can read MileageRecordList
-              /></div> 
-         <div>
+          <div ref={printRef}>
+            {/* Vehicle info */}
+            <VehicleDetailsMOT dataItems={motData.motCheck} userProfile={userProfile} />
+            {/* The main MOT result */}
             <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
           </div>
         </div>

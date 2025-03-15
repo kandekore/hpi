@@ -1,38 +1,40 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
 import HpiResultDisplay from '../components/HpiResultDisplay';
 import { useReactToPrint } from 'react-to-print';
-
-import heroBg from '../images/drkbgd.jpg';
+import heroBg from '../images/full-vehicle-check.jpg';
 
 export default function HPICheckPage() {
+  // 1) Query params, nav
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialReg = searchParams.get('reg') || '';
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
+  // 2) Query user
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  const [hpiCheck, { data: hpiData, loading: hpiLoading, error: hpiError }] =
-    useLazyQuery(HPI_CHECK);
-
+  // 3) HPI lazy query
+  const [hpiCheck, { data: hpiData, loading: hpiLoading, error: hpiError }] = useLazyQuery(HPI_CHECK);
   const hasResults = !!(hpiData && hpiData.hpiCheck);
 
-  // Print
+  // 4) Print logic
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `HPI_Report_${reg}`,
   });
 
+  // 5) If there’s ?reg param, auto-check once
   React.useEffect(() => {
     if (initialReg) {
-      handleCheck();
+      handleHpiCheck();
       navigate('/hpi', { replace: true });
     }
     // eslint-disable-next-line
@@ -40,14 +42,73 @@ export default function HPICheckPage() {
 
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
-    if (val.length <= 8) setReg(val);
+    if (val.length <= 8) {
+      setReg(val);
+    }
   };
 
-  const handleCheck = async () => {
+  ////////////////////////////////////////////////
+  // BEGIN: Modal logic (same pattern as your HomePage)
+  ////////////////////////////////////////////////
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
+  const modalRef = useRef(null);
+
+  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+    setModalMsg(
+      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+    );
+    setModalSearchType(searchType);
+    setShowModal(true);
+    setPendingSearchAction(() => actionFn);
+  };
+
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) {
+      pendingSearchAction();
+    }
+    setShowModal(false);
+  };
+
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
+  };
+  ////////////////////////////////////////////////
+  // END: Modal logic
+  ////////////////////////////////////////////////
+
+  // 6) Our "Check HPI" button
+  const handleHpiCheck = async () => {
     setAttemptedSearch(true);
-    if (!isLoggedIn) return;
-    if (!reg) return;
-    await hpiCheck({ variables: { reg } });
+    setErrorMsg('');
+
+    // Basic checks
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      setErrorMsg('Please login or register to do a Full HPI check.');
+      return;
+    }
+    if (!userProfile) {
+      setErrorMsg('Unable to fetch your profile. Please try again later.');
+      return;
+    }
+
+    // Check if user has HPI credits
+    const hpiCredits = userProfile.hpiCredits ?? 0;
+    if (hpiCredits > 0) {
+      // Show the confirm modal
+      showCreditsModal(hpiCredits, 'HPI', () => {
+        hpiCheck({ variables: { reg } });
+      });
+    } else {
+      setErrorMsg('You have no HPI credits left. Please purchase more.');
+    }
   };
 
   return (
@@ -66,10 +127,14 @@ export default function HPICheckPage() {
           font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
+          text-shadow: 2px 2px #ffde45;
+          color: #003366;
         }
         .hpi-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
+          text-shadow: 1px 1px #ffde45;
+          color: #003366;
         }
         .plate-container {
           width: 70%;
@@ -133,8 +198,41 @@ export default function HPICheckPage() {
         }
       `}</style>
 
+      {/* MODAL => same approach as HomePage */}
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          ref={modalRef}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '8px' }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCancelSearch}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>{modalMsg}</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-danger" onClick={handleCancelSearch}>
+                  Cancel
+                </button>
+                <button className="btn btn-success" onClick={handleConfirmSearch}>
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="hpi-hero">
-        <h1>Full HPI Check</h1>
+        <h1>Full Vehicle History Check</h1>
         <p>
           Access complete vehicle history: outstanding finance, insurance 
           write-offs, theft records, and more.
@@ -170,7 +268,7 @@ export default function HPICheckPage() {
               </button>
             ) : (
               <button
-                onClick={handleCheck}
+                onClick={handleHpiCheck}
                 disabled={hpiLoading}
                 style={{
                   fontSize: '1.2rem',
@@ -188,9 +286,15 @@ export default function HPICheckPage() {
             )}
           </div>
 
+          {/* Show missing login/credits error, etc. */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do a Full HPI check.
+            </div>
+          )}
+          {errorMsg && (
+            <div className="alert alert-danger mt-2">
+              {errorMsg}
             </div>
           )}
           {hpiError && (

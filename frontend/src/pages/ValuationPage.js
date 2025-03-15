@@ -1,39 +1,47 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_USER_PROFILE, VALUATION_CHECK } from '../graphql/queries';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { GET_USER_PROFILE, VALUATION_CHECK, MOT_CHECK } from '../graphql/queries';
 import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
+import MOTResultDisplay from '../components/MOTResultDisplay'; // If you truly want to show MOT as well
 import { useReactToPrint } from 'react-to-print';
-
-// Optional background
-import heroBg from '../images/drkbgd.jpg';
+import heroBg from '../images/vehicle-valuation.jpg';
 
 export default function ValuationPage() {
+  // 1) Read ?reg param
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialReg = searchParams.get('reg') || '';
   const [reg, setReg] = useState(initialReg);
   const [attemptedSearch, setAttemptedSearch] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
+  // 2) Query user
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
+  // 3) Lazy queries for Valuation and MOT
   const [valuationCheck, { data: valData, loading: valLoading, error: valError }] =
     useLazyQuery(VALUATION_CHECK);
 
-  const hasResults = !!(valData && valData.valuation);
+  const hasValResults = !!(valData && valData.valuation);
 
-  // Print
+  const [getMotData, { data: motData, loading: motLoading, error: motError }] =
+    useLazyQuery(MOT_CHECK);
+  const hasMotResults = !!(motData && motData.motCheck);
+
+  // 4) Print logic
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `Valuation_Report_${reg}`,
   });
 
+  // 5) If there's a ?reg param, auto-check
   React.useEffect(() => {
     if (initialReg) {
-      handleCheck();
+      handleValuationCheck();
       navigate('/valuation', { replace: true });
     }
     // eslint-disable-next-line
@@ -44,11 +52,71 @@ export default function ValuationPage() {
     if (val.length <= 8) setReg(val);
   };
 
-  const handleCheck = async () => {
+  ////////////////////////////////////////////////
+  // BEGIN: Credit-confirmation modal logic
+  ////////////////////////////////////////////////
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
+  const modalRef = useRef(null);
+
+  // Show the modal
+  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+    setModalMsg(
+      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+    );
+    setModalSearchType(searchType);
+    setShowModal(true);
+    setPendingSearchAction(() => actionFn);
+  };
+
+  // Confirm => run the action
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) pendingSearchAction();
+    setShowModal(false);
+  };
+
+  // Cancel => close
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
+  };
+  ////////////////////////////////////////////////
+  // END: Modal logic
+  ////////////////////////////////////////////////
+
+  // 6) The actual "Valuation Check" button logic
+  // We'll replicate the same approach used for MOT in your HomePage
+  const handleValuationCheck = async () => {
     setAttemptedSearch(true);
-    if (!isLoggedIn) return;
-    if (!reg) return;
-    await valuationCheck({ variables: { reg } });
+    setErrorMsg('');
+
+    if (!isLoggedIn) {
+      setErrorMsg('Please login or register to do a Valuation check.');
+      return;
+    }
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!userProfile) {
+      setErrorMsg('Unable to fetch your profile. Please try again later.');
+      return;
+    }
+
+    // 7) Check if user has Valuation credits
+    const valuationCredits = userProfile.valuationCredits ?? 0;
+    if (valuationCredits > 0) {
+      // Show the modal: "Valuation" search
+      showCreditsModal(valuationCredits, 'Valuation', async () => {
+        // If user confirms, do the queries
+        await getMotData({ variables: { reg } });
+        await valuationCheck({ variables: { reg } });
+      });
+    } else {
+      setErrorMsg('You have no Valuation credits left. Please purchase more.');
+    }
   };
 
   return (
@@ -67,10 +135,14 @@ export default function ValuationPage() {
           font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
+          color: #003366;
+          text-shadow: 2px 2px #ffde45;
         }
         .valuation-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
+          color: #000;
+          text-shadow: 1px 1px #ffde45;
         }
         .plate-container {
           width: 70%;
@@ -132,13 +204,51 @@ export default function ValuationPage() {
           margin-bottom: 2rem;
           font-weight: 700;
         }
+        .valbutton {
+          display: none;
+        }
       `}</style>
 
+      {/* MODAL => same approach as your HomePage */}
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          ref={modalRef}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '8px' }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCancelSearch}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>{modalMsg}</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-danger" onClick={handleCancelSearch}>
+                  Cancel
+                </button>
+                <button className="btn btn-success" onClick={handleConfirmSearch}>
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HERO */}
       <div className="valuation-hero">
         <h1>Valuation Check</h1>
         <p>Get an instant estimate of your vehicle’s market value.</p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          {/* Registration input */}
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
@@ -149,8 +259,9 @@ export default function ValuationPage() {
             />
           </div>
 
+          {/* Button */}
           <div className="text-center">
-            {hasResults ? (
+            {hasValResults ? (
               <button
                 onClick={() => window.location.reload()}
                 style={{
@@ -168,7 +279,7 @@ export default function ValuationPage() {
               </button>
             ) : (
               <button
-                onClick={handleCheck}
+                onClick={handleValuationCheck}
                 disabled={valLoading}
                 style={{
                   fontSize: '1.2rem',
@@ -186,9 +297,15 @@ export default function ValuationPage() {
             )}
           </div>
 
+          {/* Info if user not logged in, or error */}
           {attemptedSearch && !isLoggedIn && (
             <div className="alert alert-info mt-2">
               Please login or register to do a Valuation check.
+            </div>
+          )}
+          {errorMsg && (
+            <div className="alert alert-danger mt-2">
+              {errorMsg}
             </div>
           )}
           {valError && (
@@ -199,6 +316,7 @@ export default function ValuationPage() {
         </div>
       </div>
 
+      {/* If we got valuation data => show */}
       {valData?.valuation && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div className="text-end mb-2">
@@ -209,6 +327,13 @@ export default function ValuationPage() {
           <div ref={printRef}>
             <ValuationAggregatorDisplay valData={valData.valuation} userProfile={userProfile} />
           </div>
+        </div>
+      )}
+
+      {/* If we also got MOT data => show that too */}
+      {hasMotResults && (
+        <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
+          <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
         </div>
       )}
 

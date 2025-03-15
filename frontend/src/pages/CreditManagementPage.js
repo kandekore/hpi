@@ -420,28 +420,30 @@ export default function CreditManagementPage() {
 
           {/* PROFILE TAB */}
           {activeTab === 'profile' && (
-            
             <div className="tab-pane active">
-              <h2>Your Profile</h2>
+              <h2 className="text-dark">Your Profile</h2>
               {profileInfo ? (
                 <>
-                  <p><strong>Email:</strong> {profileInfo.email}</p>
-                  <p><strong>Username:</strong> {profileInfo.username}</p>
-                  <p><strong>Phone:</strong> {profileInfo.phone}</p>
-                 
+                  <p className="text-dark"><strong>Email:</strong> {profileInfo.email}</p>
+                  <p className="text-dark"><strong>Username:</strong> {profileInfo.username}</p>
+                  <p className="text-dark"><strong>Phone:</strong> {profileInfo.phone}</p>
+                  {/* If you want dateRegistered displayed:
+                  <p className="text-dark"><strong>Date Registered:</strong> {dateRegistered}</p> */}
                 </>
               ) : (
-                <p>Unable to load profile info.</p>
+                <p className="text-dark">Unable to load profile info.</p>
               )}
-
+          
               <hr />
-
-              <h3>Change Password</h3>
+          
+              <h3 className="text-dark">Change Password</h3>
               {passError && <div className="alert alert-danger">{passError}</div>}
               {passSuccess && <div className="alert alert-success">{passSuccess}</div>}
-
+          
               <div className="mb-3">
-                <label htmlFor="currentPass" className="form-label">Current Password</label>
+                <label htmlFor="currentPass" className="form-label text-dark">
+                  Current Password
+                </label>
                 <input
                   type="password"
                   id="currentPass"
@@ -452,7 +454,9 @@ export default function CreditManagementPage() {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="newPass" className="form-label">New Password</label>
+                <label htmlFor="newPass" className="form-label text-dark">
+                  New Password
+                </label>
                 <input
                   type="password"
                   id="newPass"
@@ -463,7 +467,7 @@ export default function CreditManagementPage() {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="confirmNewPass" className="form-label">
+                <label htmlFor="confirmNewPass" className="form-label text-dark">
                   Confirm New Password
                 </label>
                 <input
@@ -475,7 +479,7 @@ export default function CreditManagementPage() {
                   disabled={cpLoading}
                 />
               </div>
-
+          
               <button
                 className="btn btn-primary"
                 onClick={handleChangePassword}
@@ -483,7 +487,7 @@ export default function CreditManagementPage() {
               >
                 {cpLoading ? 'Changing...' : 'Change Password'}
               </button>
-
+          
               {cpError && (
                 <div className="alert alert-danger mt-3">
                   {cpError.message}
@@ -491,6 +495,7 @@ export default function CreditManagementPage() {
               )}
             </div>
           )}
+          
         </div>
       </div>
     </>
