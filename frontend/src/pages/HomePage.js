@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_USER_PROFILE } from '../graphql/queries';
 import { useNavigate } from 'react-router-dom';
@@ -6,18 +6,11 @@ import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
 import MainPricing from '../components/MainPricing';
 import drkbgd from '../images/drkbgd.jpg';
 import flexiblePlansBg from '../images/happyuser.jpg';
+import { Link } from 'react-router-dom';
 
 export default function HomePage() {
   const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-
-  // For the modal
-  const [showModal, setShowModal] = useState(false);
-  const [modalMsg, setModalMsg] = useState('');
-  const [modalSearchType, setModalSearchType] = useState('');
-  const [pendingSearchAction, setPendingSearchAction] = useState(null);
-
-  const modalRef = useRef(null);
 
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
@@ -40,34 +33,12 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
-  // Handle reg input
+  // Registration input
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
     if (val.length <= 8) {
       setReg(val);
     }
-  };
-
-  // Show a modal confirming credit usage
-  const showCreditsModal = (creditsCount, searchType, navigateFn) => {
-    setModalMsg(
-      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
-    );
-    setModalSearchType(searchType);
-    setShowModal(true);
-    setPendingSearchAction(() => navigateFn);
-  };
-
-  // Confirm search in modal
-  const handleConfirmSearch = () => {
-    if (pendingSearchAction) pendingSearchAction();
-    setShowModal(false);
-  };
-
-  // Cancel search in modal
-  const handleCancelSearch = () => {
-    setShowModal(false);
-    setPendingSearchAction(null);
   };
 
   // Handle MOT
@@ -78,7 +49,11 @@ export default function HomePage() {
       return;
     }
     if (!isLoggedIn) {
-      setErrorMsg('Please login or register to do an MOT check.');
+      setErrorMsg(
+        <>
+        Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a MOT check.
+      </> 
+      );
       return;
     }
     if (!userProfile) {
@@ -87,8 +62,8 @@ export default function HomePage() {
     }
 
     if (totalMot > 0) {
-      // free or paid available
-      showCreditsModal(totalMot, 'MOT', () => navigate(`/mot?reg=${reg}`));
+      // If user has free or paid MOT credits, go straight to MOT page
+      navigate(`/mot?reg=${reg}`);
     } else {
       setErrorMsg(
         'You have no MOT checks remaining. Please purchase credits or wait for more free checks.'
@@ -104,16 +79,18 @@ export default function HomePage() {
       return;
     }
     if (!isLoggedIn) {
-      setErrorMsg('Please login or register to do a Valuation check.');
+      setErrorMsg(
+      <>
+      Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a Valuation check.
+    </>);
       return;
     }
     if (!hasValuationCredits) {
       setErrorMsg('You have no Valuation credits left. Please purchase more.');
       return;
     }
-    showCreditsModal(userProfile.valuationCredits, 'Valuation', () =>
-      navigate(`/valuation?reg=${reg}`)
-    );
+    // Directly navigate
+    navigate(`/valuation?reg=${reg}`);
   };
 
   // Handle VDI/HPI
@@ -124,16 +101,19 @@ export default function HomePage() {
       return;
     }
     if (!isLoggedIn) {
-      setErrorMsg('Please login or register to do a VDI check.');
+      setErrorMsg(
+        <>
+      Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a Full Vehicle History check.
+    </>
+    );
       return;
     }
     if (!hasVdiCredits) {
       setErrorMsg('You have no VDI credits left. Please purchase more.');
       return;
     }
-    showCreditsModal(userProfile.hpiCredits, 'VDI', () =>
-      navigate(`/hpi?reg=${reg}`)
-    );
+    // Directly navigate
+    navigate(`/hpi?reg=${reg}`);
   };
 
   // Purchase session for buying credits
@@ -174,22 +154,19 @@ export default function HomePage() {
           padding: 3rem 1rem;
           color: #fff;
           text-align: center;
-        
         }
         .hero-title {
           font-size: 2.5rem;
           margin-bottom: 1rem;
           font-weight: 700;
-            text-shadow: 2px 2px #003366;
+          text-shadow: 2px 2px #003366;
         }
         .hero-subtitle {
           font-size: 1.2rem;
           margin-bottom: 2rem;
           font-weight: 600;
           text-shadow: 1px 1px #003366;
-        
         }
-
         .plate-container {
           width: 70%;
           height: 200px;
@@ -225,7 +202,6 @@ export default function HomePage() {
           line-height: 1;
           padding-left: 10%;
         }
-
         .button-group {
           display: flex;
           justify-content: center;
@@ -242,7 +218,7 @@ export default function HomePage() {
           padding: 10px 25px;
           cursor: pointer;
           font-size: 1.1rem;
-          width: 240px; /* fixed width so text doesn't wrap awkwardly */
+          width: 240px; 
           text-align: center;
         }
         .action-button:hover {
@@ -252,8 +228,6 @@ export default function HomePage() {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
-        /* MOBILE STYLES */
         @media (max-width: 768px) {
           .plate-container {
             width: 100%;
@@ -273,7 +247,6 @@ export default function HomePage() {
             margin: 0 auto;
           }
         }
- /* WHY CHECK WITH US */
         .why-check-section {
           background: #f4f4f4;
           padding: 4rem 1rem;
@@ -306,8 +279,6 @@ export default function HomePage() {
           margin-bottom: 1rem;
           color: #1560bd;
         }
-
-        /* YELLOW SECTION STYLES */
         .why-vehicle-check {
           background-color: #FFDE46;
           padding: 3rem 1rem;
@@ -329,10 +300,6 @@ export default function HomePage() {
         .why-vehicle-check li {
           margin-bottom: 0.5rem;
         }
-
-        /* WHY CHECK WITH US, PLANS, TABS, FAQ, BRAND, ETC. REMAIN UNCHANGED */
-
-           /* FLEXIBLE PLANS SECTION */
         .flexible-plans-section {
           background: url(${flexiblePlansBg}) center center no-repeat;
           background-size: cover;
@@ -363,8 +330,6 @@ export default function HomePage() {
           margin-top: 0;
           font-weight: 700;
         }
-
-        /* TAB SECTION */
         .report-tabs-section {
           background: #fff;
           padding: 4rem 1rem;
@@ -390,8 +355,6 @@ export default function HomePage() {
           margin-left: auto;
           margin-right: auto;
         }
-
-        /* FAQ SECTION */
         .faq-section {
           background: #f9f9f9;
           padding: 4rem 1rem;
@@ -405,8 +368,6 @@ export default function HomePage() {
         .accordion-button:focus {
           box-shadow: none;
         }
-
-        /* BOTTOM BRAND MENTION */
         .vdi-brand-section {
           background: #fff;
           padding: 3rem 1rem;
@@ -422,49 +383,12 @@ export default function HomePage() {
           font-size: x-large;
           font-weight: 600;
         }
-
-        .modal-backdrop.show {
-          opacity: 0.4;
-        }
         .yellow {
           color: #ffde45;
           text-shadow: 1px 1px #000;
           margin-bottom: -15px;
         }
       `}</style>
-
-      {/* MODAL */}
-      {showModal && (
-        <div
-          className="modal fade show"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          ref={modalRef}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: '8px' }}>
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleCancelSearch}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>{modalMsg}</p>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-danger" onClick={handleCancelSearch}>
-                  Cancel
-                </button>
-                <button className="btn btn-success" onClick={handleConfirmSearch}>
-                  Proceed
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* HERO SECTION */}
       <div className="hero section-fullwidth">
@@ -473,7 +397,6 @@ export default function HomePage() {
           FREE MOT History, Vehicle Valuations &amp; Full HPI/VDI style Vehicle History Data
           — All in One Place
         </p>
-
         <p className="hero-subtitle yellow">Enter Your Registration</p>
 
         <div style={{ maxWidth: '1200px', margin: '-30px auto' }}>
@@ -482,7 +405,7 @@ export default function HomePage() {
             <input
               type="text"
               className="plate-input"
-              placeholder="AB12 CDE"
+              placeholder="AB12 CDE" 
               value={reg}
               onChange={handleRegChange}
             />
@@ -498,10 +421,11 @@ export default function HomePage() {
               Vehicle Valuation
             </button>
             <button className="action-button" onClick={handleClickVDI}>
-              Detailed Vehicle Data
+              Full Vehicle History
             </button>
           </div>
 
+          {/* If there's an error, display it */}
           {errorMsg && (
             <div
               className="alert alert-danger mt-3"
@@ -520,7 +444,7 @@ export default function HomePage() {
         onPurchase={(product, quantity) => handlePurchase(product, quantity)}
       />
 
-      {/* NEW YELLOW SECTION: "Why do I need to get a vehicle check?" */}
+      {/* YELLOW SECTION: "Why do I need to get a vehicle check?" */}
       <div className="why-vehicle-check section-fullwidth">
         <h2>Why Check a Vehicle’s History?</h2>
         <div className="content">
@@ -529,64 +453,66 @@ export default function HomePage() {
             just by looking. Running a vehicle history check helps you avoid 
             nasty surprises and gives you confidence before buying.
           </p>
-         
-          <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">1 in 3</h4>
-                <p class="card-text">vehicles has some hidden history</p>
+
+          <div className="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">1 in 3</h4>
+                <p className="card-text">vehicles has some hidden history</p>
               </div>
             </div>
-        
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">74</h4>
-                <p class="card-text">stolen cars are identified daily</p>
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">74</h4>
+                <p className="card-text">stolen cars are identified daily</p>
               </div>
             </div>
-        
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">1,771</h4>
-                <p class="card-text">insurance write-offs occur each day</p>
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">1,771</h4>
+                <p className="card-text">insurance write-offs occur each day</p>
               </div>
             </div>
           </div>
-        
-          <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center mt-3">
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">1 in 3</h4>
-                <p class="card-text">has outstanding finance</p>
+
+          <div className="row row-cols-1 row-cols-md-3 g-4 justify-content-center mt-3">
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">1 in 3</h4>
+                <p className="card-text">has outstanding finance</p>
               </div>
             </div>
-        
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">£11k</h4>
-                <p class="card-text">average finance amount on a car</p>
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">£11k</h4>
+                <p className="card-text">average finance amount on a car</p>
               </div>
             </div>
-        
-            <div class="col">
-              <div class="card shadow h-100 text-center p-3">
-                <h4 class="card-title mb-2">1 in 16</h4>
-                <p class="card-text">shows a mileage discrepancy</p>
+            <div className="col">
+              <div className="card shadow h-100 text-center p-3">
+                <h4 className="card-title mb-2">1 in 16</h4>
+                <p className="card-text">shows a mileage discrepancy</p>
               </div>
-            </div><p className='small'>Statistics based on cars checked by HPI® Ltd in 2017.</p>
-          </div><div>
-          <p>
-            Whether it’s <strong>outstanding finance</strong>, 
-            an <strong>insurance write-off</strong>, or even 
-            a <strong>stolen vehicle</strong>, our checks uncover critical 
-            details you need to know. We also validate for <strong>mileage anomalies </strong> 
-             to ensure you’re not inheriting a car that's already been round the clock. 
-          </p>
-          <p>
-            Make an informed decision with a comprehensive report—because 
-            peace of mind is invaluable when you’re spending thousands 
-            on a used car.
-          </p></div>
+            </div>
+            <p className="small">
+              Statistics based on cars checked by HPI® Ltd in 2017.
+            </p>
+          </div>
+
+          <div>
+            <p>
+              Whether it’s <strong>outstanding finance</strong>, 
+              an <strong>insurance write-off</strong>, or even 
+              a <strong>stolen vehicle</strong>, our checks uncover critical 
+              details you need to know. We also validate for <strong>mileage anomalies</strong> 
+              to ensure you’re not inheriting a car that's already been round the clock. 
+            </p>
+            <p>
+              Make an informed decision with a comprehensive report—because 
+              peace of mind is invaluable when you’re spending thousands 
+              on a used car.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -630,7 +556,7 @@ export default function HomePage() {
               We understand that everyone has different needs when it 
               comes to vehicle checks. That's why we offer a range of 
               options, from free MOT checks and quick valuations to 
-              more comprehensive HPI or VDI style reports. You can purchase 
+              more comprehensive Full Vehicle History (HPI or VDI style) reports. You can purchase 
               a single search for peace of mind or opt for a multi-check 
               bundle if you're comparing several cars at once.
             </p>
@@ -869,7 +795,7 @@ export default function HomePage() {
       <div className="vdi-brand-section section-fullwidth">
         <div className="vdi-brand-content">
           <p>
-          All <stong>Vehicle Data Information</stong> reports are built using secure data from leading sources, including the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA.
+            All <strong>Vehicle Data Information</strong> reports are built using secure data from leading sources, including the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA.
           </p>
         </div>
       </div>

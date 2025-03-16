@@ -1,53 +1,59 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
-import MOTResultDisplay from '../components/MOTResultDisplay';
 import { useReactToPrint } from 'react-to-print';
+
+import MOTResultDisplay from '../components/MOTResultDisplay';
 import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
-import heroBg from '../images/mot-head.jpg'; // Your background image
+
+import heroBg from '../images/mot-head.jpg';
 
 export default function MOTPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // 1) Registration input
+  // Registration input
   const initialReg = searchParams.get('reg') || '';
   const [reg, setReg] = useState(initialReg);
+
+  // For controlling whether we've tried a search at all
   const [attemptedSearch, setAttemptedSearch] = useState(false);
+
+  // Single error message (can be string or JSX)
   const [errorMsg, setErrorMsg] = useState('');
 
-  // 2) Query user for credit logic
+  // Query user for credit logic
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // 3) Calculate free vs. paid credits
+  // Calculate free vs. paid credits
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
   const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
   const motCredits = userProfile?.motCredits ?? 0;
-  const totalMot = freeMotLeft + motCredits; // total available MOT checks
+  const totalMot = freeMotLeft + motCredits;
 
-  // 4) Lazy query for MOT
+  // Lazy query for MOT
   const [motCheck, { data: motData, loading: motLoading, error: motError }] =
-    useLazyQuery(MOT_CHECK);
-
+    useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
   const hasResults = !!(motData && motData.motCheck);
 
-  // 5) For printing
+  // For printing
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `MOT_Report_${reg}`,
   });
 
-  // 6) If there's ?reg= param, auto-check once
-  React.useEffect(() => {
+  // If there's a ?reg= param, auto-check once
+  useEffect(() => {
     if (initialReg) {
       handleMOTCheck();
+      // Remove the ?reg from the URL:
       navigate('/mot', { replace: true });
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRegChange = (e) => {
@@ -57,16 +63,14 @@ export default function MOTPage() {
     }
   };
 
-  ////////////////////////////////////////////////
-  // BEGIN: Modal logic (copy from HomePage pattern)
-  ////////////////////////////////////////////////
+  // --- Modal logic for credit usage confirmation ---
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState('');
   const [modalSearchType, setModalSearchType] = useState('');
   const [pendingSearchAction, setPendingSearchAction] = useState(null);
   const modalRef = useRef(null);
 
-  // show the credit usage modal
+  // Show the credit usage modal
   const showCreditsModal = (creditsCount, searchType, actionFn) => {
     setModalMsg(
       `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
@@ -76,7 +80,7 @@ export default function MOTPage() {
     setPendingSearchAction(() => actionFn);
   };
 
-  // user confirmed => run the action
+  // User confirmed => run action
   const handleConfirmSearch = () => {
     if (pendingSearchAction) {
       pendingSearchAction();
@@ -84,37 +88,44 @@ export default function MOTPage() {
     setShowModal(false);
   };
 
-  // user canceled
+  // User canceled
   const handleCancelSearch = () => {
     setShowModal(false);
     setPendingSearchAction(null);
   };
-  ////////////////////////////////////////////////
-  // END: Modal logic
-  ////////////////////////////////////////////////
+  // --- End modal logic ---
 
-  // 7) Our "Check MOT" logic
+  // The main "Check MOT" handler
   const handleMOTCheck = async () => {
     setAttemptedSearch(true);
-    setErrorMsg('');
+    setErrorMsg(''); // Clear any existing error
 
-    // Basic checks
+    // 1) Validate registration
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
+    // 2) Check login
     if (!isLoggedIn) {
-      setErrorMsg('Please login or register to do an MOT check.');
+      setErrorMsg(
+        <>
+          Please{' '}
+          <Link to="/login">login</Link>
+          {' '}or{' '}
+          <Link to="/register">register</Link> to do an MOT check.
+        </>
+      );
       return;
     }
+    // 3) Check if user data is loaded
     if (!userProfile) {
       setErrorMsg('Unable to fetch your profile. Please try again later.');
       return;
     }
 
-    // If credits exist => show the confirm modal
+    // 4) Check credits
     if (totalMot > 0) {
-      // pass an action that calls the actual motCheck query
+      // Show usage confirmation modal
       showCreditsModal(totalMot, 'MOT', () =>
         motCheck({ variables: { reg } })
       );
@@ -200,7 +211,6 @@ export default function MOTPage() {
             padding-left: 5%;
           }
         }
-        /* Additional info section styling */
         .mot-info-section {
           background: #fff;
           padding: 3rem 1rem;
@@ -213,7 +223,7 @@ export default function MOTPage() {
         }
       `}</style>
 
-      {/* MODAL => same pattern as HomePage */}
+      {/* Modal for credit confirmation */}
       {showModal && (
         <div
           className="modal fade show"
@@ -228,16 +238,22 @@ export default function MOTPage() {
                   type="button"
                   className="btn-close"
                   onClick={handleCancelSearch}
-                ></button>
+                />
               </div>
               <div className="modal-body">
                 <p>{modalMsg}</p>
               </div>
               <div className="modal-footer">
-                <button className="btn btn-danger" onClick={handleCancelSearch}>
+                <button
+                  className="btn btn-danger"
+                  onClick={handleCancelSearch}
+                >
                   Cancel
                 </button>
-                <button className="btn btn-success" onClick={handleConfirmSearch}>
+                <button
+                  className="btn btn-success"
+                  onClick={handleConfirmSearch}
+                >
                   Proceed
                 </button>
               </div>
@@ -246,7 +262,6 @@ export default function MOTPage() {
         </div>
       )}
 
-      {/* HERO SECTION */}
       <div className="mot-hero">
         <h1>MOT Check</h1>
         <p>Instantly retrieve your vehicle’s MOT history and advisories.</p>
@@ -299,17 +314,14 @@ export default function MOTPage() {
             )}
           </div>
 
-          {/* If user not logged in or no reg => info, or error => show it */}
-          {attemptedSearch && !isLoggedIn && (
-            <div className="alert alert-info mt-2">
-              Please login or register to do an MOT check.
-            </div>
-          )}
+          {/* Single error message (for missing reg, not logged in, or no credits) */}
           {errorMsg && (
-            <div className="alert alert-danger mt-2">
+            <div className="alert alert-danger mt-2" style={{ maxWidth: '600px', margin: '1rem auto' }}>
               {errorMsg}
             </div>
           )}
+
+          {/* GraphQL error from the motCheck query */}
           {motError && (
             <div className="alert alert-danger mt-2">
               {motError.message}
@@ -318,18 +330,13 @@ export default function MOTPage() {
         </div>
       </div>
 
-      {/* RESULT: only show if we have data */}
       {motData?.motCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div className="text-end mb-2">
-            <button className="btn btn-secondary" onClick={handlePrint}>
-              Print / Save
-            </button>
+           
           </div>
           <div ref={printRef}>
-            {/* Vehicle info */}
             <VehicleDetailsMOT dataItems={motData.motCheck} userProfile={userProfile} />
-            {/* The main MOT result */}
             <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
           </div>
         </div>

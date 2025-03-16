@@ -140,8 +140,11 @@ export default function MainPricing({
             <li>Insurance Write Off</li>
             <li>Ownership &amp; Car Identity</li>
             <li>VIN Confirmation</li>
-            <li>Scrapped / Mileage Anomaly / Colour Change</li>
-            <li>Import Check / Emissions &amp; Tax Rates</li>
+            <li>Scrapped Check</li> 
+            <li> Mileage Anomaly Check</li>
+            <li>Colour Change Check</li>
+            <li>Import Check </li> 
+            <li>Emissions &amp; Tax Rates</li>
             <li>Technical Details</li>
             <li>-</li>
             <li style={styles.addon}>
