@@ -7,7 +7,7 @@ const searchRecordSchema = new mongoose.Schema({
   vehicleReg: { type: String, required: true },
   searchType: { 
     type: String, 
-    enum: ['MOT', 'Valuation', 'HPI'], 
+    enum: ['MOT', 'FULL_HISTORY', 'Valuation', 'HPI'], 
     required: true 
   },
   timestamp: { type: Date, default: Date.now },

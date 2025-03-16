@@ -120,11 +120,10 @@ export default function HomePage() {
   const handlePurchase = async (product, quantity) => {
     const productMap = {
       Valuation: 'VALUATION',
-      VDI: 'VDI',
       MOT: 'MOT',
-      HPI: 'VDI',
+      FULL_HISTORY: 'FULL_HISTORY',
     };
-    const creditType = productMap[product] || 'VDI';
+    const creditType = productMap[product] || 'FULL_HISTORY';
 
     try {
       const { data } = await createSession({ variables: { creditType, quantity }});

@@ -89,7 +89,7 @@ console.log('Server: motCheck =>', fullData);
       const record = await SearchRecord.create({
         userId: currentUser._id,
         vehicleReg: reg,
-        searchType: 'VDI',
+        searchType: 'FULL_HISTORY',
         responseData: mergedResponse,
       });
       currentUser.searchHistory.push(record._id);
@@ -154,7 +154,7 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       if (!user) throw new Error('Not authenticated');
       const currentUser = await User.findById(user.userId);
       if (!currentUser) throw new Error('User not found');
-      if (currentUser.hpiCredits < 1) throw new Error('No HPI credits available');
+      if (currentUser.hpiCredits < 1) throw new Error('No Full History credits available');
 
       // deduct 1 credit
       currentUser.hpiCredits -= 1;
@@ -203,7 +203,7 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       const record = await SearchRecord.create({
         userId: currentUser._id,
         vehicleReg: reg,
-        searchType: 'HPI',
+        searchType: 'FULL_HISTORY',
         responseData: combinedResponse,
       });
       currentUser.searchHistory.push(record._id);

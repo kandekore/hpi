@@ -32,9 +32,9 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
       // For example, if creditType is 'MOT', 'VDI', 'HPI', etc.
       if (creditType === 'MOT') {
         user.motCredits += parseInt(quantity, 10);
-      } else if (creditType === 'VDI') {
+      } else if (creditType === 'VALUATION') {
         user.valuationCredits += parseInt(quantity, 10);
-      } else if (creditType === 'HPI') {
+      } else if (creditType === 'FULL_HISTORY') {
         user.hpiCredits += parseInt(quantity, 10);
       }
 

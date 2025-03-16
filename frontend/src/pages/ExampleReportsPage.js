@@ -119,7 +119,7 @@ export default function ExampleReportsPage() {
           <HpiSample hpiData={responseData} />
         )}
 
-        {searchType === 'VDI' && (
+        {searchType === 'FULL_HISTORY' && (
           <VdiResultDisplay vdiData={responseData} userProfile={null} />
         )}
       </div>

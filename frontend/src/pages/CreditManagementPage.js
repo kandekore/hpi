@@ -54,7 +54,7 @@ function getMakeModel(record) {
       responseData.vehicleAndMotHistory?.DataItems?.ClassificationDetails?.Dvla
         ?.Model || 'ValModel?';
     return `${make} ${model}`;
-  } else if (searchType === 'VDI' || searchType === 'HPI') {
+  } else if (searchType === 'FULL_HISTORY' || searchType === 'HPI') {
     const make = responseData.vdiCheckFull?.DataItems?.Make || 'N/A';
     const model = responseData.vdiCheckFull?.DataItems?.Model || '';
     return `${make} ${model}`;
@@ -146,11 +146,11 @@ export default function CreditManagementPage() {
   // 10) Purchase logic
   const handlePurchase = async (product, quantity) => {
     const productMap = {
-      Valuation: 'VALUATION',
-      VDI: 'VDI',
+      VALUATION: 'VALUATION',
+    FULL_HISTORY: 'FULL_HISTORY',
       MOT: 'MOT'
     };
-    const creditType = productMap[product] || 'VDI';
+    const creditType = productMap[product] || 'FULL_HISTORY';
     try {
       const { data } = await createSession({
         variables: { creditType, quantity }

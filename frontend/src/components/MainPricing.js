@@ -155,7 +155,7 @@ export default function MainPricing({
             </li>
           </ul>
           <hr />
-          <button onClick={() => handleBuy('VDI')} style={styles.buyButton}>
+          <button onClick={() => handleBuy('FULL_HISTORY')} style={styles.buyButton}>
             Buy
           </button>
         </div>

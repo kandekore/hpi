@@ -12,19 +12,19 @@ export default function SubPricing({
   let title = '';
   let deals = [];
 
-  if (product === 'VDI') {
-    title = 'VDI Full Lookup';
+  if (product === 'FULL_HISTORY') {
+    title = 'Full Vehicle History';
     deals = [
       { quantity: 1, label: '1 Search', price: '£9.99' },
       { quantity: 3, label: '3 Searches', price: '£22.49' },
-      { quantity: 10, label: '10 Searches', price: '£60.00' },
+      { quantity: 10, label: '10 Searches', price: '£59.99' },
     ];
-  } else if (product === 'Valuation') {
+  } else if (product === 'VALUATION') {
     title = 'Vehicle Valuation';
     deals = [
       { quantity: 1, label: '1 Search', price: '£4.99' },
       { quantity: 3, label: '3 Searches', price: '£12.49' },
-      { quantity: 10, label: '10 Searches', price: '£30.00' },
+      { quantity: 10, label: '10 Searches', price: '£29.99' },
     ];
   } else if (product === 'MOT') {
     title = 'MOT Full History';
