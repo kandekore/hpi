@@ -119,7 +119,7 @@ export default function HomePage() {
   // Purchase session for buying credits
   const handlePurchase = async (product, quantity) => {
     const productMap = {
-      Valuation: 'VALUATION',
+      VALUATION: 'VALUATION',
       MOT: 'MOT',
       FULL_HISTORY: 'FULL_HISTORY',
     };

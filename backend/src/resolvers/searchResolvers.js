@@ -117,7 +117,7 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       const record = await SearchRecord.create({
         userId: currentUser._id,
         vehicleReg: reg,
-        searchType: 'Valuation',
+        searchType: 'VALUATION',
         responseData: fullResponse,
       });
       currentUser.searchHistory.push(record._id);

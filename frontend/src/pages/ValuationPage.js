@@ -113,7 +113,7 @@ export default function ValuationPage() {
     const valuationCredits = userProfile?.valuationCredits ?? 0;
     if (valuationCredits > 0) {
       // Show usage confirmation modal
-      showCreditsModal(valuationCredits, 'Valuation', async () => {
+      showCreditsModal(valuationCredits, 'VALUATION', async () => {
         // Once user confirms => we run both queries (Valuation + MOT)
         await getMotData({ variables: { reg } });
         await valuationCheck({ variables: { reg } });

@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 const router = express.Router();
-
+console.log('Webhook endpoint hit')
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -20,6 +20,8 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     console.error('Webhook signature verification failed.', err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  console.log('Event type:', event.type) 
 
   // Handle the checkout.session.completed event
   if (event.type === 'checkout.session.completed') {
@@ -45,8 +47,10 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
         creditsPurchased: parseInt(quantity, 10),
         creditType,
         amountPaid: session.amount_total, // in cents
-      });
-
+      }
+      
+    );
+    console.log(session.metadata);
       await user.save();
       console.log(`User ${userId} credited with ${quantity} ${creditType} credits.`);
     } else {

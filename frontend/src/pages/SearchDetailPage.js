@@ -111,7 +111,7 @@
          </>
        )}
  
-       {searchType === 'Valuation' && (
+       {searchType === 'VALUATION' && (
          <>
            
            {/* If you have partial logic for VDI, pass userProfile similarly */}
