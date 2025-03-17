@@ -37,8 +37,25 @@ function formatTimestamp(ts) {
   return d.toLocaleString();
 }
 
+function getDisplayName(value) {
+  switch (value) {
+    case 'FULL_HISTORY':
+      return 'Full History';
+    case 'VALUATION':
+      return 'Valuation';
+    case 'MOT':
+      return 'MOT';
+    case 'HPI':
+      // If you still have an 'HPI' type anywhere, handle it here:
+      return 'Full History';
+    default:
+      return value;
+  }
+}
+
 // Get a make/model for each record, with fallback logic
 function getMakeModel(record) {
+  console.log(record)
   const { searchType, responseData } = record;
   if (!responseData) return 'N/A';
 
@@ -46,7 +63,7 @@ function getMakeModel(record) {
     const make = responseData.DataItems?.VehicleDetails?.Make || 'Unknown';
     const model = responseData.DataItems?.VehicleDetails?.Model || 'Unknown';
     return `${make} ${model}`;
-  } else if (searchType === 'VALUATION') {
+  } else if (searchType === 'Valuation') {
     const make =
       responseData.vehicleAndMotHistory?.DataItems?.ClassificationDetails?.Dvla
         ?.Make || 'ValMake?';
@@ -394,7 +411,9 @@ export default function CreditManagementPage() {
                         return (
                           <tr key={record.id}>
                             <td data-label="Vehicle Reg">{record.vehicleReg}</td>
-                            <td data-label="Search Type">{record.searchType}</td>
+                            <td data-label="Search Type">
+                            {getDisplayName(record.searchType)}
+                          </td>
                             <td data-label="Date">{dateStr}</td>
                             <td data-label="Make &amp; Model">{makeModel}</td>
                             <td data-label="Action">
@@ -452,7 +471,7 @@ export default function CreditManagementPage() {
                           <tr key={tx.id}>
                             <td data-label="Transaction ID">{tx.transactionId}</td>
                             <td data-label="Credits Purchased">{tx.creditsPurchased}</td>
-                            <td data-label="Credit Type">{tx.creditType}</td>
+                            <td data-label="Credit Type">{getDisplayName(tx.creditType)}</td>
                             <td data-label="Amount Paid">
                               £{(tx.amountPaid / 100).toFixed(2)}
                             </td>
