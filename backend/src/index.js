@@ -67,13 +67,15 @@ async function startServer() {
   }
 
   // Use webhook routes
+  console.log('>>> About to mount /webhook routes...');
   app.use('/webhook', webhookRoutes);
+  console.log('>>> Done mounting, next is static React...');
 
   // Serve React from /frontend/build
   app.use(express.static(path.join(__dirname, '../../frontend/build')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
-  });
+  // app.get('*', (req, res) => {
+  //   res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
+  // });
 
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () => {
