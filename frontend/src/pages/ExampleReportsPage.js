@@ -160,7 +160,7 @@ export default function ExampleReportsPage() {
           <MOTResultDisplay motCheck={responseData} userProfile={null} />
         )}
 
-        {searchType === 'VALUATION' || searchType === 'Valuation' && (
+        {(searchType === 'VALUATION' || searchType === 'Valuation') && (
           
           <ValuationAggregatorDisplayHistory 
             valData={responseData}
