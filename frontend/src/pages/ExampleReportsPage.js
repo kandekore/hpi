@@ -168,17 +168,14 @@ export default function ExampleReportsPage() {
           />
           
         )}
-        {searchType === 'VALUATION' || searchType === 'Valuation' && (
+        {(searchType === 'VALUATION' || searchType === 'Valuation') && (
         <MOTResultDisplayValuation motData={motData} userProfile={null} /> 
       )}
         {/* If your sample record for "VDI" or "HPI" uses the same or different component */}
-        {searchType === 'HPI' && (
+        {(searchType === 'HPI' || searchType === 'FULL_HISTORY') && (
           <HpiSample hpiData={responseData} />
         )}
 
-        {searchType === 'FULL_HISTORY' && (
-          <VdiResultDisplay vdiData={responseData} userProfile={null} />
-        )}
       </>
     );
   }
