@@ -4,7 +4,7 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_USER_PROFILE, VALUATION_CHECK, MOT_CHECK } from '../graphql/queries';
 
 import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
-import MOTResultDisplay from '../components/MOTResultDisplay'; 
+import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation'; 
 import { useReactToPrint } from 'react-to-print';
 
 import heroBg from '../images/vehicle-valuation.jpg';
@@ -30,9 +30,13 @@ export default function ValuationPage() {
     useLazyQuery(VALUATION_CHECK, { fetchPolicy: 'no-cache' });
   const hasValResults = !!(valData && valData.valuation);
 
-  const [getMotData, { data: motData, loading: motLoading, error: motError }] =
-    useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
-  const hasMotResults = !!(motData && motData.motCheck);
+  // const [getMotData, { data: motData, loading: motLoading, error: motError }] =
+  //   useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
+  const motData = valData?.valuation?.vehicleAndMotHistory?.DataItems?.MotHistory;
+  const hasMotResults = !!motData;
+  console.log('PageMOTData =>', motData);
+  console.log("valDataPage =>", valData);
+
 
   // 4) Print logic
   const printRef = useRef(null);
@@ -115,7 +119,7 @@ export default function ValuationPage() {
       // Show usage confirmation modal
       showCreditsModal(valuationCredits, 'VALUATION', async () => {
         // Once user confirms => we run both queries (Valuation + MOT)
-        await getMotData({ variables: { reg } });
+        // await getMotData({ variables: { reg } });
         await valuationCheck({ variables: { reg } });
         
       },
@@ -322,11 +326,7 @@ export default function ValuationPage() {
               {valError.message}
             </div>
           )}
-          {motError && (
-            <div className="alert alert-danger mt-2">
-              {motError.message}
-            </div>
-          )}
+       
         </div>
       </div>
 
@@ -345,7 +345,7 @@ export default function ValuationPage() {
       {/* Optionally show the MOT data as well */}
       {hasMotResults && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
-          <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
+          <MOTResultDisplayValuation motData={motData} userProfile={userProfile} />
         </div>
       )}
 

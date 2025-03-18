@@ -293,7 +293,7 @@ export default function HPICheckPage() {
                   marginTop: '1rem',
                 }}
               >
-                {hpiLoading ? 'Checking...' : 'Check HPI'}
+                {hpiLoading ? 'Checking...' : 'Check Vehicle History'}
               </button>
             )}
           </div>

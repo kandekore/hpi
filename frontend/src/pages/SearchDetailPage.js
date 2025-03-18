@@ -7,6 +7,7 @@
  import VdiResultDisplay from '../components/VdiResultDisplay';
  import HpiSearchHistory from '../components/HpiSearchHistory';
  import ValuationAggregatorDisplayHistory from '../components/ValuationAggregatorDisplayHistory';
+ import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation';
  
  function formatTimestamp(ts) {
    if (!ts) return 'N/A';
@@ -78,22 +79,77 @@
    const dateString = formatTimestamp(timestamp);
    const hpiResponseData = responseData.vdiCheckFull;
    console.log('Server: hpiResponseData =>', hpiResponseData);
+   const motData = responseData?.vehicleAndMotHistory?.DataItems?.MotHistory;
+
    
    return (
-     <div className="container my-4">
-     <div className="row row-cols-1 row-cols-sm-2 g-3">
-  <div className="col">
-    <h3><strong>ID:</strong> {id}</h3>
+    <><style>{
+      `.plate-input {
+      flex: 1;
+        background-color: #FFDE46;
+  color: #000;
+  font-weight: bold;
+  font-size: 7rem;
+  border: 10px solid;
+  text-transform: uppercase;
+  padding: 0 1rem;
+  outline: none;
+  line-height: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 25px;
+    }
+  .search-type {
+  text-align: center;
+  font-weight: 600;
+  color: #003366;
+  font-size: 30px !important;
+}
+  `}</style>
+  <div>
+{searchType === 'MOT' && (
+  <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+    <div className="col">
+      <h5 className='plate-input'>{vehicleReg}</h5>
+      <br></br>
+        <h3><strong>ID:</strong> {id}</h3>
+       <h3><strong>Date/Time:</strong> {dateString}</h3>
+    </div>
+    <div className="col search-type">
+      <img src="/images/moticon.png" alt="MOT" className="img-fluid" />
+    
+      <h5 className='search-type'>Full MOT History</h5>
+    </div>
   </div>
-  <div className="col">
-    <h3><strong>Vehicle Reg:</strong> {vehicleReg}</h3>
+)}
+   {(searchType === 'Valuation' || searchType === 'VALUATION') && (
+  <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+    <div className="col">
+      <h5 className='plate-input'>{vehicleReg}</h5>
+       <br></br>
+        <h3><strong>ID:</strong> {id}</h3>
+       <h3><strong>Date/Time:</strong> {dateString}</h3>
+    </div>
+    <div className="col search-type">
+      <img src="/images/valueicon.png" alt="Valuation" className="img-fluid" />
+      <h5 className='search-type'>Vehicle Valuation</h5>
+    </div>
   </div>
-  <div className="col">
-    <h3><strong>Search Type:</strong> {searchType}</h3>
+)}
+   {(searchType === 'HPI' || searchType === 'VDI' || searchType === 'FULL_HISTORY')  && (
+  <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+    <div className="col">
+      <h5 className='plate-input'>{vehicleReg}</h5>
+       <br></br>
+        <h3><strong>ID:</strong> {id}</h3>
+       <h3><strong>Date/Time:</strong> {dateString}</h3>
+    </div>
+    <div className="col search-type">
+      <img src="/images/reporticon.png" alt="Full HistoryOT" className="img-fluid" />
+      <h5 className='search-type'>Full Vehicle History</h5>
+    </div>
   </div>
-  <div className="col">
-    <h3><strong>Date/Time:</strong> {dateString}</h3>
-  </div>
+)}
 </div>
 
  
@@ -111,7 +167,7 @@
          </>
        )}
  
-       {searchType === 'VALUATION' && (
+       {(searchType === 'Valuation' || searchType === 'VALUATION')&& (
          <>
            
            {/* If you have partial logic for VDI, pass userProfile similarly */}
@@ -119,9 +175,10 @@
              valData={responseData} 
              userProfile={userProfile} 
            />
+            <MOTResultDisplayValuation motData={motData} userProfile={userProfile} />
          </>
        )}
-        {searchType === 'HPI' && (
+        {(searchType === 'HPI' || searchType === 'VDI' || searchType === 'FULL_HISTORY') && (
   <>
     
     <HpiSearchHistory 
@@ -130,7 +187,8 @@
     />
   </>
 )}
-     </div>
+     
+     </>
    );
  }
  

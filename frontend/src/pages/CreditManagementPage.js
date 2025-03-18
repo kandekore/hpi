@@ -63,7 +63,7 @@ function getMakeModel(record) {
     const make = responseData.DataItems?.VehicleDetails?.Make || 'Unknown';
     const model = responseData.DataItems?.VehicleDetails?.Model || 'Unknown';
     return `${make} ${model}`;
-  } else if (searchType === 'Valuation') {
+  } else if (searchType === 'Valuation' || searchType === 'VALUATION') {
     const make =
       responseData.vehicleAndMotHistory?.DataItems?.ClassificationDetails?.Dvla
         ?.Make || 'ValMake?';

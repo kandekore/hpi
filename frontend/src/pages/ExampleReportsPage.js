@@ -88,26 +88,75 @@ export default function ExampleReportsPage() {
     const { vehicleReg, searchType, timestamp, responseData } = record;
     const dateString = formatTimestamp(timestamp);
 
+    console.log('searchType =>', searchType);
+
     return (
-      <div>
-        <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
-          <div className="col">
-            <h5><strong>Vehicle Reg:</strong> {vehicleReg}</h5>
-          </div>
-          <div className="col">
-            <h5><strong>Search Type:</strong> {searchType}</h5>
-          </div>
-          <div className="col">
-            <h5><strong>Date/Time:</strong> {dateString}</h5>
-          </div>
-        </div>
+      <><style>{
+        `.plate-input {
+        flex: 1;
+          background-color: #FFDE46;
+    color: #000;
+    font-weight: bold;
+    font-size: 7rem;
+    border: 10px solid;
+    text-transform: uppercase;
+    padding: 0 1rem;
+    outline: none;
+    line-height: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 25px;
+      }
+    .search-type {
+    text-align: center;
+    font-weight: 600;
+    color: #003366;
+    font-size: 30px !important;
+}
+    `}</style>
+    <div>
+  {searchType === 'MOT' && (
+    <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+      <div className="col">
+        <h5 className='plate-input'>{vehicleReg}</h5>
+      </div>
+      <div className="col search-type">
+        <img src="/images/moticon.png" alt="MOT" className="img-fluid" />
+        <h5 className='search-type'>Full MOT History</h5>
+      </div>
+    </div>
+  )}
+     {searchType === 'Valuation' && (
+    <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+      <div className="col">
+        <h5 className='plate-input'>{vehicleReg}</h5>
+      </div>
+      <div className="col search-type">
+        <img src="/images/valueicon.png" alt="Valuation" className="img-fluid" />
+        <h5 className='search-type'>Vehicle Valuation</h5>
+      </div>
+    </div>
+  )}
+     {(searchType === 'HPI' || searchType === 'VDI' || searchType === 'FULL_HISTORY')  && (
+    <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
+      <div className="col">
+        <h5 className='plate-input'>{vehicleReg}</h5>
+      </div>
+      <div className="col search-type">
+        <img src="/images/reporticon.png" alt="Full HistoryOT" className="img-fluid" />
+        <h5 className='search-type'>Full Vehicle History</h5>
+      </div>
+    </div>
+  )}
+</div>
+
 
         {/* Use the same logic as SearchDetailPage to display results */}
         {searchType === 'MOT' && (
           <MOTResultDisplay motCheck={responseData} userProfile={null} />
         )}
 
-        {searchType === 'VALUATION' && (
+        {searchType === 'VALUATION' || searchType === 'Valuation' && (
           <ValuationAggregatorDisplayHistory 
             valData={responseData}
             userProfile={null}
@@ -122,7 +171,7 @@ export default function ExampleReportsPage() {
         {searchType === 'FULL_HISTORY' && (
           <VdiResultDisplay vdiData={responseData} userProfile={null} />
         )}
-      </div>
+      </>
     );
   }
 
