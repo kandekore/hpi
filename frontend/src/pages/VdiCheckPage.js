@@ -79,7 +79,7 @@ function VdiCheckPage() {
           {attemptedSearch && isLoggedIn && !profileLoading && userProfile && userProfile.valuationCredits < 1 && (
             <div className="alert alert-warning">
               You have 0 VDI credits. Please{' '}
-              <a href="/credits" className="alert-link">purchase credits</a> to continue.
+              <a href="/dashboard" className="alert-link">purchase credits</a> to continue.
             </div>
           )}
 

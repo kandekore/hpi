@@ -11,7 +11,7 @@ export default function MainPricing({
 
   // Access the current path
   const location = useLocation();
-  const isCreditsPage = location.pathname === '/credits';
+  const isCreditsPage = location.pathname === '/dashboard';
 
   const handleBuy = (productKey) => {
     setSubProduct(productKey);

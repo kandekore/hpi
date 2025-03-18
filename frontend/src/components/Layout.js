@@ -11,7 +11,7 @@ function Layout({ children }) {
   const isHomeRoute = location.pathname === '/';
   const isMotRoute = location.pathname === '/mot';
   const isValuationRoute = location.pathname === '/valuation';
-  const isDashboardRoute = location.pathname === '/credits';
+  const isDashboardRoute = location.pathname === '/dashboard';
   const isFullWidth =
     isHomeRoute || isHpiRoute || isMotRoute || isValuationRoute || isDashboardRoute;
 
@@ -106,7 +106,7 @@ function Layout({ children }) {
                   <>
                     
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/credits">
+                      <Link className="nav-link text-white" to="/dashboard">
                         Dashboard
                       </Link>
                     </li>

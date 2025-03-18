@@ -10,8 +10,8 @@ export default {
         const currentUser = await User.findById(user.userId);
         if (!currentUser) throw new Error('User not found');
   
-        const successUrl = `${FRONTEND_URL}/credits?status=success`;
-        const cancelUrl = `${FRONTEND_URL}/credits?status=cancel`;
+        const successUrl = `${FRONTEND_URL}/dashboard?status=success`;
+        const cancelUrl = `${FRONTEND_URL}/dashboard?status=cancel`;
   
         const session = await stripeService.createCheckoutSession(
           creditType,

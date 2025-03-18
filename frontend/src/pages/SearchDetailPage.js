@@ -67,7 +67,7 @@
    }
  
    // If you want partial/advanced logic in the result display,
-   // pass the user profile so those components can check free checks/credits
+   // pass the user profile so those components can check free checks/dashboard
    const userProfile = userData?.getUserProfile || null;
  
    // Basic info about the search

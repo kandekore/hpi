@@ -57,6 +57,9 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
             color: inherit;
             text-decoration: none;
           }
+            .heading{
+            text-align: center;
+            font-weight: 600;}
         `}
       </style>
       {/* ------------------------------------------ */}
@@ -66,6 +69,7 @@ export default function AtAGlance({ dataItems, motTaxStatus }) {
           <h3 className="mb-0">At a Glance</h3>
         </div>
         <div className="card-body">
+        <h3 className='heading'>Click A Button For More Detailed Information</h3>
           <div className="row g-3">
 
             {/* Finance */}

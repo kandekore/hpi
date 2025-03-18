@@ -54,7 +54,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/valuation" element={<ValuationPage />} />
             <Route path="/mot" element={<MOTPage />} />
-            <Route path="/credits" element={<CreditManagementPage />} />
+            <Route path="/dashboard" element={<CreditManagementPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -66,7 +66,7 @@ function App() {
 
             {/* Protected Route */}
             <Route 
-              path="/credits"
+              path="/dashboard"
               element={
                 <PrivateRoute>
                   <CreditManagementPage />

@@ -6,6 +6,7 @@ import MOTResultDisplay from '../components/MOTResultDisplay';
 import ValuationAggregatorDisplayHistory from '../components/ValuationAggregatorDisplayHistory';
 import VdiResultDisplay from '../components/VdiResultDisplay';
 import HpiSample from '../components/HpiSample'; // or HpiSearchHistory, etc.
+import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation';
 
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
@@ -87,6 +88,8 @@ export default function ExampleReportsPage() {
     // Basic info
     const { vehicleReg, searchType, timestamp, responseData } = record;
     const dateString = formatTimestamp(timestamp);
+    const motData = responseData?.vehicleAndMotHistory?.DataItems?.MotHistory;
+
 
     console.log('searchType =>', searchType);
 
@@ -157,12 +160,16 @@ export default function ExampleReportsPage() {
         )}
 
         {searchType === 'VALUATION' || searchType === 'Valuation' && (
+          
           <ValuationAggregatorDisplayHistory 
             valData={responseData}
             userProfile={null}
           />
+          
         )}
-
+        {searchType === 'VALUATION' || searchType === 'Valuation' && (
+        <MOTResultDisplayValuation motData={motData} userProfile={null} /> 
+      )}
         {/* If your sample record for "VDI" or "HPI" uses the same or different component */}
         {searchType === 'HPI' && (
           <HpiSample hpiData={responseData} />
@@ -179,7 +186,7 @@ export default function ExampleReportsPage() {
     <div className="container my-4">
       <h2>Public Example Reports</h2>
       <p className="text-muted">
-        Below are three sample searches (MOT, Valuation, and VDI). Select a tab to 
+        Below are three sample searches (MOT, Valuation, and Full History). Select a tab to 
         see how an actual report looks based on real data from our system. 
         (No login required.)
       </p>
@@ -212,7 +219,7 @@ export default function ExampleReportsPage() {
             type="button"
             role="tab"
           >
-            VDI Example
+            Full History Example
           </button>
         </li>
       </ul>
