@@ -15,6 +15,7 @@ import HpiCheckPage from './pages/HpiCheckPage';
 import ExampleReportsPage from './pages/ExampleReportsPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ResendVerificationPage from './pages/ResendVerificationPage';
+import { Helmet } from 'react-helmet';
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
 }
@@ -25,6 +26,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
+    
     <ApolloProvider client={client}>
     <style>
     {`
@@ -44,6 +46,7 @@ function App() {
       */
     `}
   </style>
+ 
       <Router>
         <Layout>
           <Routes>
@@ -76,7 +79,9 @@ function App() {
           </Routes>
         </Layout>
       </Router>
+      
     </ApolloProvider>
+    
   );
 }
 

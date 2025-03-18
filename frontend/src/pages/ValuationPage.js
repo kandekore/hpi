@@ -65,9 +65,9 @@ export default function ValuationPage() {
   const [pendingSearchAction, setPendingSearchAction] = useState(null);
   const modalRef = useRef(null);
 
-  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+  const showCreditsModal = (creditsCount, searchType, actionFn, reg) => {
     setModalMsg(
-      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+      `You are requesting a Vehicle Valuation for registration ${reg}. You have ${creditsCount} Valuation checks left. This search will deduct 1 credit.`
     );
     setModalSearchType(searchType);
     setShowModal(true);
@@ -117,7 +117,9 @@ export default function ValuationPage() {
         // Once user confirms => we run both queries (Valuation + MOT)
         await getMotData({ variables: { reg } });
         await valuationCheck({ variables: { reg } });
-      });
+        
+      },
+      reg);
     } else {
       setErrorMsg('You have no Valuation credits left. Please purchase more.');
     }
@@ -145,8 +147,8 @@ export default function ValuationPage() {
         .valuation-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
-          color: #000;
-          text-shadow: 1px 1px #ffde45;
+          color: #fff;
+          text-shadow: 2px 2px #000;
         }
         .plate-container {
           width: 70%;

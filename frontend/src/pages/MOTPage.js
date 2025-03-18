@@ -71,9 +71,9 @@ export default function MOTPage() {
   const modalRef = useRef(null);
 
   // Show the credit usage modal
-  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+  const showCreditsModal = (creditsCount, searchType, actionFn, reg) => {
     setModalMsg(
-      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+      `You are checking MOT History for registration ${reg}. You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
     );
     setModalSearchType(searchType);
     setShowModal(true);
@@ -127,7 +127,8 @@ export default function MOTPage() {
     if (totalMot > 0) {
       // Show usage confirmation modal
       showCreditsModal(totalMot, 'MOT', () =>
-        motCheck({ variables: { reg } })
+        motCheck({ variables: { reg } }),
+        reg
       );
     } else {
       setErrorMsg(
@@ -158,8 +159,8 @@ export default function MOTPage() {
         .mot-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
-          color: #000;
-          text-shadow: 1px 1px #ffde45;
+          color: #fff;
+          text-shadow: 1px 1px #000;
         }
         .plate-container {
           width: 70%;
@@ -263,7 +264,7 @@ export default function MOTPage() {
       )}
 
       <div className="mot-hero">
-        <h1>MOT Check</h1>
+        <h1>MOT Full History Check</h1>
         <p>Instantly retrieve your vehicle’s MOT history and advisories.</p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -344,7 +345,7 @@ export default function MOTPage() {
 
       {/* Additional Info */}
       <div className="mot-info-section">
-        <h2>Why is an MOT Check Important?</h2>
+        <h2>Why is an MOT History Check Important?</h2>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p>
             Regular MOT checks ensure your vehicle meets the minimum safety 

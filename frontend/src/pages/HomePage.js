@@ -7,6 +7,7 @@ import MainPricing from '../components/MainPricing';
 import drkbgd from '../images/drkbgd.jpg';
 import flexiblePlansBg from '../images/happyuser.jpg';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 export default function HomePage() {
   const [reg, setReg] = useState('');
@@ -137,6 +138,23 @@ export default function HomePage() {
 
   return (
     <>
+          <Helmet>
+        <title>Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks</title>
+        <meta name="description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
+
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
+        <meta property="og:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
+        <meta property="og:image" content="{drkbg}" />
+        <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+        <meta property="og:type" content="website" />
+
+        {/* Twitter Card tags */}
+        <meta name="twitter:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
+        <meta name="twitter:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
+        <meta name="twitter:image" content="{drkbg}" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <style>{`
         body, html {
           margin: 0;
@@ -619,7 +637,7 @@ export default function HomePage() {
               aria-controls="vdi"
               aria-selected="false"
             >
-              Full VDI Check
+              Full Vehicle History
             </button>
           </li>
         </ul>
@@ -655,11 +673,14 @@ export default function HomePage() {
           >
             <p>
               Get a quick market estimate of your car’s value. Our 
-              <strong> Simple Valuation</strong> tool leverages extensive 
+              <strong> Vehicle Valuation</strong> tool leverages extensive 
               market data to tell you if the asking price is fair.
             </p>
             <ul>
               <li>Immediate valuation report</li>
+              <li>Part Exchange valuations</li>
+              <li>Trade valuations</li>
+              <li>Auction Valuations</li>
               <li>Up-to-date pricing from real market data</li>
               <li>Avoid overpaying for your next car</li>
             </ul>
@@ -673,10 +694,10 @@ export default function HomePage() {
             aria-labelledby="vdi-tab"
           >
             <p>
-              Our most comprehensive offering, the <strong>Full Vehicle Data Information </strong> check, 
+              Our most comprehensive offering, the <strong>Full Vehicle Data History </strong> check, 
               uncovers all aspects of a vehicle’s past — from outstanding finance 
               and theft records to plate changes, keeper history, technical 
-              specs, and more. 
+              specs, and more, just like a HPI check. 
             </p>
             <ul>
               <li>Finance checks &amp; stolen vehicle status</li>
@@ -794,7 +815,7 @@ export default function HomePage() {
       <div className="vdi-brand-section section-fullwidth">
         <div className="vdi-brand-content">
           <p>
-            All <strong>Vehicle Data Information</strong> reports are built using secure data from leading sources, including the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA.
+            All <strong>Vehicle Data Information</strong> reports are built using secure data from leading sources, including UK Vehicle Data, the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA. All reports are provided without prejudice on a PAYG basis
           </p>
         </div>
       </div>
