@@ -9,6 +9,7 @@ export const REGISTER = gql`
     $phone: String
     $userIntention: String
     $termsAccepted: Boolean!
+    $captchaToken: String!
   ) {
     register(
       email: $email
@@ -17,6 +18,7 @@ export const REGISTER = gql`
       phone: $phone
       userIntention: $userIntention
       termsAccepted: $termsAccepted
+      captchaToken: $captchaToken
     )
   }
 `;
@@ -29,8 +31,8 @@ export const RESEND_VERIFICATION = gql`
 
 
 export const LOGIN = gql`
-  mutation Login($email: String!, $password: String!) {
-    login(email: $email, password: $password)
+  mutation Login($email: String!, $password: String!, $captchaToken: String!) {
+    login(email: $email, password: $password, captchaToken: $captchaToken)
   }
 `;
 

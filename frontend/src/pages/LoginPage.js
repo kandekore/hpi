@@ -2,17 +2,25 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from '../graphql/mutations';
 import { useNavigate, Link } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
+
 
 function LoginPage() {
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginMutation, { loading, error }] = useMutation(LOGIN);
   const navigate = useNavigate();
 
+    // When the user successfully completes the captcha:
+    const onCaptchaChange = (token) => {
+      setCaptchaToken(token);
+    };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await loginMutation({ variables: { email, password } });
+      const { data } = await loginMutation({ variables: { email, password, captchaToken } });
       if (data.login) {
         // Store token & redirect
         localStorage.setItem('authToken', data.login);
@@ -31,6 +39,11 @@ function LoginPage() {
   };
 
   return (
+    <><style>{`.captcha {
+    text-align: center;
+    align-items: center;
+    padding: 10px;
+}`}</style>
     <div className="container my-4">
       <div className="card p-4 shadow-sm">
         <h1 className="card-title mb-4">Login</h1>
@@ -72,12 +85,16 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-
-          <button 
-            type="submit"
-            className="btn btn-primary w-100"
-            disabled={loading}
-          >
+          <div className='captcha'>
+          <ReCAPTCHA
+          sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+          onChange={onCaptchaChange}
+        /></div>
+        <button
+        type="submit"
+        className="btn btn-primary w-100"
+        disabled={loading || !captchaToken} // <-- Key line
+      >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
@@ -90,7 +107,7 @@ function LoginPage() {
       <div className="card mt-4 border rounded p-3 text-center">
         [Ad Banner]
       </div>
-    </div>
+    </div></>
   );
 }
 

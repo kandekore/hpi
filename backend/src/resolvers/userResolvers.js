@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import { hashPassword, comparePasswords, createToken } from '../services/auth.js';
 import { sendMail }  from '../services/mailer.js'; // hypothetical mailer service
 import crypto from 'crypto';
+import fetch from 'node-fetch'; 
 
 export default {
   Query: {
@@ -16,8 +17,20 @@ export default {
     // EXTENDED REGISTER WITH VERIFICATION
     async register(
       _,
-      { email, password, username, phone, userIntention, termsAccepted }
+      { email, password, username, phone, userIntention, termsAccepted, captchaToken }
     ) {
+
+      const secretKey = process.env.RECAPTCHA_SECRET_KEY; // set in your .env
+  if (!captchaToken) {
+    throw new Error('Missing CAPTCHA token');
+  }
+
+  const recaptchaUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
+  const captchaResp = await fetch(recaptchaUrl, { method: 'POST' });
+  const captchaData = await captchaResp.json();
+  if (!captchaData.success) {
+    throw new Error('Invalid CAPTCHA. Please try again.');
+  }
       // 1) Check if user exists
       const existing = await User.findOne({ email });
       if (existing) throw new Error('User already exists');
@@ -48,6 +61,7 @@ export default {
         isVerified: false,
         verificationToken,
         passwordHash,
+        
       });
 
       // 7) Build verification link (your front-end or server route)
@@ -83,7 +97,21 @@ export default {
       return true;
     },
     // LOGIN
-    async login(_, { email, password }) {
+    async login(_, { email, password, captchaToken }) {
+      if (!captchaToken) {
+        throw new Error('Please solve the CAPTCHA first.');
+      }
+       // 1) reCAPTCHA check
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (!captchaToken) {
+    throw new Error('Missing CAPTCHA token');
+  }
+  const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
+  const resp = await fetch(verifyUrl, { method: 'POST' });
+  const captchaData = await resp.json();
+  if (!captchaData.success) {
+    throw new Error('Invalid CAPTCHA. Please try again.');
+  }
       // 1) Find user
       const user = await User.findOne({ email });
       if (!user) throw new Error('Invalid credentials');
@@ -132,16 +160,16 @@ export default {
       await user.save();
 
       // 4) Send an email with the new token
-      const verifyUrl = `${process.env.EMAIL_VERIFICATION_URL}?token=${verificationToken}`;
-      await sendMail({
-        to: user.email,
-        subject: 'Resend Verification - Please Verify Your Email',
-        html: `
-          <p>Click to verify your account: 
-            <a href="${verifyUrl}">Verify</a>
-          </p>
-        `,
-      });
+      const emailVerifyUrl = `${process.env.EMAIL_VERIFICATION_URL}?token=${verificationToken}`;
+await sendMail({
+  to: user.email,
+  subject: 'Verify Your Email',
+  html: `
+    <h1>Welcome to Our App</h1>
+    <p>Click the link below to verify your account:</p>
+    <a href="${emailVerifyUrl}">Verify Email</a>
+  `,
+});
 
       return true; // or return a string if you prefer
     }

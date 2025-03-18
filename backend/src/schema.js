@@ -13,6 +13,7 @@ const typeDefs = gql`
     userIntention: String
     isVerified: Boolean
     termsAccepted: Boolean
+    captchaToken: String!
 
     motCredits: Int
     valuationCredits: Int
@@ -52,26 +53,32 @@ const typeDefs = gql`
     hpiCheck(reg: String!): JSON
   }
 
-  type Mutation {
-    payMOTCredit: User
+type Mutation {
+  payMOTCredit: User
 
-      register(
+  register(
     email: String!
     password: String!
     username: String
     phone: String
     userIntention: String
     termsAccepted: Boolean!
+    captchaToken: String
   ): String
 
-    login(email: String!, password: String!): String
+  login(
+    email: String!
+    password: String!
+    captchaToken: String!
+  ): String
+
   verifyEmail(token: String!): Boolean
   resendVerificationEmail(email: String!): Boolean
   changePassword(currentPassword: String!, newPassword: String!): Boolean
 
-    createCreditPurchaseSession(creditType: String!, quantity: Int!): String
-    finalizeCreditPurchase(creditType: String!, quantity: Int!): User
-  }
+  createCreditPurchaseSession(creditType: String!, quantity: Int!): String
+  finalizeCreditPurchase(creditType: String!, quantity: Int!): User
+}
 `;
 
 export default typeDefs;

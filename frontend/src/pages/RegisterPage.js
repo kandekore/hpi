@@ -3,8 +3,12 @@ import { useMutation } from '@apollo/client';
 import { REGISTER } from '../graphql/mutations';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
+
 
 function RegisterPage() {
+  const [captchaToken, setCaptchaToken] = useState(null);
+
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
@@ -17,6 +21,10 @@ function RegisterPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const [registerMutation, { loading, error }] = useMutation(REGISTER);
+
+  const onCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
 
   const handleRegister = async () => {
     // If we already succeeded, no need to let them re-submit:
@@ -51,7 +59,8 @@ function RegisterPage() {
           username: finalUsername,
           phone,
           userIntention,
-          termsAccepted
+          termsAccepted,
+          captchaToken, 
         },
       });
 
@@ -71,7 +80,11 @@ function RegisterPage() {
   // If successful, we hide or disable the form
   const isFormDisabled = !!successMsg;
 
-  return (
+  return ( <><style>{`.captcha {
+    text-align: center;
+    align-items: center;
+    padding: 10px;
+}`}</style>
     <div className="container my-4">
       <div className="card p-4 shadow-sm">
         <h1 className="card-title mb-4">Register</h1>
@@ -199,13 +212,16 @@ function RegisterPage() {
               <label className="form-check-label" htmlFor="termsCheck">
                 I agree to the <a href="/terms" target="_blank" rel="noreferrer">terms and conditions</a>.
               </label>
-            </div>
-
+            </div><div className='captcha'>
+<ReCAPTCHA
+        sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+        onChange={onCaptchaChange}
+      /></div>
             {/* Submit button */}
             <button 
               onClick={handleRegister}
               className="btn btn-primary w-100" 
-              disabled={loading || isFormDisabled}
+              disabled={loading || isFormDisabled || !captchaToken}
             >
               {loading ? 'Registering...' : 'Register'}
             </button>
@@ -220,7 +236,7 @@ function RegisterPage() {
       <div className="card border rounded p-3 mt-4 text-center">
         [Ad Banner]
       </div>
-    </div>
+    </div></>
   );
 }
 
