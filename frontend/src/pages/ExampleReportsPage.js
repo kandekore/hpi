@@ -38,8 +38,8 @@ export default function ExampleReportsPage() {
   const [activeTab, setActiveTab] = useState('mot');
 
   // Replace these IDs with your actual "sample" record IDs
-  const MOT_SEARCH_ID = '67d882c417563f24cb3827af';       // searchType === 'MOT'
-  const VAL_SEARCH_ID = '67d9de188b58f829acf6fae2';       // searchType === 'Valuation'
+  const MOT_SEARCH_ID = '67ccb04dba934cab25039552';       // searchType === 'MOT'
+  const VAL_SEARCH_ID = '67d05c0dd2651e963d529342';       // searchType === 'Valuation'
   const VDI_SEARCH_ID = '67d9e7588b58f829acf6fae8';       // searchType === 'VDI' or 'HPI'
 
   // Query each record via getSampleSearchById 
@@ -77,6 +77,7 @@ export default function ExampleReportsPage() {
 
     // IMPORTANT: use data?.getSampleSearchById 
     const record = data?.getSampleSearchById;
+    console.log('record =>', record);
     if (!record) {
       return (
         <div className="alert alert-warning">
