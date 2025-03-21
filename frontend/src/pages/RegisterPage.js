@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMutation } from '@apollo/client';
 import { REGISTER } from '../graphql/mutations';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +21,7 @@ function RegisterPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const [registerMutation, { loading, error }] = useMutation(REGISTER);
+  const captchaRef = useRef(null);
 
   const onCaptchaChange = (token) => {
     setCaptchaToken(token);
@@ -30,23 +31,32 @@ function RegisterPage() {
     // If we already succeeded, no need to let them re-submit:
     if (successMsg) return;
 
-    // Basic client-side checks
-    if (!email) {
-      setErrorMsg('Please enter an email.');
-      return;
-    }
-    if (!password || !confirmPassword) {
-      setErrorMsg('Please enter and confirm your password.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
-      return;
-    }
-    if (!termsAccepted) {
-      setErrorMsg('You must accept the terms and conditions.');
-      return;
-    }
+   // Basic client-side checks
+   if (!email) {
+    setErrorMsg('Please enter an email.');
+    captchaRef.current?.reset();
+    setCaptchaToken(null);
+    return;
+  }
+  if (!password || !confirmPassword) {
+    setErrorMsg('Please enter and confirm your password.');
+    captchaRef.current?.reset();
+    setCaptchaToken(null);
+    return;
+  }
+  if (password !== confirmPassword) {
+    setErrorMsg('Passwords do not match.');
+    captchaRef.current?.reset();
+    setCaptchaToken(null);
+    return;
+  }
+  if (!termsAccepted) {
+    setErrorMsg('You must accept the terms and conditions.');
+    captchaRef.current?.reset();
+    setCaptchaToken(null);
+    return;
+  }
+  
     const finalUsername = username.trim() || email.trim();
 
     setErrorMsg('');
@@ -74,6 +84,8 @@ function RegisterPage() {
     } catch (err) {
       console.error(err);
       setErrorMsg(err.message);
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -212,8 +224,11 @@ function RegisterPage() {
               <label className="form-check-label" htmlFor="termsCheck">
                 I agree to the <a href="/terms" target="_blank" rel="noreferrer">terms and conditions</a>.
               </label>
-            </div><div className='captcha'>
+            </div>
+                        <div className="mb-3 d-flex justify-content-center">
+
 <ReCAPTCHA
+                ref={captchaRef}
         sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
         onChange={onCaptchaChange}
       /></div>

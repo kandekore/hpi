@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN } from '../graphql/mutations';
 import { useNavigate, Link } from 'react-router-dom';
@@ -11,6 +11,8 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [loginMutation, { loading, error }] = useMutation(LOGIN);
   const navigate = useNavigate();
+
+  const captchaRef = useRef(null);
 
     // When the user successfully completes the captcha:
     const onCaptchaChange = (token) => {
@@ -29,11 +31,14 @@ function LoginPage() {
           sessionStorage.removeItem('pendingReg');
           navigate(`/?autoCheck=${pendingReg}`);
         } else {
-          navigate('/');
+          navigate('/dashboard');
         }
       }
     } catch (err) {
       console.error(err);
+      captchaRef.current?.reset();
+  setCaptchaToken(null);
+      
       // The error from useMutation is handled below in {error && ...}
     }
   };
@@ -85,8 +90,9 @@ function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className='captcha'>
+          <div className="mb-3 d-flex justify-content-center">
           <ReCAPTCHA
+          ref={captchaRef}
           sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
           onChange={onCaptchaChange}
         /></div>
@@ -97,6 +103,10 @@ function LoginPage() {
       >
             {loading ? 'Logging in...' : 'Login'}
           </button>
+          <p className="mt-3 text-center">
+  <Link to="/forgot-password">Forgot your password?</Link>
+</p>
+
         </form>
       </div>
 

@@ -172,6 +172,49 @@ await sendMail({
 });
 
       return true; // or return a string if you prefer
+    },
+    async requestPasswordReset(_, { email }) {
+      // 1) Find user
+      const user = await User.findOne({ email });
+      if (!user) {
+        // for security, you might pretend success anyway
+        return true;
+      }
+    
+      // 2) Generate a reset token (like in email verification)
+      const resetToken = crypto.randomBytes(24).toString('hex');
+      user.passwordResetToken = resetToken;
+      user.passwordResetExpires = Date.now() + 1000 * 60 * 15; // e.g. 15 minutes
+      await user.save();
+    
+      // 3) Email the link
+      const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+      await sendMail({
+        to: user.email,
+        subject: 'Reset your password',
+        html: `Click to reset: <a href="${resetUrl}">${resetUrl}</a>`
+      });
+    
+      return true;
+    }, async resetPassword(_, { token, newPassword }) {
+      // 1) Find user by passwordResetToken
+      const user = await User.findOne({
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: Date.now() } // not expired
+      });
+      if (!user) {
+        throw new Error('Reset token is invalid or expired.');
+      }
+    
+      // 2) Update password
+      user.passwordHash = await hashPassword(newPassword);
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+    
+      return true;
     }
+    
+    
   }
 };

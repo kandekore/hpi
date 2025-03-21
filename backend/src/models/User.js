@@ -10,8 +10,8 @@ const userSchema = new mongoose.Schema({
   termsAccepted: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String, required: false },
-
-  // existing fields
+  passwordResetToken: String,
+  passwordResetExpires: Date,   
   freeMotChecksUsed: { type: Number, default: 0 },
   motCredits: { type: Number, default: 0 },
   valuationCredits: { type: Number, default: 0 },

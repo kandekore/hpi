@@ -13,7 +13,7 @@ const typeDefs = gql`
     userIntention: String
     isVerified: Boolean
     termsAccepted: Boolean
-    captchaToken: String!
+   
 
     motCredits: Int
     valuationCredits: Int
@@ -71,6 +71,8 @@ type Mutation {
     password: String!
     captchaToken: String!
   ): String
+requestPasswordReset(email: String!): Boolean
+  resetPassword(token: String!, newPassword: String!): Boolean
 
   verifyEmail(token: String!): Boolean
   resendVerificationEmail(email: String!): Boolean
