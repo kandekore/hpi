@@ -85,3 +85,40 @@ export const RESET_PASSWORD = gql`
     resetPassword(token: $token, newPassword: $newPassword)
   }
 `;
+export const REPLY_TO_TICKET = gql`
+  mutation ReplyToSupportTicket($input: ReplyTicketInput!) {
+    replyToSupportTicket(input: $input) {
+      id
+      status
+      messages {
+        sender
+        text
+        postedAt
+      }
+    }
+  }
+`;
+export const CREATE_SUPPORT_TICKET = gql`
+  mutation CreateSupportTicket($input: CreateTicketInput!) {
+    createSupportTicket(input: $input) {
+      id
+      ticketRef
+      status
+      subject
+      department
+      priority
+      assignedAgent
+      name
+      email
+      # If you want the array of messages:
+      messages {
+        sender
+        text
+        postedAt
+      }
+      # Optionally:
+      createdAt
+      lastUpdated
+    }
+  }
+`;

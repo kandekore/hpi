@@ -117,6 +117,10 @@ export default function ExampleReportsPage() {
     color: #003366;
     font-size: 30px !important;
 }
+      @media (max-width: 768px) {
+     .plate-input {
+       font-size: 4.25rem;
+     }}
     `}</style>
     <div>
   {searchType === 'MOT' && (

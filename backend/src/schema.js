@@ -13,8 +13,6 @@ const typeDefs = gql`
     userIntention: String
     isVerified: Boolean
     termsAccepted: Boolean
-   
-
     motCredits: Int
     valuationCredits: Int
     hpiCredits: Int
@@ -39,8 +37,45 @@ const typeDefs = gql`
     amountPaid: Float
     timestamp: String
   }
+    type TicketMessage {
+  sender: String!
+  text: String!
+  postedAt: String!
+}
+
+type SupportTicket {
+  id: ID!
+  userId: ID!
+  email: String!
+  name: String!
+  department: String!
+  subject: String!
+  status: String!
+  priority: String!
+  assignedAgent: String!
+  ticketRef: String!
+  messages: [TicketMessage!]!
+  createdAt: String!
+  lastUpdated: String!
+}
+
+input CreateTicketInput {
+  name: String!
+  email: String!
+  department: String
+  subject: String!
+  priority: String
+  message: String!
+}
+
+input ReplyTicketInput {
+  ticketId: ID!
+  message: String!
+}
 
   type Query {
+    getMyTickets: [SupportTicket!]!
+getTicketById(ticketId: ID!): SupportTicket
     getSearchById(id: ID!): SearchRecord
     getSampleSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON
@@ -71,6 +106,10 @@ type Mutation {
     password: String!
     captchaToken: String!
   ): String
+
+   createSupportTicket(input: CreateTicketInput!): SupportTicket
+  replyToSupportTicket(input: ReplyTicketInput!): SupportTicket
+  closeSupportTicket(ticketId: ID!): SupportTicket
 requestPasswordReset(email: String!): Boolean
   resetPassword(token: String!, newPassword: String!): Boolean
 

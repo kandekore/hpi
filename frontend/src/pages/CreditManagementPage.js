@@ -9,8 +9,12 @@ import {
 import {
   CREATE_CREDIT_PURCHASE_SESSION,
   CHANGE_PASSWORD
+  
 } from '../graphql/mutations';
 import MainPricingDashboard from '../components/MainPricingDashboard';
+import SupportForm from '../components/SupportForm';
+import SupportTicketPage from './SupportTicketPage';
+import MyTickets from '../components/MyTickets';
 
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
@@ -339,6 +343,15 @@ export default function CreditManagementPage() {
               Profile
             </button>
           </li>
+          <li className="nav-item">
+  <button
+    className={`nav-link ${activeTab === 'support' ? 'active' : ''}`}
+    onClick={() => setActiveTab('support')}
+  >
+    Support
+  </button>
+</li>
+
         </ul>
 
         <div className="tab-content py-3">
@@ -563,6 +576,14 @@ export default function CreditManagementPage() {
               )}
             </div>
           )}
+            {activeTab === 'support' && (
+  <div className="tab-pane active">
+    <SupportForm email={profileInfo?.email} />
+    <hr />
+    <MyTickets />
+  </div>
+)}
+
         </div>
       </div>
     </>

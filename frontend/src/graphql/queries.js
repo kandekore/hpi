@@ -100,3 +100,37 @@ export const HPI_CHECK = gql`
   }
 `;
 
+export const GET_MY_TICKETS = gql`
+  query GetMyTickets {
+    getMyTickets {
+      id
+      ticketRef
+      subject
+      status
+      department
+      lastUpdated
+      createdAt
+    }
+  }
+`;
+export const GET_TICKET_BY_ID = gql`
+  query GetTicketById($ticketId: ID!) {
+  getTicketById(ticketId: $ticketId) {
+    id
+    ticketRef
+    subject
+    status
+    department
+    priority
+    assignedAgent
+    name
+    email
+    createdAt
+    messages {
+      sender
+      text
+      postedAt
+    }
+  }
+}
+`;

@@ -4,6 +4,7 @@ import { hashPassword, comparePasswords, createToken } from '../services/auth.js
 import { sendMail }  from '../services/mailer.js'; // hypothetical mailer service
 import crypto from 'crypto';
 import fetch from 'node-fetch'; 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 export default {
   Query: {
@@ -188,7 +189,7 @@ await sendMail({
       await user.save();
     
       // 3) Email the link
-      const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+      const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
       await sendMail({
         to: user.email,
         subject: 'Reset your password',

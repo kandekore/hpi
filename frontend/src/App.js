@@ -17,6 +17,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import ResendVerificationPage from './pages/ResendVerificationPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import SupportTicketPage from './pages/SupportTicketPage';
 import { Helmet } from 'react-helmet';
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
@@ -67,6 +68,7 @@ function App() {
             <Route path="/resend-verification" element={<ResendVerificationPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/support/ticket/:ticketId" element={<SupportTicketPage />} />
 
             {/* Protected Route */}
             <Route 

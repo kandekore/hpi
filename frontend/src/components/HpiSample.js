@@ -64,7 +64,11 @@ const motApi = vehicleAndMotHistory?.DataItems.MotHistory || {};
     margin-bottom: 0;
     padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
     text-align: center;
-}`}
+}
+     @media (max-width: 768px) {
+     .plate-input {
+       font-size: 4.25rem;
+     }}`}
     </style>
     <div className="container my-4">
     
