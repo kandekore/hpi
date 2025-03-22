@@ -3,13 +3,14 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
 import { useReactToPrint } from 'react-to-print';
-
+import { Helmet } from 'react-helmet-async';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
 
 import heroBg from '../images/mot-head.jpg';
 
 export default function MOTPage() {
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -139,6 +140,23 @@ export default function MOTPage() {
 
   return (
     <>
+         <Helmet>
+            <title>MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History</title>
+            <meta name="description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
+    
+            {/* Open Graph tags for social sharing */}
+            <meta property="og:title" content="MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History<" />
+            <meta property="og:description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
+            <meta property="og:image" content={heroBg} />
+            <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+            <meta property="og:type" content="website" />
+    
+            {/* Twitter Card tags */}
+            <meta name="twitter:title" content="MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History<" />
+            <meta name="twitter:description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
+            <meta name="twitter:image" content={heroBg} />
+            <meta name="twitter:card" content="summary_large_image" />
+          </Helmet>
       <style>{`
         .mot-hero {
           width: 100%;

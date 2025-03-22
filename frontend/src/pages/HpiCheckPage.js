@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
 import { useReactToPrint } from 'react-to-print';
-
+import { Helmet } from 'react-helmet-async';
 import HpiResultDisplay from '../components/HpiResultDisplay';
 import heroBg from '../images/full-vehicle-check.jpg'; // your background image
 
@@ -118,6 +118,23 @@ export default function HPICheckPage() {
 
   return (
     <>
+         <Helmet>
+            <title>Full Vehicle History Report | HPI / VDI Type Check | Vehicle Data Information</title>
+            <meta name="description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+    
+            {/* Open Graph tags for social sharing */}
+            <meta property="og:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
+            <meta property="og:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+            <meta property="og:image" content={heroBg} />
+            <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+            <meta property="og:type" content="website" />
+    
+            {/* Twitter Card tags */}
+            <meta name="twitter:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
+            <meta name="twitter:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+            <meta name="twitter:image" content={heroBg} />
+            <meta name="twitter:card" content="summary_large_image" />
+          </Helmet>
       <style>{`
         .hpi-hero {
           width: 100%;
@@ -334,7 +351,7 @@ export default function HPICheckPage() {
         <h2>Why Get a Full Vehicle History Check?</h2>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p>
-            A Full Vehicle History Check ensures you don’t inherit someone else’s debt 
+            A Full Vehicle History Check report ensures you don’t inherit someone else’s debt 
             or risk owning a stolen vehicle. Verify finance status, previous 
             accidents, theft records, and more—all in one detailed report.
           </p>

@@ -7,7 +7,7 @@ import MainPricing from '../components/MainPricing';
 import drkbgd from '../images/drkbgd.jpg';
 import flexiblePlansBg from '../images/happyuser.jpg';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 export default function HomePage() {
   const [reg, setReg] = useState('');
@@ -145,14 +145,14 @@ export default function HomePage() {
         {/* Open Graph tags for social sharing */}
         <meta property="og:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta property="og:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
-        <meta property="og:image" content="{drkbg}" />
+        <meta property="og:image" content={drkbgd} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
         <meta property="og:type" content="website" />
 
         {/* Twitter Card tags */}
         <meta name="twitter:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta name="twitter:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
-        <meta name="twitter:image" content="{drkbg}" />
+        <meta name="twitter:image" content={drkbgd} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <style>{`

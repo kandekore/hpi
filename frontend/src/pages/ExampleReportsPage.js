@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_SAMPLE_SEARCH_BY_ID } from '../graphql/queries'; 
-
+import { Helmet } from 'react-helmet-async';
 import MOTResultDisplay from '../components/MOTResultDisplay';
 import ValuationAggregatorDisplayHistory from '../components/ValuationAggregatorDisplayHistory';
 import VdiResultDisplay from '../components/VdiResultDisplay';
 import HpiSample from '../components/HpiSample'; // or HpiSearchHistory, etc.
 import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation';
+import heroBg from '../images/full-vehicle-check.jpg'; // your background image
 
 function formatTimestamp(ts) {
   if (!ts) return 'N/A';
@@ -38,9 +39,9 @@ export default function ExampleReportsPage() {
   const [activeTab, setActiveTab] = useState('mot');
 
   // Replace these IDs with your actual "sample" record IDs
-  const MOT_SEARCH_ID = '67ccb04dba934cab25039552';       // searchType === 'MOT'
-  const VAL_SEARCH_ID = '67d05c0dd2651e963d529342';       // searchType === 'Valuation'
-  const VDI_SEARCH_ID = '67d9e7588b58f829acf6fae8';       // searchType === 'VDI' or 'HPI'
+  const MOT_SEARCH_ID = '67d9f2258b58f829acf6fb29';       // searchType === 'MOT'
+  const VAL_SEARCH_ID = '67d9f1ce8b58f829acf6fb1d';       // searchType === 'Valuation'
+  const VDI_SEARCH_ID = '67dc126c8b58f829acf6fb8c';       // searchType === 'VDI' or 'HPI'
 
   // Query each record via getSampleSearchById 
   const {
@@ -95,7 +96,25 @@ export default function ExampleReportsPage() {
     console.log('searchType =>', searchType);
 
     return (
-      <><style>{
+      <>
+        <Helmet>
+                  <title>Full Vehicle History Example Reports | HPI / VDI Type Check | MOT & Vehicle Valuations</title>
+                  <meta name="description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+          
+                  {/* Open Graph tags for social sharing */}
+                  <meta property="og:title" content="Full Vehicle History | HPI / VDI Type Check | MOT & Vehicle Valuations" />
+                  <meta property="og:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+                  <meta property="og:image" content={heroBg} />
+                  <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+                  <meta property="og:type" content="website" />
+          
+                  {/* Twitter Card tags */}
+                  <meta name="twitter:title" content="Full Vehicle History | HPI / VDI Type Check | MOT & Vehicle Valuations" />
+                  <meta name="twitter:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+                  <meta name="twitter:image" content={heroBg} />
+                  <meta name="twitter:card" content="summary_large_image" />
+                </Helmet>
+                <style>{
         `.plate-input {
         flex: 1;
           background-color: #FFDE46;

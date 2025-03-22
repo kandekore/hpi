@@ -18,7 +18,6 @@ import ResendVerificationPage from './pages/ResendVerificationPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SupportTicketPage from './pages/SupportTicketPage';
-import { Helmet } from 'react-helmet';
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
 }

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_USER_PROFILE, VALUATION_CHECK, MOT_CHECK } from '../graphql/queries';
-
+import { Helmet } from 'react-helmet-async';
 import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
 import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation'; 
 import { useReactToPrint } from 'react-to-print';
@@ -131,6 +131,23 @@ export default function ValuationPage() {
 
   return (
     <>
+    <Helmet>
+                <title>Instant Vehicle Valuations & Full MOT History | Vehicle Data Information </title>
+                <meta name="description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our vehicle valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        
+                {/* Open Graph tags for social sharing */}
+                <meta property="og:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information " />
+                <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+                <meta property="og:image" content={heroBg} />
+                <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+                <meta property="og:type" content="website" />
+        
+                {/* Twitter Card tags */}
+                <meta name="twitter:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information " />
+                <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+                <meta name="twitter:image" content={heroBg} />
+                <meta name="twitter:card" content="summary_large_image" />
+              </Helmet>
       <style>{`
         .valuation-hero {
           width: 100%;
@@ -355,7 +372,7 @@ export default function ValuationPage() {
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p>
             Knowing a car’s true market value helps you avoid overpaying 
-            or underselling. Our valuation tool analyzes current market 
+            or underselling. Our <strong>instant vehicle valuation tool</strong> analyzes current market 
             data to give you a realistic price range for your vehicle.
           </p>
           <ul>
