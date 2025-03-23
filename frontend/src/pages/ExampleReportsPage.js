@@ -40,8 +40,8 @@ export default function ExampleReportsPage() {
 
   // Replace these IDs with your actual "sample" record IDs
   const MOT_SEARCH_ID = '67d9f2258b58f829acf6fb29';       // searchType === 'MOT'
-  const VAL_SEARCH_ID = '67d9f1ce8b58f829acf6fb1d';       // searchType === 'Valuation'
-  const VDI_SEARCH_ID = '67dc126c8b58f829acf6fb8c';       // searchType === 'VDI' or 'HPI'
+  const VAL_SEARCH_ID = '67e0716182e6f36e8d462228';       // searchType === 'Valuation'
+  const VDI_SEARCH_ID = '67dddad18b58f829acf6fb9e';       // searchType === 'VDI' or 'HPI'
 
   // Query each record via getSampleSearchById 
   const {
@@ -153,7 +153,7 @@ export default function ExampleReportsPage() {
       </div>
     </div>
   )}
-     {searchType === 'Valuation' && (
+     {(searchType === 'VALUATION' || searchType === 'Valuation')&& (
     <div className="row row-cols-1 row-cols-sm-2 g-3 mb-3">
       <div className="col">
         <h5 className='plate-input'>{vehicleReg}</h5>
