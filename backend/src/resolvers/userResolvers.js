@@ -74,7 +74,7 @@ export default {
         to: user.email,
         subject: 'Verify Your Email',
         html: `
-          <h1>Welcome to Our App</h1>
+          <img src='https://vehicledatainformation.co.uk/static/media/vdilogo600x119.d9ee5fef3636da9d32c0.jpg' width='250' />
           <p>Click the link below to verify your account:</p>
           <a href="${verifyUrl}">Verify Email</a>
         `,
@@ -166,7 +166,7 @@ await sendMail({
   to: user.email,
   subject: 'Verify Your Email',
   html: `
-    <h1>Welcome to Our App</h1>
+              <img src='https://vehicledatainformation.co.uk/static/media/vdilogo600x119.d9ee5fef3636da9d32c0.jpg' width='250' />
     <p>Click the link below to verify your account:</p>
     <a href="${emailVerifyUrl}">Verify Email</a>
   `,
@@ -193,7 +193,8 @@ await sendMail({
       await sendMail({
         to: user.email,
         subject: 'Reset your password',
-        html: `Click to reset: <a href="${resetUrl}">${resetUrl}</a>`
+        html: `          <img src='https://vehicledatainformation.co.uk/static/media/vdilogo600x119.d9ee5fef3636da9d32c0.jpg' width='250' />
+  <p>Click to reset: <a href="${resetUrl}">${resetUrl}</a></p>`
       });
     
       return true;
