@@ -154,6 +154,7 @@ export default function HomePage() {
         <meta name="twitter:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
         <meta name="twitter:image" content={drkbgd} />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="google-site-verification" content="jg1WMN4AdyYhyigF3HnV1UZszOTW2FNslHlylX7Ds4I" />
       </Helmet>
       <style>{`
         body, html {
