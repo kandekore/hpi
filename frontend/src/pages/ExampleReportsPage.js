@@ -36,7 +36,7 @@ function formatTimestamp(ts) {
 }
 
 export default function ExampleReportsPage() {
-  const [activeTab, setActiveTab] = useState('mot');
+  const [activeTab, setActiveTab] = useState('vdi');
 
   // Replace these IDs with your actual "sample" record IDs
   const MOT_SEARCH_ID = '67d9f2258b58f829acf6fb29';       // searchType === 'MOT'
@@ -215,12 +215,12 @@ export default function ExampleReportsPage() {
       <ul className="nav nav-tabs" role="tablist">
         <li className="nav-item" role="presentation">
           <button
-            className={`nav-link ${activeTab === 'mot' ? 'active' : ''}`}
-            onClick={() => setActiveTab('mot')}
+            className={`nav-link ${activeTab === 'vdi' ? 'active' : ''}`}
+            onClick={() => setActiveTab('vdi')}
             type="button"
             role="tab"
           >
-            MOT Example
+            Full History Example
           </button>
         </li>
         <li className="nav-item" role="presentation">
@@ -233,14 +233,15 @@ export default function ExampleReportsPage() {
             Valuation Example
           </button>
         </li>
+        
         <li className="nav-item" role="presentation">
           <button
-            className={`nav-link ${activeTab === 'vdi' ? 'active' : ''}`}
-            onClick={() => setActiveTab('vdi')}
+            className={`nav-link ${activeTab === 'mot' ? 'active' : ''}`}
+            onClick={() => setActiveTab('mot')}
             type="button"
             role="tab"
           >
-            Full History Example
+            MOT Example
           </button>
         </li>
       </ul>
