@@ -34,8 +34,8 @@ export default function ValuationPage() {
   //   useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
   const motData = valData?.valuation?.vehicleAndMotHistory?.DataItems?.MotHistory;
   const hasMotResults = !!motData;
-  console.log('PageMOTData =>', motData);
-  console.log("valDataPage =>", valData);
+ // console.log('PageMOTData =>', motData);
+ // console.log("valDataPage =>", valData);
 
 
   // 4) Print logic

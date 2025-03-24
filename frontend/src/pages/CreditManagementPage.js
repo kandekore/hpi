@@ -59,7 +59,7 @@ function getDisplayName(value) {
 
 // Get a make/model for each record, with fallback logic
 function getMakeModel(record) {
-  console.log(record)
+  // console.log(record)
   const { searchType, responseData } = record;
   if (!responseData) return 'N/A';
 

@@ -50,7 +50,7 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
       }
       
     );
-    console.log(session.metadata);
+    // console.log(session.metadata);
       await user.save();
       console.log(`User ${userId} credited with ${quantity} ${creditType} credits.`);
     } else {

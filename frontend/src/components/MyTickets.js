@@ -30,12 +30,12 @@ function formatTimestamp(ts) {
   
 export default function MyTickets() {
   const { data, loading, error } = useQuery(GET_MY_TICKETS);
-console.log('MyTickets data =>', data);
+// console.log('MyTickets data =>', data);
   if (loading) return <div>Loading your tickets...</div>;
   if (error) return <div className="alert alert-danger">{error.message}</div>;
 
   const tickets = data.getMyTickets;
-console.log('MyTickets tickets =>', tickets);
+// console.log('MyTickets tickets =>', tickets);
   if (!tickets.length) {
     return <p>No support tickets yet.</p>;
   }

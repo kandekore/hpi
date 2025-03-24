@@ -43,6 +43,6 @@ const supportTicketSchema = new mongoose.Schema({
 supportTicketSchema.pre('save', function (next) {
   this.lastUpdated = new Date();
   next();
-});
+}, { timestamps: true });
 
 export default mongoose.model('SupportTicket', supportTicketSchema);

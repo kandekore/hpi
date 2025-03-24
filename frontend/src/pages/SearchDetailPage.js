@@ -73,12 +73,12 @@
    // Basic info about the search
    const { vehicleReg, searchType, timestamp, responseData } = record;
 
-   console.log('Server: responseData =>', responseData);
+   // console.log('Server: responseData =>', responseData);
  
    // Use our custom function instead of new Date(...)
    const dateString = formatTimestamp(timestamp);
    const hpiResponseData = responseData.vdiCheckFull;
-   console.log('Server: hpiResponseData =>', hpiResponseData);
+   // console.log('Server: hpiResponseData =>', hpiResponseData);
    const motData = responseData?.vehicleAndMotHistory?.DataItems?.MotHistory;
 
    

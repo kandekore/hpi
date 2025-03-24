@@ -5,7 +5,7 @@ import ValuationResults from './ValuationResults';
 import VehicleDetailsHistory from './VehicleDetailsHistory';
 
 export default function ValuationAggregatorDisplay({ valData }) {
-  console.log('valData', valData)
+ //  console.log('valData', valData)
   // If no data => show warning
   if (!valData) {
     return <div className="alert alert-warning">No Valuation data available.</div>;

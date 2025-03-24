@@ -28,7 +28,7 @@ import React from 'react';
  */
 
 function VdiResultDisplay({ data }) {
-  console.log("VDI Data =>", data);
+  // console.log("VDI Data =>", data);
 
   // If no data is given, show an alert
   if (!data) {
@@ -110,10 +110,10 @@ function VdiResultDisplay({ data }) {
     YearOfManufacture,
   } = DataItems;
   const imageList = data?.DataItems?.VehicleImages?.ImageDetailsList;
-  console.log("imageList =>", imageList);
+  // console.log("imageList =>", imageList);
     const vehicleImageUrl =imageList[0].ImageUrl;
 
-      console.log("vehicleImageUrl =>", vehicleImageUrl);
+      // console.log("vehicleImageUrl =>", vehicleImageUrl);
   return (
     <div className="card p-3 mb-4 shadow-sm">
       <h4 className="mb-3">VDI Check Details</h4>

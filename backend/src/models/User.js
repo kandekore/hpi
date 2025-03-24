@@ -16,7 +16,12 @@ const userSchema = new mongoose.Schema({
   motCredits: { type: Number, default: 0 },
   valuationCredits: { type: Number, default: 0 },
   hpiCredits: { type: Number, default: 0 },
-  searchHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SearchRecord' }]
-});
+  searchHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SearchRecord' }],
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  }
+}, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

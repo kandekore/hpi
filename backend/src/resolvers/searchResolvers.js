@@ -54,7 +54,7 @@ export default {
       });
       currentUser.searchHistory.push(record._id);
       await currentUser.save();
-console.log('Server: motCheck =>', fullData);
+// console.log('Server: motCheck =>', fullData);
       return fullData;
     },
 
@@ -112,7 +112,7 @@ console.log('Server: motCheck =>', fullData);
 
       // 1) Call fetchValuationBundle
       const fullResponse = await fetchValuationBundle(reg);
-console.log('Server: fetchValuationBundle =>', fullResponse);
+// console.log('Server: fetchValuationBundle =>', fullResponse);
       // 2) Save
       const record = await SearchRecord.create({
         userId: currentUser._id,
@@ -180,12 +180,6 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       ]);
       await new Promise((r) => setTimeout(r, 600));
 
-      // console.log('Server: vdiFull =>', JSON.stringify(vdiFull, null, 2));
-      // console.log('Server: images =>', JSON.stringify(images, null, 2));
-      // console.log('Server: vehicleAndMot =>', JSON.stringify(vehicleAndMot, null, 2));
-      // console.log('Server: valuation =>', JSON.stringify(valuation, null, 2));
-      // console.log('Server: motTaxStatus =>', JSON.stringify(motTaxStatus, null, 2));
-      // // no final delay needed unless you want it
 
       // build
       const combinedResponse = {
@@ -197,7 +191,7 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
         motTaxStatus,
         images,
       };
-      console.log('Server: final HPI =>', JSON.stringify(combinedResponse, null, 2));
+      // console.log('Server: final HPI =>', JSON.stringify(combinedResponse, null, 2));
 
       // log search
       const record = await SearchRecord.create({
@@ -209,7 +203,7 @@ console.log('Server: fetchValuationBundle =>', fullResponse);
       currentUser.searchHistory.push(record._id);
       await currentUser.save();
 
-      console.log('Server: hpiCheck =>', combinedResponse);
+      // console.log('Server: hpiCheck =>', combinedResponse);
 
       return combinedResponse;
     },

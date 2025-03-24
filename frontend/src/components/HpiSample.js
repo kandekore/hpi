@@ -16,7 +16,7 @@ import VehicleTaxRates from './VehicleTaxRates';
 import VedCo2Emissions from './VedCo2Emissions';
 import TechnicalDetails from './TechnicalDetails';
 export default function HpiResultDisplay({ hpiData, userProfile }) {
-  console.log('hpiData:', hpiData);
+ // console.log('hpiData:', hpiData);
   if (!hpiData) {
     return <div className="alert alert-warning">No HPI data available.</div>;
   }

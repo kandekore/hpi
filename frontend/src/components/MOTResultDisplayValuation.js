@@ -14,7 +14,7 @@ dayjs.extend(customParseFormat);
  */
 export default function ValuationMOTResultDisplay({ motData }) {
   // 1) If there's no data at all, just show "No MOT data"
-  console.log("motDataVal =>", motData); 
+  // console.log("motDataVal =>", motData); 
   if (!motData) {
     return (
       <div className="card mb-4">

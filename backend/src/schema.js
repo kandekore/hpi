@@ -19,7 +19,6 @@ const typeDefs = gql`
     freeMotChecksUsed: Int
     searchHistory: [SearchRecord]
   }
-
   type SearchRecord {
     id: ID!
     vehicleReg: String!
@@ -58,7 +57,63 @@ type SupportTicket {
   createdAt: String!
   lastUpdated: String!
 }
+ type AdminCustomer {
+  id: ID!
+  email: String
+  username: String
+  createdAt: String
+  totalSpent: Float
+  phone: String
+  userIntention: String
+  isVerified: Boolean
+  termsAccepted: Boolean
+  motCredits: Int
+  valuationCredits: Int
+  hpiCredits: Int
+  freeMotChecksUsed: Int
+  searchHistory: [SearchRecord]
+}
 
+type AdminGrantCreditsResponse {
+  success: Boolean!
+  message: String
+}
+
+type AdminSearchRecord {
+  id: ID!
+  userId: ID!
+  userEmail: String
+  vehicleReg: String
+  searchType: String
+  timestamp: String
+}
+
+type AdminTransaction {
+  id: ID!
+  userId: ID!
+  userEmail: String
+  transactionId: String
+  creditsPurchased: Int
+  creditType: String
+  amountPaid: Int
+  timestamp: String
+}
+
+type AdminSupportTicket {
+  id: ID!
+  userId: ID!
+  email: String!
+  name: String!
+  subject: String!
+  status: String!
+  department: String!
+  priority: String!
+  assignedAgent: String!
+  ticketRef: String!
+  messages: [TicketMessage!]!
+  createdAt: String!
+  lastUpdated: String!
+}
 input CreateTicketInput {
   name: String!
   email: String!
@@ -74,6 +129,15 @@ input ReplyTicketInput {
 }
 
   type Query {
+  adminGetAllCustomers(email: String, username: String): [AdminCustomer!]!
+  adminGetCustomerDetails(userId: ID!): User
+
+  adminGetAllSearches(email: String, searchType: String): [AdminSearchRecord!]!
+  adminGetAllTransactions(email: String, creditType: String): [AdminTransaction!]!
+  adminGetAllTickets(status: String, email: String): [AdminSupportTicket!]!
+
+
+  grantFreeCredits(userId: ID!, quantity: Int!, creditType: String!): Transaction
     getMyTickets: [SupportTicket!]!
 getTicketById(ticketId: ID!): SupportTicket
     getSearchById(id: ID!): SearchRecord
@@ -106,6 +170,11 @@ type Mutation {
     password: String!
     captchaToken: String!
   ): String
+
+  adminLogin(email: String!, password: String!): String
+  adminGrantFreeCredits(userId: ID!, creditType: String!, quantity: Int!): AdminGrantCreditsResponse
+  adminReplyToTicket(ticketId: ID!, message: String!): AdminSupportTicket
+  adminCloseTicket(ticketId: ID!): AdminSupportTicket
 
    createSupportTicket(input: CreateTicketInput!): SupportTicket
   replyToSupportTicket(input: ReplyTicketInput!): SupportTicket

@@ -78,7 +78,7 @@ export default function ExampleReportsPage() {
 
     // IMPORTANT: use data?.getSampleSearchById 
     const record = data?.getSampleSearchById;
-    console.log('record =>', record);
+    // console.log('record =>', record);
     if (!record) {
       return (
         <div className="alert alert-warning">
@@ -93,7 +93,7 @@ export default function ExampleReportsPage() {
     const motData = responseData?.vehicleAndMotHistory?.DataItems?.MotHistory;
 
 
-    console.log('searchType =>', searchType);
+    // console.log('searchType =>', searchType);
 
     return (
       <>
