@@ -31,7 +31,7 @@ async function startServer() {
         'https://cdn2.vdicheck.com',
         'http://localhost:4000',
         'http://localhost:3001',
-        'https://admin.vehicledatainformation.co.uk',
+        'https://admin.vehicledatainformation.co.uk/',
       ],
       credentials: true,
     })

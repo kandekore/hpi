@@ -140,10 +140,10 @@ input ReplyTicketInput {
   adminGetAllTickets(status: String, email: String): [AdminSupportTicket!]!
 
  
-
+getTicketById(ticketId: ID!): SupportTicket
   grantFreeCredits(userId: ID!, quantity: Int!, creditType: String!): Transaction
     getMyTickets: [SupportTicket!]!
-getTicketById(id: ID!): SupportTicket
+adminGetTicketById(id: ID!): SupportTicket
     getSearchById(id: ID!): SearchRecord
     getSampleSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON

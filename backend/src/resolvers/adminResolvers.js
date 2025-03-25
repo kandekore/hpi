@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import Transaction from '../models/Transaction.js';
 import SearchRecord from '../models/SearchRecord.js';
 import SupportTicket from '../models/SupportTicket.js';
+import { sendMail } from '../services/mailer.js';
 
 import { comparePasswords, createToken } from '../services/auth.js';
 
@@ -227,14 +228,14 @@ async function adminGrantFreeCredits(_, { userId, creditType, quantity }, { user
 
 /** Admin replies to an existing ticket */
 async function adminReplyToTicket(_, { ticketId, message }, { user }) {
-  // isAdminOrThrow(user);
+  // isAdminOrThrow(user); // re-enable if you want to ensure user.role === 'admin'
 
   const ticket = await SupportTicket.findById(ticketId);
   if (!ticket) {
     throw new Error('Ticket not found');
   }
 
-  // add new message
+  // add new message from 'Support'
   ticket.messages.push({
     sender: 'Support',
     text: message
@@ -242,6 +243,19 @@ async function adminReplyToTicket(_, { ticketId, message }, { user }) {
 
   ticket.status = 'Answered';
   await ticket.save();
+
+  // Send email to the ticket owner notifying of new staff reply
+  await sendMail({
+    to: ticket.email,
+    subject: `New Reply on Ticket #${ticket.ticketRef} - ${ticket.subject}`,
+    html: `
+      <p>Hi ${ticket.name},</p>
+      <p>You have a new reply from our Support team on Ticket #${ticket.ticketRef}.</p>
+      <p><strong>Message:</strong><br/>${message}</p>
+      <hr/>
+      <p>Please log in to your dashboard to view or respond further.</p>
+    `
+  });
 
   return ticket;
 }
@@ -285,7 +299,7 @@ async function getSearchById(_, { id }, { user }) {
 }
 
 // Return a single SupportTicket by _id
-async function getTicketById(_, { id }, { user }) {
+async function adminGetTicketById(_, { id }, { user }) {
   // isAdminOrThrow(user);
 
   const ticket = await SupportTicket.findById(id);
@@ -310,7 +324,7 @@ export default {
     adminGetAllSearches,
     adminGetAllTransactions,
     adminGetAllTickets,
-    getTicketById,
+    adminGetTicketById,
     getSearchById,
   },
   Mutation: {
