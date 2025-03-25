@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   valuationCredits: { type: Number, default: 0 },
   hpiCredits: { type: Number, default: 0 },
   searchHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SearchRecord' }],
+  timestamp: { type: Date, default: Date.now },
   role: {
     type: String,
     enum: ['user', 'admin'],

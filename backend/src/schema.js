@@ -18,6 +18,7 @@ const typeDefs = gql`
     hpiCredits: Int
     freeMotChecksUsed: Int
     searchHistory: [SearchRecord]
+    timestamp: String!
   }
   type SearchRecord {
     id: ID!
@@ -72,6 +73,7 @@ type SupportTicket {
   hpiCredits: Int
   freeMotChecksUsed: Int
   searchHistory: [SearchRecord]
+  timestamp: String!
 }
 
 type AdminGrantCreditsResponse {
@@ -86,6 +88,7 @@ type AdminSearchRecord {
   vehicleReg: String
   searchType: String
   timestamp: String
+ responseData: JSON
 }
 
 type AdminTransaction {
@@ -136,10 +139,11 @@ input ReplyTicketInput {
   adminGetAllTransactions(email: String, creditType: String): [AdminTransaction!]!
   adminGetAllTickets(status: String, email: String): [AdminSupportTicket!]!
 
+ 
 
   grantFreeCredits(userId: ID!, quantity: Int!, creditType: String!): Transaction
     getMyTickets: [SupportTicket!]!
-getTicketById(ticketId: ID!): SupportTicket
+getTicketById(id: ID!): SupportTicket
     getSearchById(id: ID!): SearchRecord
     getSampleSearchById(id: ID!): SearchRecord
     motCheck(reg: String!): JSON

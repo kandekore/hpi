@@ -29,7 +29,9 @@ async function startServer() {
         'https://studio.apollographql.com',
         'http://192.168.1.9:4000',
         'https://cdn2.vdicheck.com',
-        'http://localhost:4000'
+        'http://localhost:4000',
+        'http://localhost:3001',
+        'https://admin.vehicledatainformation.co.uk',
       ],
       credentials: true,
     })
