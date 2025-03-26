@@ -18,6 +18,7 @@ import ResendVerificationPage from './pages/ResendVerificationPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import SupportTicketPage from './pages/SupportTicketPage';
+import Pricing from './pages/Pricing';
 function isAuthenticated() {
   return !!localStorage.getItem('authToken');
 }
@@ -68,7 +69,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/support/ticket/:ticketId" element={<SupportTicketPage />} />
-
+            <Route path="/pricing" element={<Pricing />} />
             {/* Protected Route */}
             <Route 
               path="/dashboard"

@@ -22,6 +22,11 @@ function Layout({ children }) {
     <div className="d-flex flex-column min-vh-100">
       <style>{`
         /* Navbar background and bottom border */
+        a.nav-link.text-white.buy {
+    text-shadow: 2px 2px #000000;
+    font-weight: 600;
+    color: #ffde45 !important;
+}
         .custom-navbar {
           background-color: #1560bd !important;
           border-bottom: 5px solid #fff;
@@ -97,10 +102,10 @@ function Layout({ children }) {
                    
                     <li className="nav-item">
                       <Link className="nav-link text-white" to="/hpi">
-                      Full Vehicle History
+                      Vehicle History
                       </Link>
                     </li>
-
+                  
                 {/* Only show these links if logged in */}
                 {isLoggedIn && (
                   <>
@@ -119,7 +124,11 @@ function Layout({ children }) {
                     Sample Reports
                   </Link>
                 </li>
-
+                <li className="nav-item">
+                <Link className="nav-link text-white buy" to="/pricing">
+                Buy Checks
+                </Link>
+              </li>
                 {/* Auth Logic: Show Logout if logged in, otherwise show Login/Register */}
                 {isLoggedIn ? (
                   <li className="nav-item">
