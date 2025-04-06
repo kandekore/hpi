@@ -134,3 +134,15 @@ export const GET_TICKET_BY_ID = gql`
   }
 }
 `;
+export const PUBLIC_VEHICLE_PREVIEW = gql`
+  query PublicVehiclePreview($reg: String!, $captchaToken: String!) {
+    publicVehiclePreview(reg: $reg, captchaToken: $captchaToken) {
+      found
+      make
+      colour
+      year
+      imageUrl
+      message
+    }
+  }
+`;

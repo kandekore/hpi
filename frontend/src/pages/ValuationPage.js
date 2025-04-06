@@ -1,79 +1,93 @@
+// src/pages/ValuationPage.js
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_USER_PROFILE, VALUATION_CHECK, MOT_CHECK } from '../graphql/queries';
 import { Helmet } from 'react-helmet-async';
-import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
-import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation'; 
 import { useReactToPrint } from 'react-to-print';
 
+// GraphQL
+import { GET_USER_PROFILE, PUBLIC_VEHICLE_PREVIEW, VALUATION_CHECK } from '../graphql/queries';
+
+// Components
+import AuthTabs from '../components/AuthTabs';
+import ValuationAggregatorDisplay from '../components/ValuationAggregatorDisplay';
+import MOTResultDisplayValuation from '../components/MOTResultDisplayValuation'; 
+
+// reCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha';
+
+// Images
 import heroBg from '../images/vehicle-valuation.jpg';
 
 export default function ValuationPage() {
-  // 1) Read ?reg param
+  // 1) React Router stuff
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialReg = searchParams.get('reg') || '';
 
-  // Basic states
-  const [reg, setReg] = useState(initialReg);
-  const [attemptedSearch, setAttemptedSearch] = useState(false);
+  // 2) Local states
+  const [reg, setReg] = useState(initialReg.toUpperCase());
   const [errorMsg, setErrorMsg] = useState('');
+  const [partialData, setPartialData] = useState(null);  // public DVLA fallback
+  const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
-  // 2) Query user
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
-  const userProfile = profileData?.getUserProfile || null;
-  const isLoggedIn = !!localStorage.getItem('authToken');
-
-  // 3) Lazy queries for Valuation + optional MOT
-  const [valuationCheck, { data: valData, loading: valLoading, error: valError }] =
-    useLazyQuery(VALUATION_CHECK, { fetchPolicy: 'no-cache' });
-  const hasValResults = !!(valData && valData.valuation);
-
-  // const [getMotData, { data: motData, loading: motLoading, error: motError }] =
-  //   useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
-  const motData = valData?.valuation?.vehicleAndMotHistory?.DataItems?.MotHistory;
-  const hasMotResults = !!motData;
- // console.log('PageMOTData =>', motData);
- // console.log("valDataPage =>", valData);
-
-
-  // 4) Print logic
-  const printRef = useRef(null);
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `Valuation_Report_${reg}`,
-  });
-
-  // 5) If there's a ?reg param, auto-check
-  useEffect(() => {
-    if (initialReg) {
-      handleValuationCheck();
-      navigate('/valuation', { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Registration input
-  const handleRegChange = (e) => {
-    const val = e.target.value.toUpperCase();
-    if (val.length <= 8) {
-      setReg(val);
-    }
-  };
-
-  // --- Modal logic for credit confirmation ---
+  // For the usage confirmation modal
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState('');
   const [modalSearchType, setModalSearchType] = useState('');
   const [pendingSearchAction, setPendingSearchAction] = useState(null);
   const modalRef = useRef(null);
 
-  const showCreditsModal = (creditsCount, searchType, actionFn, reg) => {
+  // 3) GraphQL queries
+  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const userProfile = profileData?.getUserProfile || null;
+  const isLoggedIn = !!localStorage.getItem('authToken');
+
+  // If user is logged in, get Valuation credits
+  const valuationCredits = userProfile?.valuationCredits ?? 0;
+
+  // Public partial data
+  const [fetchPublicPreview, { loading: publicLoading, error: publicError }] =
+    useLazyQuery(PUBLIC_VEHICLE_PREVIEW, {
+      onCompleted: (data) => {
+        setPartialData(data.publicVehiclePreview);
+      },
+    });
+
+  // Full valuation
+  const [valuationCheck, { data: valData, loading: valLoading, error: valError }] =
+    useLazyQuery(VALUATION_CHECK, { fetchPolicy: 'no-cache' });
+
+  // If we have valData.valuation => show aggregator
+  const hasValResults = !!(valData?.valuation);
+
+  // Possibly show MOT data from valData.valuation.vehicleAndMotHistory?
+  const motData = valData?.valuation?.vehicleAndMotHistory?.DataItems?.MotHistory;
+  const hasMotResults = !!motData;
+
+  // 4) If there's a ?reg param, remove it from URL
+  useEffect(() => {
+    if (initialReg) {
+      navigate('/valuation', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 5) Print logic
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Valuation_Report_${reg}`,
+  });
+
+  // 6) Confirm usage modal
+  const showCreditsModal = (creditsCount, actionFn) => {
     setModalMsg(
-      `You are requesting a Vehicle Valuation for registration ${reg}. You have ${creditsCount} Valuation checks left. This search will deduct 1 credit.`
+      `You are requesting a Vehicle Valuation for registration ${reg}. ` +
+      `You have ${creditsCount} Valuation checks left. This search will deduct 1 credit.`
     );
-    setModalSearchType(searchType);
+    setModalSearchType('VALUATION');
     setShowModal(true);
     setPendingSearchAction(() => actionFn);
   };
@@ -85,69 +99,90 @@ export default function ValuationPage() {
     setShowModal(false);
     setPendingSearchAction(null);
   };
-  // --- End modal logic ---
 
-  // 6) The "Valuation Check" logic
-  const handleValuationCheck = async () => {
-    setAttemptedSearch(true);
+  // 7) handlePublicCheck => open recaptcha modal
+  const handlePublicCheck = () => {
     setErrorMsg('');
-
-    // If not logged in => set a React node with links
-    if (!isLoggedIn) {
-      setErrorMsg(
-        <>
-          Please <Link to="/login">login</Link> or{' '}
-          <Link to="/register">register</Link> to do a Valuation check.
-        </>
-      );
-      return;
-    }
-    // If no registration
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
-    // If user profile not loaded
+    // show reCAPTCHA modal
+    setShowCaptchaModal(true);
+  };
+
+  // Once user solves reCAPTCHA in the modal:
+  const handleCaptchaSuccess = async (token) => {
+    setShowCaptchaModal(false);
+    setCaptchaToken(token);
+    setErrorMsg('');
+    try {
+      await fetchPublicPreview({ variables: { reg, captchaToken: token } });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    }
+  };
+
+  // 8) Full Valuation check if logged in
+  const handleFullValuationCheck = async () => {
+    setErrorMsg('');
     if (!userProfile) {
       setErrorMsg('Unable to fetch your profile. Please try again later.');
       return;
     }
-
-    // 7) Check Valuation credits
-    const valuationCredits = userProfile?.valuationCredits ?? 0;
-    if (valuationCredits > 0) {
-      // Show usage confirmation modal
-      showCreditsModal(valuationCredits, 'VALUATION', async () => {
-        // Once user confirms => we run both queries (Valuation + MOT)
-        // await getMotData({ variables: { reg } });
-        await valuationCheck({ variables: { reg } });
-        
-      },
-      reg);
-    } else {
+    if (valuationCredits < 1) {
       setErrorMsg('You have no Valuation credits left. Please purchase more.');
+      return;
     }
+    // show usage modal
+    showCreditsModal(valuationCredits, async () => {
+      await valuationCheck({ variables: { reg } });
+    });
+  };
+
+  // 9) The main "Check Valuation" button => partial or full
+  const handleCheckButton = async () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      // partial
+      handlePublicCheck();
+    } else {
+      // full
+      handleFullValuationCheck();
+    }
+  };
+
+  // 10) If user logs in or registers => do the full check or reload
+  const handleAuthSuccess = () => {
+    handleFullValuationCheck();
+    // or window.location.reload();
   };
 
   return (
     <>
-    <Helmet>
-                <title>Instant Vehicle Valuations & Full MOT History | Vehicle Data Information </title>
-                <meta name="description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our vehicle valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
-        
-                {/* Open Graph tags for social sharing */}
-                <meta property="og:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information " />
-                <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
-                <meta property="og:image" content={heroBg} />
-                <meta property="og:url" content="https://vehicledatainformation.co.uk" />
-                <meta property="og:type" content="website" />
-        
-                {/* Twitter Card tags */}
-                <meta name="twitter:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information " />
-                <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
-                <meta name="twitter:image" content={heroBg} />
-                <meta name="twitter:card" content="summary_large_image" />
-              </Helmet>
+      <Helmet>
+        <title>Instant Vehicle Valuations & Full MOT History | Vehicle Data Information</title>
+        <meta name="description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our vehicle valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+    
+        {/* Open Graph tags */}
+        <meta property="og:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
+        <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        <meta property="og:image" content={heroBg} />
+        <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+        <meta property="og:type" content="website" />
+    
+        {/* Twitter */}
+        <meta name="twitter:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
+        <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        <meta name="twitter:image" content={heroBg} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <style>{`
         .valuation-hero {
           width: 100%;
@@ -231,12 +266,9 @@ export default function ValuationPage() {
           margin-bottom: 2rem;
           font-weight: 700;
         }
-        .valbutton {
-          display: none;
-        }
       `}</style>
 
-      {/* Modal => credit usage */}
+      {/* USAGE MODAL */}
       {showModal && (
         <div
           className="modal fade show"
@@ -275,20 +307,51 @@ export default function ValuationPage() {
         </div>
       )}
 
+      {/* reCAPTCHA Modal for partial search if user is not logged in */}
+      {showCaptchaModal && !isLoggedIn && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: 8 }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Verify You're Human</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCaptchaModal(false)}
+                />
+              </div>
+              <div className="modal-body mb-3 d-flex justify-content-center" style={{ textAlign: 'center' }}>
+                <ReCAPTCHA
+                  sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+                  onChange={(token) => handleCaptchaSuccess(token)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HERO */}
       <div className="valuation-hero">
         <h1>Valuation Check</h1>
         <p>Get an instant estimate of your vehicle’s market value.</p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Registration input */}
+          {/* Plate input */}
           <div className="plate-container">
             <div className="plate-blue">GB</div>
             <input
               className="plate-input"
               placeholder="AB12 CDE"
               value={reg}
-              onChange={handleRegChange}
+              onChange={(e) => {
+                setReg(e.target.value.toUpperCase());
+                setPartialData(null);
+                setErrorMsg('');
+              }}
             />
           </div>
 
@@ -312,8 +375,8 @@ export default function ValuationPage() {
               </button>
             ) : (
               <button
-                onClick={handleValuationCheck}
-                disabled={valLoading}
+                onClick={handleCheckButton}
+                disabled={valLoading || publicLoading}
                 style={{
                   fontSize: '1.2rem',
                   fontWeight: 'bold',
@@ -325,41 +388,80 @@ export default function ValuationPage() {
                   marginTop: '1rem',
                 }}
               >
-                {valLoading ? 'Checking...' : 'Get Valuation'}
+                {(valLoading || publicLoading) ? 'Checking...' : 'Get Valuation'}
               </button>
             )}
           </div>
 
-          {/* Unified error display */}
+          {/* Error Messages */}
           {errorMsg && (
-            <div className="alert alert-danger mt-2" style={{ maxWidth: '600px', margin: '1rem auto' }}>
+            <div
+              className="alert alert-danger mt-2"
+              style={{ maxWidth: '600px', margin: '1rem auto' }}
+            >
               {errorMsg}
             </div>
           )}
-
-          {/* GraphQL errors */}
           {valError && (
-            <div className="alert alert-danger mt-2">
+            <div className="alert alert-danger mt-2" style={{ maxWidth: 600, margin: '1rem auto' }}>
               {valError.message}
             </div>
           )}
-       
+          {publicError && (
+            <div className="alert alert-danger mt-2" style={{ maxWidth: 600, margin: '1rem auto' }}>
+              {publicError.message}
+            </div>
+          )}
+
+          {/* PARTIAL DATA => if not logged in */}
+          {partialData && !isLoggedIn && partialData.found && (
+            <div
+              className="alert alert-info mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              <h5>Vehicle Found!</h5>
+              {partialData.imageUrl && (
+                <img
+                  src={partialData.imageUrl}
+                  alt="Car Preview"
+                  style={{ maxWidth: '100%', marginBottom: '1rem' }}
+                />
+              )}
+              <p style={{ fontSize: '25px', color: '#003366', textShadow: 'none'}}>
+                <strong>
+                {partialData.year} {partialData.colour} {partialData.make}
+            
+                </strong>
+              </p>
+              <p style={{color: '#003366', textShadow: 'none'}}>
+                Please register or log in below to unlock the full Valuation, 
+                including market pricing data, optional MOT history, and more.
+              </p>
+
+              <AuthTabs onAuthSuccess={() => handleAuthSuccess()} />
+            </div>
+          )}
+          {partialData && !isLoggedIn && !partialData.found && (
+            <div
+              className="alert alert-warning mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {partialData.message || 'No data found for this registration.'}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Show the Valuation data if available */}
+      {/* If Valuation data is found */}
       {hasValResults && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
-          <div className="text-end mb-2">
-           
-          </div>
           <div ref={printRef}>
             <ValuationAggregatorDisplay valData={valData.valuation} userProfile={userProfile} />
           </div>
         </div>
       )}
 
-      {/* Optionally show the MOT data as well */}
+      {/* If we also want to show MOT data from the valuation's combined response */}
       {hasMotResults && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <MOTResultDisplayValuation motData={motData} userProfile={userProfile} />

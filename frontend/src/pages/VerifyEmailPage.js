@@ -20,11 +20,23 @@ function VerifyEmailPage() {
   const [loginMutation, { loading: loginLoading, error: loginError }] 
     = useMutation(LOGIN);
 
-  useEffect(() => {
-    if (token) {
-      verifyEmail({ variables: { token } });
-    }
-  }, [token, verifyEmail]);
+    useEffect(() => {
+      if (token) {
+        verifyEmail({ variables: { token } })
+          .then(({ data }) => {
+            if (data?.verifyEmail) {
+              // This is your JWT
+              localStorage.setItem('authToken', data.verifyEmail);
+              // Optionally redirect
+              window.location.href = '/dashboard';
+            }
+          })
+          .catch(err => {
+            console.error('Email verify error:', err);
+          });
+      }
+    }, [token, verifyEmail]);
+    
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -1,7 +1,8 @@
 // backend/src/resolvers/userResolvers.js
 import User from '../models/User.js';
 import { hashPassword, comparePasswords, createToken } from '../services/auth.js';
-import { sendMail }  from '../services/mailer.js'; // hypothetical mailer service
+import { sendMail }  from '../services/mailer.js'; 
+// import { sendVerificationEmail, sendAdminEmail } from '../services/mailer.js';
 import crypto from 'crypto';
 import fetch from 'node-fetch'; 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -131,20 +132,20 @@ export default {
     },
 
     // VERIFY EMAIL
-    async verifyEmail(_, { token }) {
-      // 1) Lookup user by verificationToken
-      const user = await User.findOne({ verificationToken: token });
-      if (!user) {
-        throw new Error('Invalid or expired verification token.');
-      }
+    // async verifyEmail(_, { token }) {
+    //   // 1) Lookup user by verificationToken
+    //   const user = await User.findOne({ verificationToken: token });
+    //   if (!user) {
+    //     throw new Error('Invalid or expired verification token.');
+    //   }
 
-      // 2) Mark as verified, clear token
-      user.isVerified = true;
-      user.verificationToken = undefined;
-      await user.save();
+    //   // 2) Mark as verified, clear token
+    //   user.isVerified = true;
+    //   user.verificationToken = undefined;
+    //   await user.save();
 
-      return true; // or return a string message if you prefer
-    },
+    //   return true; // or return a string message if you prefer
+    // },
     async resendVerificationEmail(_, { email }) {
       // 1) Find the user
       const user = await User.findOne({ email });
@@ -215,6 +216,22 @@ await sendMail({
       await user.save();
     
       return true;
+    },
+    async verifyEmail(_, { token }) {
+      // 1) Lookup user
+      const user = await User.findOne({ verificationToken: token });
+      if (!user) {
+        throw new Error('Invalid or expired verification token.');
+      }
+
+      // 2) Mark verified, clear token
+      user.isVerified = true;
+      user.verificationToken = undefined;
+      await user.save();
+
+      // 3) Generate JWT to auto-log them in
+      const jwt = createToken(user);
+      return jwt; // Return the token string
     }
     
     

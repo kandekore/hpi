@@ -30,3 +30,6 @@ export async function sendMail({ to, subject, html }) {
 
 // Optional default export (e.g., if you want to import everything at once)
 export default { sendMail };
+
+
+

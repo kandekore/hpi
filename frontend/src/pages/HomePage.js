@@ -1,60 +1,69 @@
+// src/pages/HomePage.js
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_USER_PROFILE } from '../graphql/queries';
-import { useNavigate } from 'react-router-dom';
+import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
+import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import ReCAPTCHA from 'react-google-recaptcha';
+
+import { GET_USER_PROFILE, PUBLIC_VEHICLE_PREVIEW } from '../graphql/queries';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
+
+import AuthTabs from '../components/AuthTabs';
 import MainPricing from '../components/MainPricing';
+
 import drkbgd from '../images/drkbgd.jpg';
 import flexiblePlansBg from '../images/happyuser.jpg';
-import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 
 export default function HomePage() {
+  const navigate = useNavigate();
+
+  // 1) Local states
   const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [partialData, setPartialData] = useState(null); // from publicVehiclePreview
+  const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [searchType, setSearchType] = useState(null); // 'MOT', 'VALUATION', 'FULL_HISTORY'
 
+  // 2) Queries + user data
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // Free MOT usage
+  // Credits
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
   const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
-
-  // Paid credits
   const motCredits = userProfile?.motCredits ?? 0;
-  const totalMot = freeMotLeft + motCredits; // total available MOT checks
-
-  // Valuation credits
+  const totalMot = freeMotLeft + motCredits;
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
-
-  // VDI or HPI credits
   const hasVdiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
-  const navigate = useNavigate();
+  // 3) Lazy query for partial data
+  const [fetchPublicPreview, { loading: publicLoading, error: publicError }] =
+    useLazyQuery(PUBLIC_VEHICLE_PREVIEW, {
+      onCompleted: (data) => {
+        setPartialData(data.publicVehiclePreview);
+      },
+    });
+
+  // 4) Mutation for purchase session
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
-  // Registration input
+  // 5) Handle registration input
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
     if (val.length <= 8) {
       setReg(val);
     }
+    setPartialData(null);
+    setErrorMsg('');
   };
 
-  // Handle MOT
-  const handleClickMOT = () => {
+  // 6) If user is logged in => go to the correct page with ?reg
+  const handleLoggedInSearch = (type) => {
     setErrorMsg('');
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
-      return;
-    }
-    if (!isLoggedIn) {
-      setErrorMsg(
-        <>
-        Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a MOT check.
-      </> 
-      );
       return;
     }
     if (!userProfile) {
@@ -62,62 +71,92 @@ export default function HomePage() {
       return;
     }
 
-    if (totalMot > 0) {
-      // If user has free or paid MOT credits, go straight to MOT page
-      navigate(`/mot?reg=${reg}`);
+    switch (type) {
+      case 'MOT':
+        // check if user has free or paid MOT left
+        if (totalMot > 0) {
+          navigate(`/mot?reg=${reg}`);
+        } else {
+          setErrorMsg('You have no MOT checks remaining. Please purchase more credits.');
+        }
+        break;
+      case 'VALUATION':
+        if (hasValuationCredits) {
+          navigate(`/valuation?reg=${reg}`);
+        } else {
+          setErrorMsg('You have no Valuation credits left. Please purchase more.');
+        }
+        break;
+      case 'FULL_HISTORY':
+        if (hasVdiCredits) {
+          navigate(`/hpi?reg=${reg}`);
+        } else {
+          setErrorMsg('You have no Full Vehicle History credits left. Please purchase more.');
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  // 7) If not logged in => partial data => reCAPTCHA
+  const handlePublicSearch = (type) => {
+    setErrorMsg('');
+    setSearchType(type); // store which type they clicked
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    // show reCAPTCHA modal
+    setShowCaptchaModal(true);
+  };
+
+  // reCAPTCHA success => fetch partial
+  const handleCaptchaSuccess = async (token) => {
+    setShowCaptchaModal(false);
+    setCaptchaToken(token);
+    setErrorMsg('');
+    try {
+      await fetchPublicPreview({ variables: { reg, captchaToken: token } });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    }
+  };
+
+  // 8) The "click" handlers for each search type
+  const handleClickMOT = () => {
+    if (isLoggedIn) {
+      handleLoggedInSearch('MOT');
     } else {
-      setErrorMsg(
-        'You have no MOT checks remaining. Please purchase credits or wait for more free checks.'
-      );
+      handlePublicSearch('MOT');
     }
   };
 
-  // Handle Valuation
   const handleClickValuation = () => {
-    setErrorMsg('');
-    if (!reg) {
-      setErrorMsg('Please enter a valid registration.');
-      return;
+    if (isLoggedIn) {
+      handleLoggedInSearch('VALUATION');
+    } else {
+      handlePublicSearch('VALUATION');
     }
-    if (!isLoggedIn) {
-      setErrorMsg(
-      <>
-      Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a Valuation check.
-    </>);
-      return;
-    }
-    if (!hasValuationCredits) {
-      setErrorMsg('You have no Valuation credits left. Please purchase more.');
-      return;
-    }
-    // Directly navigate
-    navigate(`/valuation?reg=${reg}`);
   };
 
-  // Handle VDI/HPI
   const handleClickVDI = () => {
-    setErrorMsg('');
-    if (!reg) {
-      setErrorMsg('Please enter a valid registration.');
-      return;
+    if (isLoggedIn) {
+      handleLoggedInSearch('FULL_HISTORY');
+    } else {
+      handlePublicSearch('FULL_HISTORY');
     }
-    if (!isLoggedIn) {
-      setErrorMsg(
-        <>
-      Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to do a Full Vehicle History check.
-    </>
-    );
-      return;
-    }
-    if (!hasVdiCredits) {
-      setErrorMsg('You have no VDI credits left. Please purchase more.');
-      return;
-    }
-    // Directly navigate
-    navigate(`/hpi?reg=${reg}`);
   };
 
-  // Purchase session for buying credits
+  // 9) If they log in or register => proceed to the correct search
+  const handleAuthSuccess = () => {
+    if (searchType) {
+      handleLoggedInSearch(searchType);
+    }
+  };
+
+  // 10) Purchase
   const handlePurchase = async (product, quantity) => {
     const productMap = {
       VALUATION: 'VALUATION',
@@ -125,9 +164,8 @@ export default function HomePage() {
       FULL_HISTORY: 'FULL_HISTORY',
     };
     const creditType = productMap[product] || 'FULL_HISTORY';
-
     try {
-      const { data } = await createSession({ variables: { creditType, quantity }});
+      const { data } = await createSession({ variables: { creditType, quantity } });
       if (data.createCreditPurchaseSession) {
         window.location.href = data.createCreditPurchaseSession;
       }
@@ -138,24 +176,22 @@ export default function HomePage() {
 
   return (
     <>
-          <Helmet>
+      <Helmet>
         <title>Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks</title>
         <meta name="description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
-
-        {/* Open Graph tags for social sharing */}
+        {/* Social meta tags */}
         <meta property="og:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta property="og:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
         <meta property="og:image" content={drkbgd} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
         <meta property="og:type" content="website" />
 
-        {/* Twitter Card tags */}
         <meta name="twitter:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta name="twitter:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
         <meta name="twitter:image" content={drkbgd} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="google-site-verification" content="jg1WMN4AdyYhyigF3HnV1UZszOTW2FNslHlylX7Ds4I" />
       </Helmet>
+
       <style>{`
         body, html {
           margin: 0;
@@ -406,7 +442,37 @@ export default function HomePage() {
           text-shadow: 1px 1px #000;
           margin-bottom: -15px;
         }
+          p.hero-subtitle.yellow {
+    margin-bottom: 25px;
+}
       `}</style>
+
+      {/* reCAPTCHA modal for partial data */}
+      {showCaptchaModal && !isLoggedIn && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '8px' }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Verify You're Human</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCaptchaModal(false)}
+                />
+              </div>
+              <div className="modal-body" style={{ textAlign: 'center' }}>
+                <ReCAPTCHA
+                  sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+                  onChange={(token) => handleCaptchaSuccess(token)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* HERO SECTION */}
       <div className="hero section-fullwidth">
@@ -423,7 +489,7 @@ export default function HomePage() {
             <input
               type="text"
               className="plate-input"
-              placeholder="AB12 CDE" 
+              placeholder="AB12 CDE"
               value={reg}
               onChange={handleRegChange}
             />
@@ -431,7 +497,7 @@ export default function HomePage() {
 
           <p className="hero-subtitle yellow">Choose a Search Type</p>
 
-          <div className="button-group">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '50px'}}>
             <button className="action-button" onClick={handleClickMOT}>
               Full MOT History
             </button>
@@ -443,7 +509,6 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* If there's an error, display it */}
           {errorMsg && (
             <div
               className="alert alert-danger mt-3"
@@ -453,8 +518,57 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </div>
 
+        {/* If partial data is found, user not logged in => show teaser + AuthTabs in the hero */}
+        {partialData && !isLoggedIn && partialData.found && (
+          <div
+            className="alert alert-info mt-3"
+            style={{
+              maxWidth: '600px',
+              margin: '2rem auto 0 auto',
+              border: '3px solid #003366',
+              borderRadius: 25,
+              padding: '1rem',
+              background: '#fff',
+              color: '#003366',
+              textAlign: 'center',
+            }}
+          >
+            <h5>Vehicle Found!</h5>
+            {partialData.imageUrl && (
+              <img
+                src={partialData.imageUrl}
+                alt="Car"
+                style={{ maxWidth: '100%', marginBottom: '1rem' }}
+              />
+            )}
+            <p style={{ fontSize: '1.1rem' }}>
+              <strong>
+                {partialData.colour} {partialData.make}
+                {partialData.year && ` from ${partialData.year}`}
+              </strong>
+            </p>
+            <p>
+              Please Register or Login below to unlock a {searchType === 'MOT'
+                ? 'Full MOT History'
+                : searchType === 'VALUATION'
+                ? 'Vehicle Valuation'
+                : 'Full Vehicle History'}{' '}
+              check!
+            </p>
+            <AuthTabs onAuthSuccess={handleAuthSuccess} />
+          </div>
+        )}
+
+        {partialData && !isLoggedIn && !partialData.found && (
+          <div
+            className="alert alert-warning"
+            style={{ maxWidth: '600px', margin: '2rem auto', textAlign: 'center' }}
+          >
+            {partialData.message || 'No data found for this registration.'}
+          </div>
+        )}
+      </div>
       {/* PRICING SECTION */}
       <MainPricing
         isLoggedIn={isLoggedIn}

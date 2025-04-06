@@ -1,256 +1,377 @@
+// src/pages/MOTPage.js
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_USER_PROFILE, MOT_CHECK } from '../graphql/queries';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import { Helmet } from 'react-helmet-async';
-import MOTResultDisplay from '../components/MOTResultDisplay';
-import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
 
+// GraphQL Queries
+import { GET_USER_PROFILE, PUBLIC_VEHICLE_PREVIEW, MOT_CHECK } from '../graphql/queries';
+
+// Import your separate AuthTabs component
+import AuthTabs from '../components/AuthTabs';
+
+// Additional components
+import VehicleDetailsMOT from '../components/VehicleDetailsMOT';
+import MOTResultDisplay from '../components/MOTResultDisplay';
+
+// Images / assets
 import heroBg from '../images/mot-head.jpg';
 
-export default function MOTPage() {
+// We'll import react-google-recaptcha inside a small CaptchaModal
+import ReCAPTCHA from 'react-google-recaptcha';
 
+export default function MOTPage() {
+  // 1) React Router
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Registration input
-  const initialReg = searchParams.get('reg') || '';
-  const [reg, setReg] = useState(initialReg);
-
-  // For controlling whether we've tried a search at all
-  const [attemptedSearch, setAttemptedSearch] = useState(false);
-
-  // Single error message (can be string or JSX)
+  // 2) Local States
+  const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Query user for credit logic
+  // We'll store partialData from DVLA/fallback
+  const [partialData, setPartialData] = useState(null);
+
+  // For a pop-up recaptcha modal
+  const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+
+  // For user profile / credits
   const { data: profileData } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
-
-  // Calculate free vs. paid credits
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
   const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
   const motCredits = userProfile?.motCredits ?? 0;
   const totalMot = freeMotLeft + motCredits;
 
-  // Lazy query for MOT
+  // 3) Queries
+  // (A) publicVehiclePreview
+  const [fetchPublicPreview, { loading: publicLoading, error: publicError }] =
+    useLazyQuery(PUBLIC_VEHICLE_PREVIEW, {
+      onCompleted: (data) => {
+        setPartialData(data.publicVehiclePreview);
+      },
+    });
+
+  // (B) MOT full check
   const [motCheck, { data: motData, loading: motLoading, error: motError }] =
     useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
-  const hasResults = !!(motData && motData.motCheck);
+  const hasMotResults = !!(motData && motData.motCheck);
 
-  // For printing
+  // 4) If there's a ?reg param
+  useEffect(() => {
+    const initialReg = searchParams.get('reg');
+    if (initialReg) {
+      setReg(initialReg.toUpperCase());
+      navigate('/mot', { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  // 5) "Confirm usage" modal for full check
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
+  const usageModalRef = useRef(null);
+
+  const showCreditsModal = (creditsCount, actionFn) => {
+    setModalMsg(`You have ${creditsCount} MOT checks left. Use 1 credit now?`);
+    setModalSearchType('MOT');
+    setShowModal(true);
+    setPendingSearchAction(() => actionFn);
+  };
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) pendingSearchAction();
+    setShowModal(false);
+  };
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
+  };
+
+  // 6) Partial check: open recaptcha modal
+  const handlePublicCheck = () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    // Show the small recaptcha modal
+    setShowCaptchaModal(true);
+  };
+
+  // Once user solves reCAPTCHA in the modal:
+  const handleCaptchaSuccess = async (token) => {
+    setShowCaptchaModal(false);
+    setCaptchaToken(token);
+    setErrorMsg('');
+
+    try {
+      await fetchPublicPreview({ variables: { reg, captchaToken: token } });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    }
+  };
+
+  // 7) Full MOT check if logged in
+  const handleFullMotCheck = () => {
+    setErrorMsg('');
+    if (!userProfile) {
+      setErrorMsg('Unable to load your profile. Please try again.');
+      return;
+    }
+    if (totalMot < 1) {
+      setErrorMsg('No MOT credits left. Please purchase more.');
+      return;
+    }
+    // Show usage modal
+    showCreditsModal(totalMot, () => {
+      motCheck({ variables: { reg } });
+    });
+  };
+
+  // 8) Single "Check" button => partial or full
+  const handleCheckButton = () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      handlePublicCheck();
+    } else {
+      handleFullMotCheck();
+    }
+  };
+
+  // 9) Once user logs in or registers => do the full check or refresh
+  const handleAuthSuccess = () => {
+    handleFullMotCheck();
+    // or window.location.reload();
+  };
+
+  // 10) Print logic
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: `MOT_Report_${reg}`,
   });
 
-  // If there's a ?reg= param, auto-check once
-  useEffect(() => {
-    if (initialReg) {
-      handleMOTCheck();
-      // Remove the ?reg from the URL:
-      navigate('/mot', { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleRegChange = (e) => {
-    const val = e.target.value.toUpperCase();
-    if (val.length <= 8) {
-      setReg(val);
-    }
-  };
-
-  // --- Modal logic for credit usage confirmation ---
-  const [showModal, setShowModal] = useState(false);
-  const [modalMsg, setModalMsg] = useState('');
-  const [modalSearchType, setModalSearchType] = useState('');
-  const [pendingSearchAction, setPendingSearchAction] = useState(null);
-  const modalRef = useRef(null);
-
-  // Show the credit usage modal
-  const showCreditsModal = (creditsCount, searchType, actionFn, reg) => {
-    setModalMsg(
-      `You are checking MOT History for registration ${reg}. You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
-    );
-    setModalSearchType(searchType);
-    setShowModal(true);
-    setPendingSearchAction(() => actionFn);
-  };
-
-  // User confirmed => run action
-  const handleConfirmSearch = () => {
-    if (pendingSearchAction) {
-      pendingSearchAction();
-    }
-    setShowModal(false);
-  };
-
-  // User canceled
-  const handleCancelSearch = () => {
-    setShowModal(false);
-    setPendingSearchAction(null);
-  };
-  // --- End modal logic ---
-
-  // The main "Check MOT" handler
-  const handleMOTCheck = async () => {
-    setAttemptedSearch(true);
-    setErrorMsg(''); // Clear any existing error
-
-    // 1) Validate registration
-    if (!reg) {
-      setErrorMsg('Please enter a valid registration.');
-      return;
-    }
-    // 2) Check login
-    if (!isLoggedIn) {
-      setErrorMsg(
-        <>
-          Please{' '}
-          <Link to="/login">login</Link>
-          {' '}or{' '}
-          <Link to="/register">register</Link> to do an MOT check.
-        </>
-      );
-      return;
-    }
-    // 3) Check if user data is loaded
-    if (!userProfile) {
-      setErrorMsg('Unable to fetch your profile. Please try again later.');
-      return;
-    }
-
-    // 4) Check credits
-    if (totalMot > 0) {
-      // Show usage confirmation modal
-      showCreditsModal(totalMot, 'MOT', () =>
-        motCheck({ variables: { reg } }),
-        reg
-      );
-    } else {
-      setErrorMsg(
-        'You have no MOT checks remaining. Please purchase credits or wait for more free checks.'
-      );
-    }
-  };
-
   return (
     <>
-         <Helmet>
-            <title>MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History</title>
-            <meta name="description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
-    
-            {/* Open Graph tags for social sharing */}
-            <meta property="og:title" content="MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History<" />
-            <meta property="og:description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
-            <meta property="og:image" content={heroBg} />
-            <meta property="og:url" content="https://vehicledatainformation.co.uk" />
-            <meta property="og:type" content="website" />
-    
-            {/* Twitter Card tags */}
-            <meta name="twitter:title" content="MOT History Check | Vehicle Data Information | Valuations & Full Vehicle History<" />
-            <meta name="twitter:description" content="Regular MOT checks ensure your vehicle meets the minimum safety standards required by law. Our MOT service helps you quickly see the car’s test results, mileage records, and advisories, so you’ll never be in the dark about a vehicle’s condition." />
-            <meta name="twitter:image" content={heroBg} />
-            <meta name="twitter:card" content="summary_large_image" />
-          </Helmet>
-      <style>{`
-        .mot-hero {
-          width: 100%;
-          min-height: 50vh;
-          background: url(${heroBg}) center top no-repeat;
-          background-size: cover;
-          color: #fff;
-          text-align: center;
-          padding: 3rem 1rem;
-        }
-        .mot-hero h1 {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
-          font-weight: 700;
-          color: #003366;
-          text-shadow: 2px 2px #ffde45;
-        }
-        .mot-hero p {
-          font-size: 1.2rem;
-          margin-bottom: 2rem;
-          color: #fff;
-          text-shadow: 1px 1px #000;
-        }
-        .plate-container {
-          width: 70%;
-          height: 200px;
-          margin: 2rem auto;
-          display: flex;
-          align-items: stretch;
-          border: 2px solid #000;
-          border-radius: 25px;
-          overflow: hidden;
-          max-width: 785px;
-        }
-        .plate-blue {
-          background-color: #003399;
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 130px;
-          font-size: 4.5rem;
-          font-weight: bold;
-          padding: 5px;
-        }
-        .plate-input {
-          flex: 1;
-          background-color: #FFDE46;
-          color: #000;
-          font-weight: bold;
-          font-size: 7rem;
-          border: none;
-          text-transform: uppercase;
-          padding: 0 1rem;
-          outline: none;
-          line-height: 1;
-          padding-left: 10%;
-        }
-        @media (max-width: 768px) {
-          .plate-container {
-            width: 100%;
-            height: 120px;
-            margin: 1rem auto;
-          }
-          .plate-blue {
-            width: 80px;
-            font-size: 2.5rem;
-          }
-          .plate-input {
-            font-size: 3rem;
-            padding-left: 5%;
-          }
-        }
-        .mot-info-section {
-          background: #fff;
-          padding: 3rem 1rem;
-          margin-top: 2rem;
-        }
-        .mot-info-section h2 {
-          text-align: center;
-          margin-bottom: 2rem;
-          font-weight: 700;
-        }
-      `}</style>
+      <Helmet>
+        <title>MOT History Check | Vehicle Data Information</title>
+        <meta
+          name="description"
+          content="Quickly view your vehicle’s MOT history, mileage records, and advisories."
+        />
+      </Helmet>
 
-      {/* Modal for credit confirmation */}
+      {/* HERO SECTION */}
+      <div
+        style={{
+          width: '100%',
+          minHeight: '50vh',
+          background: `url(${heroBg}) center top no-repeat`,
+          backgroundSize: 'cover',
+          color: '#fff',
+          textAlign: 'center',
+          padding: '3rem 1rem',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '2.5rem',
+            marginBottom: '1rem',
+            fontWeight: 700,
+            color: '#003366',
+            textShadow: '2px 2px #ffde45',
+          }}
+        >
+          MOT Full History Check
+        </h1>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem', textShadow: '1px 1px #000' }}>
+          Instantly view your vehicle’s MOT history and advisories.
+        </p>
+
+        {/* Plate input & button */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div
+            style={{
+              width: '70%',
+              height: 200,
+              margin: '2rem auto',
+              display: 'flex',
+              alignItems: 'stretch',
+              border: '2px solid #000',
+              borderRadius: 25,
+              overflow: 'hidden',
+              maxWidth: 785,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#003399',
+                color: '#fff',
+                width: 130,
+                fontSize: '4.5rem',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              GB
+            </div>
+            <input
+              style={{
+                flex: 1,
+                backgroundColor: '#FFDE46',
+                color: '#000',
+                fontWeight: 'bold',
+                fontSize: '7rem',
+                border: 'none',
+                textTransform: 'uppercase',
+                paddingLeft: '10%',
+                outline: 'none',
+              }}
+              placeholder="AB12 CDE"
+              value={reg}
+              onChange={(e) => {
+                setReg(e.target.value.toUpperCase());
+                setPartialData(null);
+                setErrorMsg('');
+              }}
+            />
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            {hasMotResults ? (
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: 25,
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
+              >
+                Search Again
+              </button>
+            ) : (
+              <button
+                onClick={handleCheckButton}
+                disabled={motLoading || publicLoading}
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  padding: '0.5rem 2rem',
+                  borderRadius: 25,
+                  border: 'none',
+                  backgroundColor: '#1560BD',
+                  color: '#fff',
+                  marginTop: '1rem',
+                }}
+              >
+                {motLoading || publicLoading ? 'Checking...' : 'Check MOT'}
+              </button>
+            )}
+          </div>
+
+          {/* error messages */}
+          {errorMsg && (
+            <div
+              className="alert alert-danger mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {errorMsg}
+            </div>
+          )}
+          {publicError && (
+            <div
+              className="alert alert-danger mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {publicError.message}
+            </div>
+          )}
+          {motError && (
+            <div
+              className="alert alert-danger mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {motError.message}
+            </div>
+          )}
+
+          {/* PARTIAL DATA if found & user not logged in */}
+          {partialData && !isLoggedIn && partialData.found && (
+            <div
+              className="alert alert-info mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              <h5>Vehicle Found!</h5>
+              {partialData.imageUrl && (
+                <img
+                  src={partialData.imageUrl}
+                  alt="Car Preview"
+                  style={{ maxWidth: '100%', marginBottom: '1rem' }}
+                />
+              )}
+              <p style={{fontSize:'25px'}}>
+                <strong>
+                  {partialData.colour} {partialData.make}
+                  {partialData.year && ` from ${partialData.year}`}
+                </strong>
+              </p>
+              <p>
+                Please register or log in below to unlock the full MOT history, including 
+                mileages, advisories, and more.
+              </p>
+
+              <AuthTabs onAuthSuccess={handleAuthSuccess} />
+            </div>
+          )}
+          {partialData && !isLoggedIn && !partialData.found && (
+            <div
+              className="alert alert-warning mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {partialData.message || 'No data found for this registration.'}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Full MOT data if logged in */}
+      {motData?.motCheck && (
+        <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
+          <div className="text-end mb-2">
+            {/* Optionally a Print button */}
+          </div>
+          <div ref={printRef}>
+            <VehicleDetailsMOT dataItems={motData.motCheck} userProfile={userProfile} />
+            <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
+          </div>
+        </div>
+      )}
+
+      {/* Confirm credit usage modal */}
       {showModal && (
         <div
           className="modal fade show"
           style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          ref={modalRef}
+          ref={usageModalRef}
         >
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content" style={{ borderRadius: '8px' }}>
+            <div className="modal-content" style={{ borderRadius: 8 }}>
               <div className="modal-header">
                 <h5 className="modal-title">Confirm {modalSearchType} Search</h5>
                 <button
@@ -263,16 +384,10 @@ export default function MOTPage() {
                 <p>{modalMsg}</p>
               </div>
               <div className="modal-footer">
-                <button
-                  className="btn btn-danger"
-                  onClick={handleCancelSearch}
-                >
+                <button className="btn btn-danger" onClick={handleCancelSearch}>
                   Cancel
                 </button>
-                <button
-                  className="btn btn-success"
-                  onClick={handleConfirmSearch}
-                >
+                <button className="btn btn-success" onClick={handleConfirmSearch}>
                   Proceed
                 </button>
               </div>
@@ -281,90 +396,37 @@ export default function MOTPage() {
         </div>
       )}
 
-      <div className="mot-hero">
-        <h1>MOT Full History Check</h1>
-        <p>Instantly retrieve your vehicle’s MOT history and advisories.</p>
-
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div className="plate-container">
-            <div className="plate-blue">GB</div>
-            <input
-              className="plate-input"
-              placeholder="AB12 CDE"
-              value={reg}
-              onChange={handleRegChange}
-            />
-          </div>
-
-          <div className="text-center">
-            {hasResults ? (
-              <button
-                onClick={() => window.location.reload()}
-                style={{
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  padding: '0.5rem 2rem',
-                  borderRadius: '25px',
-                  border: 'none',
-                  backgroundColor: '#1560BD',
-                  color: '#fff',
-                  marginTop: '1rem',
-                }}
-              >
-                Search Again
-              </button>
-            ) : (
-              <button
-                onClick={handleMOTCheck}
-                disabled={motLoading}
-                style={{
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  padding: '0.5rem 2rem',
-                  borderRadius: '25px',
-                  border: 'none',
-                  backgroundColor: '#1560BD',
-                  color: '#fff',
-                  marginTop: '1rem',
-                }}
-              >
-                {motLoading ? 'Checking...' : 'Check MOT'}
-              </button>
-            )}
-          </div>
-
-          {/* Single error message (for missing reg, not logged in, or no credits) */}
-          {errorMsg && (
-            <div className="alert alert-danger mt-2" style={{ maxWidth: '600px', margin: '1rem auto' }}>
-              {errorMsg}
+      {/* reCAPTCHA Modal for partial search if user is not logged in */}
+      {showCaptchaModal && !isLoggedIn && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: 8 }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Verify You're Human</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCaptchaModal(false)}
+                />
+              </div>
+              <div className="modal-body mb-3 d-flex justify-content-center" style={{ textAlign: 'center' }}>
+                <ReCAPTCHA
+                  sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+                  onChange={(token) => handleCaptchaSuccess(token)}
+                />
+              </div>
             </div>
-          )}
-
-          {/* GraphQL error from the motCheck query */}
-          {motError && (
-            <div className="alert alert-danger mt-2">
-              {motError.message}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {motData?.motCheck && (
-        <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
-          <div className="text-end mb-2">
-           
-          </div>
-          <div ref={printRef}>
-            <VehicleDetailsMOT dataItems={motData.motCheck} userProfile={userProfile} />
-            <MOTResultDisplay motCheck={motData.motCheck} userProfile={userProfile} />
           </div>
         </div>
       )}
 
-      {/* Additional Info */}
-      <div className="mot-info-section">
-        <h2>Why is an MOT History Check Important?</h2>
+      {/* Additional info area */}
+      <div style={{ background: '#fff', padding: '3rem 1rem' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <h2>Why is an MOT History Check Important?</h2>
           <p>
             Regular MOT checks ensure your vehicle meets the minimum safety 
             standards required by law. Our MOT service helps you quickly see 

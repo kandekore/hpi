@@ -131,6 +131,19 @@ input ReplyTicketInput {
   message: String!
 }
 
+type VehiclePreviewResponse {
+  found: Boolean!
+  make: String
+  colour: String
+  year: Int
+  imageUrl: String
+  message: String
+}
+
+extend type Query {
+  publicVehiclePreview(reg: String!, captchaToken: String!): VehiclePreviewResponse!
+}
+
   type Query {
   adminGetAllCustomers(email: String, username: String): [AdminCustomer!]!
   adminGetCustomerDetails(userId: ID!): User
@@ -186,7 +199,7 @@ type Mutation {
 requestPasswordReset(email: String!): Boolean
   resetPassword(token: String!, newPassword: String!): Boolean
 
-  verifyEmail(token: String!): Boolean
+  verifyEmail(token: String!): String
   resendVerificationEmail(email: String!): Boolean
   changePassword(currentPassword: String!, newPassword: String!): Boolean
 

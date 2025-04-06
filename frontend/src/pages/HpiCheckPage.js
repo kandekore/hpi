@@ -1,140 +1,195 @@
+// src/pages/HPICheckPage.js
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_USER_PROFILE, HPI_CHECK } from '../graphql/queries';
 import { useReactToPrint } from 'react-to-print';
 import { Helmet } from 'react-helmet-async';
+
+// GraphQL
+import { GET_USER_PROFILE, PUBLIC_VEHICLE_PREVIEW, HPI_CHECK } from '../graphql/queries';
+
+// Components
+import AuthTabs from '../components/AuthTabs';
 import HpiResultDisplay from '../components/HpiResultDisplay';
-import heroBg from '../images/full-vehicle-check.jpg'; // your background image
+
+// reCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha';
+
+// Hero image (full-vehicle-check.jpg)
+import heroBg from '../images/full-vehicle-check.jpg';
 
 export default function HPICheckPage() {
-  // 1) Query params and navigation
+  // 1) Query params / navigation
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  // Registration + UI states
   const initialReg = searchParams.get('reg') || '';
-  const [reg, setReg] = useState(initialReg);
-  const [attemptedSearch, setAttemptedSearch] = useState(false);
+
+  // 2) Local state
+  const [reg, setReg] = useState(initialReg.toUpperCase());
   const [errorMsg, setErrorMsg] = useState('');
+  const [partialData, setPartialData] = useState(null); // from publicVehiclePreview
+  const [showCaptchaModal, setShowCaptchaModal] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
-  // 2) Query user
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
-  const userProfile = profileData?.getUserProfile || null;
-  const isLoggedIn = !!localStorage.getItem('authToken');
-
-  // 3) HPI lazy query
-  const [hpiCheck, { data: hpiData, loading: hpiLoading, error: hpiError }] =
-    useLazyQuery(HPI_CHECK, { fetchPolicy: 'no-cache' });
-  const hasResults = !!(hpiData && hpiData.hpiCheck);
-
-  // 4) Print logic
-  const printRef = useRef(null);
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `HPI_Report_${reg}`,
-  });
-
-  // If there’s ?reg param, auto-check once
-  useEffect(() => {
-    if (initialReg) {
-      handleHpiCheck();
-      navigate('/hpi', { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleRegChange = (e) => {
-    const val = e.target.value.toUpperCase();
-    if (val.length <= 8) {
-      setReg(val);
-    }
-  };
-
-  // -- Modal logic for credit usage confirmation --
+  // For credit usage
   const [showModal, setShowModal] = useState(false);
   const [modalMsg, setModalMsg] = useState('');
   const [modalSearchType, setModalSearchType] = useState('');
   const [pendingSearchAction, setPendingSearchAction] = useState(null);
   const modalRef = useRef(null);
 
-  const showCreditsModal = (creditsCount, searchType, actionFn) => {
+  // For printing final results
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `HPI_Report_${reg}`,
+  });
+
+  // 3) Query user
+  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const userProfile = profileData?.getUserProfile || null;
+  const isLoggedIn = !!localStorage.getItem('authToken');
+
+  // If user is logged in, get their HPI credits
+  const hpiCredits = userProfile?.hpiCredits ?? 0;
+
+  // 4) Lazy Queries
+  // (A) Partial data => publicVehiclePreview
+  const [fetchPublicPreview, { loading: publicLoading, error: publicError }] =
+    useLazyQuery(PUBLIC_VEHICLE_PREVIEW, {
+      onCompleted: (data) => {
+        setPartialData(data.publicVehiclePreview);
+      },
+    });
+
+  // (B) Full HPI check
+  const [hpiCheck, { data: hpiData, loading: hpiLoading, error: hpiError }] =
+    useLazyQuery(HPI_CHECK, { fetchPolicy: 'no-cache' });
+  const hasResults = !!(hpiData?.hpiCheck);
+
+  // 5) If there's ?reg param => remove from URL
+  useEffect(() => {
+    if (initialReg) {
+      navigate('/hpi', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 6) Usage confirmation modal
+  const showCreditsModal = (creditsCount, actionFn) => {
     setModalMsg(
-      `You have ${creditsCount} ${searchType} checks left. This search will deduct 1 credit.`
+      `You have ${creditsCount} Full Vehicle History credits left. ` +
+      `This check will deduct 1 credit.`
     );
-    setModalSearchType(searchType);
+    setModalSearchType('HPI');
     setShowModal(true);
     setPendingSearchAction(() => actionFn);
   };
-
   const handleConfirmSearch = () => {
     if (pendingSearchAction) {
       pendingSearchAction();
     }
     setShowModal(false);
   };
-
   const handleCancelSearch = () => {
     setShowModal(false);
     setPendingSearchAction(null);
   };
-  // -- End modal logic --
 
-  // 5) "Check HPI" button
-  const handleHpiCheck = async () => {
-    setAttemptedSearch(true);
-    setErrorMsg(''); // clear prior errors
+  // 7) Partial check => open recaptcha modal
+  const handlePublicCheck = () => {
+    setErrorMsg('');
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    // Show the reCAPTCHA modal
+    setShowCaptchaModal(true);
+  };
 
-    // Basic checks
+  // Once user solves reCAPTCHA:
+  const handleCaptchaSuccess = async (token) => {
+    setShowCaptchaModal(false);
+    setCaptchaToken(token);
+    setErrorMsg('');
+    try {
+      await fetchPublicPreview({ variables: { reg, captchaToken: token } });
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message);
+    }
+  };
+
+  // 8) Full HPI check if logged in
+  const handleFullHpiCheck = () => {
+    setErrorMsg('');
+    if (!userProfile) {
+      setErrorMsg('Unable to fetch your profile. Please try again later.');
+      return;
+    }
+    if (hpiCredits < 1) {
+      setErrorMsg('You have no Full Vehicle History credits left. Please purchase more.');
+      return;
+    }
+    // Show usage modal => run hpiCheck on confirm
+    showCreditsModal(hpiCredits, () => {
+      hpiCheck({ variables: { reg } });
+    });
+  };
+
+  // 9) Single "Check" button => partial or full
+  const handleCheckButton = () => {
+    setErrorMsg('');
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
     if (!isLoggedIn) {
-      setErrorMsg(
-        <>
-          Please <Link to="/login">login</Link> or{' '}
-          <Link to="/register">register</Link> to do a Full Vehicle History check.
-        </>
-      );
-      return;
-    }
-    if (!userProfile) {
-      setErrorMsg('Unable to fetch your profile. Please try again later.');
-      return;
-    }
-
-    // Check user’s HPI credits
-    const hpiCredits = userProfile?.hpiCredits ?? 0;
-    if (hpiCredits > 0) {
-      // Show usage confirmation modal
-      showCreditsModal(hpiCredits, 'HPI', () => {
-        hpiCheck({ variables: { reg } });
-      });
+      handlePublicCheck();
     } else {
-      setErrorMsg('You have no Full Vehicle History credits left. Please purchase more.');
+      handleFullHpiCheck();
     }
+  };
+
+  // 10) onAuthSuccess => do full check or reload
+  const handleAuthSuccess = () => {
+    handleFullHpiCheck();
+    // or window.location.reload();
+  };
+
+  // 11) Reg input logic
+  const handleRegChange = (e) => {
+    const val = e.target.value.toUpperCase();
+    if (val.length <= 8) {
+      setReg(val);
+    }
+    // Clear old partial data / errors
+    setPartialData(null);
+    setErrorMsg('');
   };
 
   return (
     <>
-         <Helmet>
-            <title>Full Vehicle History Report | HPI / VDI Type Check | Vehicle Data Information</title>
-            <meta name="description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
-    
-            {/* Open Graph tags for social sharing */}
-            <meta property="og:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
-            <meta property="og:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
-            <meta property="og:image" content={heroBg} />
-            <meta property="og:url" content="https://vehicledatainformation.co.uk" />
-            <meta property="og:type" content="website" />
-    
-            {/* Twitter Card tags */}
-            <meta name="twitter:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
-            <meta name="twitter:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
-            <meta name="twitter:image" content={heroBg} />
-            <meta name="twitter:card" content="summary_large_image" />
-          </Helmet>
+      <Helmet>
+        <title>Full Vehicle History Report | HPI / VDI Type Check | Vehicle Data Information</title>
+        <meta
+          name="description"
+          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+        />
+        {/* Open Graph tags */}
+        <meta property="og:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
+        <meta property="og:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+        <meta property="og:image" content={heroBg} />
+        <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+        <meta property="og:type" content="website" />
+        {/* Twitter */}
+        <meta name="twitter:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
+        <meta name="twitter:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+        <meta name="twitter:image" content={heroBg} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <style>{`
         .hpi-hero {
           width: 100%;
@@ -220,7 +275,7 @@ export default function HPICheckPage() {
         }
       `}</style>
 
-      {/* Modal for credit usage confirmation */}
+      {/* Confirm usage modal */}
       {showModal && (
         <div
           className="modal fade show"
@@ -259,12 +314,39 @@ export default function HPICheckPage() {
         </div>
       )}
 
+      {/* reCAPTCHA Modal for partial search */}
+      {showCaptchaModal && !isLoggedIn && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: 8 }}>
+              <div className="modal-header">
+                <h5 className="modal-title">Verify You're Human</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCaptchaModal(false)}
+                />
+              </div>
+              <div className="modal-body mb-3 d-flex justify-content-center" style={{ textAlign: 'center' }}>
+                <ReCAPTCHA
+                  sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
+                  onChange={(token) => handleCaptchaSuccess(token)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HERO */}
       <div className="hpi-hero">
         <h1>Full Vehicle History Check</h1>
         <p>
-          Access complete vehicle history: outstanding finance, insurance 
-          write-offs, theft records, and more.
+          Access complete vehicle history: outstanding finance, 
+          insurance write-offs, theft records, and more.
         </p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -297,8 +379,8 @@ export default function HPICheckPage() {
               </button>
             ) : (
               <button
-                onClick={handleHpiCheck}
-                disabled={hpiLoading}
+                onClick={handleCheckButton}
+                disabled={hpiLoading || publicLoading}
                 style={{
                   fontSize: '1.2rem',
                   fontWeight: 'bold',
@@ -310,33 +392,73 @@ export default function HPICheckPage() {
                   marginTop: '1rem',
                 }}
               >
-                {hpiLoading ? 'Checking...' : 'Check Vehicle History'}
+                {(hpiLoading || publicLoading) ? 'Checking...' : 'Check Vehicle History'}
               </button>
             )}
           </div>
 
-          {/* Single error message displayed here */}
+          {/* Single error message */}
           {errorMsg && (
             <div className="alert alert-danger mt-2" style={{ maxWidth: '600px', margin: '1rem auto' }}>
               {errorMsg}
             </div>
           )}
 
-          {/* GraphQL error for the hpiCheck query */}
+          {/* GraphQL error for partial or full check */}
+          {publicError && (
+            <div className="alert alert-danger mt-2" style={{ maxWidth: 600, margin: '1rem auto' }}>
+              {publicError.message}
+            </div>
+          )}
           {hpiError && (
-            <div className="alert alert-danger mt-2">
+            <div className="alert alert-danger mt-2" style={{ maxWidth: 600, margin: '1rem auto' }}>
               {hpiError.message}
+            </div>
+          )}
+
+          {/* PARTIAL DATA => if user is not logged in */}
+          {partialData && !isLoggedIn && partialData.found && (
+            <div
+              className="alert alert-info mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              <h5>Vehicle Found!</h5>
+              {partialData.imageUrl && (
+                <img
+                  src={partialData.imageUrl}
+                  alt="Car Preview"
+                  style={{ maxWidth: '100%', marginBottom: '1rem' }}
+                />
+              )}
+              <p style={{ fontSize: '25px' }}>
+                <strong>
+                  {partialData.colour} {partialData.make}
+                  {partialData.year && ` from ${partialData.year}`}
+                </strong>
+              </p>
+              <p>
+                Please register or log in below to unlock the full HPI-style check,
+                including outstanding finance, theft records, and more.
+              </p>
+
+              {/* AuthTabs => inline login/register */}
+              <AuthTabs onAuthSuccess={handleAuthSuccess} />
+            </div>
+          )}
+          {partialData && !isLoggedIn && !partialData.found && (
+            <div
+              className="alert alert-warning mt-3"
+              style={{ maxWidth: 600, margin: '1rem auto' }}
+            >
+              {partialData.message || 'No data found for this registration.'}
             </div>
           )}
         </div>
       </div>
 
-      {/* If we have data, show the result & print button */}
+      {/* Full HPI data if we have it */}
       {hpiData?.hpiCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
-          <div className="text-end mb-2">
-       
-          </div>
           <div ref={printRef}>
             <HpiResultDisplay
               hpiData={hpiData.hpiCheck}

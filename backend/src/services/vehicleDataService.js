@@ -1,9 +1,10 @@
 // backend/src/services/vehicleDataService.js
 
-// const fetch = require('node-fetch');
 import fetch from 'node-fetch';
+
 const API_KEY = process.env.VEHICLE_DATA_API_KEY;
 const VDI_KEY = process.env.VEHICLE_DATA_VDI_KEY; // used for some calls
+const DVLA_API_KEY = process.env.DVLA_API_KEY;
 
 const BASE_URL = 'https://uk1.ukvehicledata.co.uk/api/datapackage';
 
@@ -15,7 +16,7 @@ export default {
   // A) MOT Check
   async motCheck(reg) {
     const url = `${BASE_URL}/MotHistoryAndTaxStatusData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`motCheck => Fetching URL: ${url}`);
+    // console.log(`motCheck => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`motCheck => Fetch failed with status ${res.status}`);
@@ -28,7 +29,7 @@ export default {
   // B) VDI Check
   async vdiCheck(reg) {
     const url = `${BASE_URL}/VdiCheckFull?v=2&api_nullitems=1&auth_apikey=${VDI_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`vdiCheck => Fetching URL: ${url}`);
+    // console.log(`vdiCheck => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`vdiCheck => Fetch failed with status ${res.status}`);
@@ -41,7 +42,7 @@ export default {
   // C) Valuation Check
   async valuationCheck(reg) {
     const url = `${BASE_URL}/ValuationData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`valuationCheck => Fetching URL: ${url}`);
+    // console.log(`valuationCheck => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`valuationCheck => Fetch failed with status ${res.status}`);
@@ -54,7 +55,7 @@ export default {
   // D) Image Check
   async imageCheck(reg) {
     const url = `${BASE_URL}/VehicleImageData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`imageCheck => Fetching URL: ${url}`);
+    // console.log(`imageCheck => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`imageCheck => Fetch failed with status ${res.status}`);
@@ -71,7 +72,7 @@ export default {
   // E) fetchValuationData
   async fetchValuationData(reg) {
     const url = `${BASE_URL}/ValuationData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchValuationData => Fetching URL: ${url}`);
+    // console.log(`fetchValuationData => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchValuationData => Fetch failed with status ${res.status}`);
@@ -84,7 +85,7 @@ export default {
   // F) fetchMotHistoryAndTaxStatusData
   async fetchMotHistoryAndTaxStatusData(reg) {
     const url = `${BASE_URL}/MotHistoryAndTaxStatusData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchMotHistoryAndTaxStatusData => Fetching URL: ${url}`);
+    // console.log(`fetchMotHistoryAndTaxStatusData => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchMotHistoryAndTaxStatusData => Fetch failed with status ${res.status}`);
@@ -97,7 +98,7 @@ export default {
   // G) fetchVedData
   async fetchVedData(reg) {
     const url = `${BASE_URL}/VedData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchVedData => Fetching URL: ${url}`);
+    // console.log(`fetchVedData => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchVedData => Fetch failed with status ${res.status}`);
@@ -110,7 +111,7 @@ export default {
   // H) fetchVdiCheckFull
   async fetchVdiCheckFull(reg) {
     const url = `${BASE_URL}/VdiCheckFull?v=2&api_nullitems=1&auth_apikey=${VDI_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchVdiCheckFull => Fetching URL: ${url}`);
+    // console.log(`fetchVdiCheckFull => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchVdiCheckFull => Fetch failed with status ${res.status}`);
@@ -123,7 +124,7 @@ export default {
   // I) fetchVehicleImageData
   async fetchVehicleImageData(reg) {
     const url = `${BASE_URL}/VehicleImageData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchVehicleImageData => Fetching URL: ${url}`);
+    // console.log(`fetchVehicleImageData => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchVehicleImageData => Fetch failed with status ${res.status}`);
@@ -136,7 +137,7 @@ export default {
   // J) fetchVehicleAndMotHistory
   async fetchVehicleAndMotHistory(reg) {
     const url = `${BASE_URL}/VehicleAndMotHistory?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchVehicleAndMotHistory => Fetching URL: ${url}`);
+    // console.log(`fetchVehicleAndMotHistory => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchVehicleAndMotHistory => Fetch failed with status ${res.status}`);
@@ -153,7 +154,7 @@ export default {
   // K) fetchVehicleData (used in batch 2 of hpiCheck)
   async fetchVehicleData(reg) {
     const url = `${BASE_URL}/VehicleData?v=2&api_nullitems=1&auth_apikey=${API_KEY}&key_VRM=${encodeURIComponent(reg)}`;
-   // console.log(`fetchVehicleData => Fetching URL: ${url}`);
+    // console.log(`fetchVehicleData => Fetching URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
       console.error(`fetchVehicleData => Fetch failed with status ${res.status}`);
@@ -174,5 +175,28 @@ export default {
     }
     const data = await res.json();
     return data.Response;
+  },
+
+  // M) fetchDvlaData
+  async fetchDvlaData(reg) {
+    const url = 'https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles';
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'x-api-key': DVLA_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ registrationNumber: reg }),
+    });
+  
+    if (!resp.ok) {
+      throw new Error(`DVLA responded with status ${resp.status}`);
+    }
+    const data = await resp.json();
+  
+    if (!data || !data.make || !data.registrationNumber) {
+      throw new Error('DVLA data incomplete');
+    }
+    return data;
   },
 };

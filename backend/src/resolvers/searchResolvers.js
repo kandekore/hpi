@@ -2,6 +2,7 @@
 import User from '../models/User.js';
 import SearchRecord from '../models/SearchRecord.js';
 import vehicleDataService from '../services/vehicleDataService.js';
+import { verifyRecaptcha } from '../services/recaptcha.js'; 
 
 const FREE_MOT_CHECKS = 3;
 
@@ -207,6 +208,74 @@ export default {
 
       return combinedResponse;
     },
+    async publicVehiclePreview(_, { reg, captchaToken }) {
+
+      // 1) Validate CAPTCHA
+      const captchaIsValid = await verifyRecaptcha(captchaToken);
+      if (!captchaIsValid) {
+        return {
+          found: false,
+          message: 'Invalid CAPTCHA.',
+        };
+      }
+
+      // 2) Try DVLA free API
+      let dvlaData;
+      try {
+        dvlaData = await vehicleDataService.fetchDvlaData(reg);
+      } catch (err) {
+        console.error('DVLA fetch failed:', err.message);
+      }
+
+      // 3) If DVLA data is missing or invalid, fallback to VedData
+      let fallbackData = null;
+      if (!dvlaData) {
+        try {
+          fallbackData = await vehicleDataService.fetchVedData(reg);
+        } catch (err) {
+          console.error('VedData fetch failed:', err.message);
+        }
+      }
+
+      // If both DVLA and fallback are null => reg not found
+      if (!dvlaData && !fallbackData) {
+        return {
+          found: false,
+          message: 'Registration not found. Please double-check your plate.',
+        };
+      }
+
+      // 4) Merge whichever data we got
+      // DVLA fields: colour, yearOfManufacture, make, ...
+      // fallback (VedData) might have similar fields in different structure
+      let make = dvlaData?.make || fallbackData?.DataItems?.Make || '';
+      let colour = dvlaData?.colour || fallbackData?.DataItems?.Colour || '';
+      let year =
+        dvlaData?.yearOfManufacture ||
+        fallbackData?.DataItems?.YearOfManufacture ||
+        null;
+
+      // 5) Fetch image
+      let imageUrl = null;
+      try {
+        const imageResp = await vehicleDataService.fetchVehicleImageData(reg);
+        if (imageResp?.DataItems?.VehicleImages?.[0]?.ImageUrl) {
+          imageUrl = imageResp.DataItems.VehicleImages[0].ImageUrl;
+        }
+      } catch (err) {
+        console.error('fetchVehicleImageData error:', err.message);
+      }
+
+      return {
+        found: true,
+        make,
+        colour,
+        year: year ? parseInt(year, 10) : null,
+        imageUrl: imageUrl || null,
+        message: '',
+      };
+    },
+    
     
   },
 
