@@ -40,7 +40,7 @@ export default function ValuationPage() {
   const modalRef = useRef(null);
 
   // 3) Query user
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
@@ -179,7 +179,9 @@ export default function ValuationPage() {
 
   // 12) If user logs in => do the full check
   const handleAuthSuccess = () => {
-    handleFullValuationCheck(reg);
+    refetch().then(() => {
+      handleFullValuationCheck(reg);
+    });
   };
 
   // Render:

@@ -39,7 +39,7 @@ export default function MOTPage() {
   const [pendingSearchAction, setPendingSearchAction] = useState(null);
 
   // For user profile / credits
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
@@ -156,7 +156,10 @@ export default function MOTPage() {
 
   // 9) if user logs in from partial => full check
   const handleAuthSuccess = () => {
-    handleFullMotCheck(reg);
+    refetch().then(() => {
+      
+      handleFullMotCheck(reg);
+    });
   };
 
   // 10) For printing final results

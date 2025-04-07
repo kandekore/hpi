@@ -46,7 +46,7 @@ export default function HPICheckPage() {
   });
 
   // 3) Query user
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
@@ -170,7 +170,9 @@ export default function HPICheckPage() {
 
   // 10) On Auth success => do the full check
   const handleAuthSuccess = () => {
+    refetch().then(() => {
     handleFullHpiCheck(reg);
+  });
   };
 
   // 11) For reg input

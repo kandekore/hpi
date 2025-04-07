@@ -26,7 +26,7 @@ export default function HomePage() {
   const [searchType, setSearchType] = useState(null); // 'MOT', 'VALUATION', 'FULL_HISTORY'
 
   // 2) Queries + user data
-  const { data: profileData } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
@@ -151,9 +151,11 @@ export default function HomePage() {
 
   // 9) If they log in or register => proceed to the correct search
   const handleAuthSuccess = () => {
+    refetch().then(() => {
     if (searchType) {
       handleLoggedInSearch(searchType);
     }
+  });
   };
 
   // 10) Purchase
