@@ -68,9 +68,9 @@ export default function MainPricing({
       <p style={styles.small}><br /></p>
       <hr />
      
-      <p>3  Searches – FREE*</p>
-      <p>10 Searches – £1.50</p>
-      <p>50 Searches – £4.00</p>
+      <p>3  Searches – <strong style={{fontSize:'20px'}}>FREE*</strong></p>
+      <p>10 Searches – <strong style={{fontSize:'20px'}}>£1.50</strong></p>
+      <p>50 Searches – <strong style={{fontSize:'20px'}}>£4.00</strong></p>
       <hr />
       <p style={styles.dataTitle}>Data Includes:</p>
       <ul style={styles.list}>
@@ -95,9 +95,9 @@ export default function MainPricing({
       <p style={styles.price}>£2.99</p>
       <p style={styles.small}>per search</p>
       <hr />
-      <p>1 Search    –  £4.99</p>
-      <p>3 Searches  –  £12.49</p>
-      <p>10 Searches –  £29.99*</p>
+      <p>1 Search    –  <strong style={{fontSize:'20px'}}>£4.99</strong></p>
+      <p>3 Searches  –  <strong style={{fontSize:'20px'}}>£12.49</strong></p>
+      <p>10 Searches –  <strong style={{fontSize:'20px'}}>£29.99*</strong></p>
       <hr />
       <p style={styles.dataTitle}>Data Includes:</p>
       <ul style={styles.list}>
@@ -118,39 +118,42 @@ export default function MainPricing({
         {/* VDI Panel */}
         <div style={panelStyle}>
         <h3 style={{ ...styles.title, color: '#003366' }}>
-        Detailed Vehicle Data
-        <br />
-        &amp; Full Vehicle History
-      </h3>
-      <img src='/images/reporticon.png' />
-      <hr />
-      <p style={styles.subheading}>From*</p>
-      <p style={styles.price}>£5.99</p>
-      <p style={styles.small}>per search</p>
-      <hr />
-      
-      <p>1 Search – £9.49</p>
-      <p>3 Searches – £22.49</p>
-      <p>10 Searches – £59.99*</p>
-      <hr />
-      <p style={styles.dataTitle}>Data Includes:</p>
-      <ul style={styles.list}>
-        <li>Outstanding Finance</li>
-        <li>Insurance Write Off</li>
-        <li>Ownership &amp; Car Identity</li>
-        <li>VIN Confirmation</li>
-        <li>Scrapped / Mileage Anomaly / Colour Change</li>
-        <li>Import Check / Emissions &amp; Tax Rates</li>
-        <li>Technical Details</li>
-        <li>-</li>
-        <li style={styles.addon}>
-          <strong>Vehicle Valuation</strong>
-        </li>
-        <li style={styles.addon}>
-          <strong>MOT Full History</strong>
-        </li>
-      </ul>
-      <hr />
+            Detailed Vehicle Data
+            <br />
+            &amp; Full Vehicle History
+          </h3>
+          <img src='/images/reporticon.png' />
+          <hr />
+          <p style={styles.subheading}>From*</p>
+          <p style={styles.price}>£5.99</p>
+          <p style={styles.small}>per search</p>
+          <hr />
+          
+          <p>1 Search – <del style={{ color: 'red'}}>£9.99</del> <strong style={{fontSize:'20px'}}>£7.49</strong></p>
+          <p>3 Searches – <strong style={{fontSize:'20px'}}>£22.49</strong></p>
+          <p>10 Searches – <strong style={{fontSize:'20px'}}>£59.99*</strong></p>
+          <hr />
+          <p style={styles.dataTitle}>Data Includes:</p>
+          <ul style={styles.list}>
+            <li>Outstanding Finance</li>
+            <li>Insurance Write Off Check</li>
+            <li>Ownership &amp; Car Identity</li>
+            <li>VIN Confirmation</li>
+            <li>Scrapped Check</li> 
+            <li> Mileage Anomaly Check</li>
+            <li>Colour Change Check</li>
+            <li>Import Check </li> 
+            <li>Emissions &amp; Tax Rates</li>
+            <li>Technical Details</li>
+            <li>-</li>
+            <li style={styles.addon}>
+              <strong>Vehicle Valuation</strong>
+            </li>
+            <li style={styles.addon}>
+              <strong>MOT Full History</strong>
+            </li>
+          </ul>
+          <hr />
           <button onClick={() => handleBuy('FULL_HISTORY')} style={styles.buyButton}>
             Buy
           </button>

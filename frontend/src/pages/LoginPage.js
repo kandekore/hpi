@@ -114,9 +114,7 @@ function LoginPage() {
         Don't have an account? <a href="/register">Register here</a>.
       </p>
 
-      <div className="card mt-4 border rounded p-3 text-center">
-        [Ad Banner]
-      </div>
+     
     </div></>
   );
 }

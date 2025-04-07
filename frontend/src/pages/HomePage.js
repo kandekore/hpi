@@ -463,7 +463,7 @@ export default function HomePage() {
                   onClick={() => setShowCaptchaModal(false)}
                 />
               </div>
-              <div className="modal-body" style={{ textAlign: 'center' }}>
+              <div className="modal-body mb-3 d-flex justify-content-center" style={{ textAlign: 'center' }}>
                 <ReCAPTCHA
                   sitekey="6LfIofgqAAAAAA1cDXWEiZBj4VquUQyAnWodIzfH"
                   onChange={(token) => handleCaptchaSuccess(token)}

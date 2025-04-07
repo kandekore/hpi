@@ -15,7 +15,7 @@ export default function SubPricing({
   if (product === 'FULL_HISTORY') {
     title = 'Full Vehicle History';
     deals = [
-      { quantity: 1, label: '1 Search', price: '£9.99' },
+      { quantity: 1, label: '1 Search', price: '£7.49' },
       { quantity: 3, label: '3 Searches', price: '£22.49' },
       { quantity: 10, label: '10 Searches', price: '£59.99' },
     ];

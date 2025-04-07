@@ -1,4 +1,3 @@
-// src/pages/MOTPage.js
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -17,8 +16,6 @@ import MOTResultDisplay from '../components/MOTResultDisplay';
 
 // Images / assets
 import heroBg from '../images/mot-head.jpg';
-
-// We'll import react-google-recaptcha inside a small CaptchaModal
 import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function MOTPage() {
@@ -29,13 +26,17 @@ export default function MOTPage() {
   // 2) Local States
   const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-
-  // We'll store partialData from DVLA/fallback
   const [partialData, setPartialData] = useState(null);
 
-  // For a pop-up recaptcha modal
+  // reCAPTCHA states
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
+
+  // For confirm usage modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [modalSearchType, setModalSearchType] = useState('');
+  const [pendingSearchAction, setPendingSearchAction] = useState(null);
 
   // For user profile / credits
   const { data: profileData } = useQuery(GET_USER_PROFILE);
@@ -60,54 +61,55 @@ export default function MOTPage() {
     useLazyQuery(MOT_CHECK, { fetchPolicy: 'no-cache' });
   const hasMotResults = !!(motData && motData.motCheck);
 
-  // 4) If there's a ?reg param
+  // 4) If there's ?reg=... in the URL => auto-trigger the same logic
   useEffect(() => {
     const initialReg = searchParams.get('reg');
     if (initialReg) {
-      setReg(initialReg.toUpperCase());
+      const upperReg = initialReg.toUpperCase();
+      setReg(upperReg);
+      // Call the same logic as clicking the "Check" button
+      autoTriggerMOTCheck(upperReg);
+      // Remove ?reg from the URL
       navigate('/mot', { replace: true });
     }
   }, [searchParams, navigate]);
 
-  // 5) "Confirm usage" modal for full check
-  const [showModal, setShowModal] = useState(false);
-  const [modalMsg, setModalMsg] = useState('');
-  const [modalSearchType, setModalSearchType] = useState('');
-  const [pendingSearchAction, setPendingSearchAction] = useState(null);
-  const usageModalRef = useRef(null);
-
-  const showCreditsModal = (creditsCount, actionFn) => {
-    setModalMsg(`You have ${creditsCount} MOT checks left. Use 1 credit now?`);
-    setModalSearchType('MOT');
-    setShowModal(true);
-    setPendingSearchAction(() => actionFn);
-  };
-  const handleConfirmSearch = () => {
-    if (pendingSearchAction) pendingSearchAction();
-    setShowModal(false);
-  };
-  const handleCancelSearch = () => {
-    setShowModal(false);
-    setPendingSearchAction(null);
+  // Helper: auto-run the same "partial vs full" check flow
+  const autoTriggerMOTCheck = (incomingReg) => {
+    setErrorMsg('');
+    if (!incomingReg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      // Not logged in => partial check => show reCAPTCHA
+      setShowCaptchaModal(true);
+    } else {
+      // Logged in => attempt full usage
+      handleFullMotCheck(incomingReg);
+    }
   };
 
-  // 6) Partial check: open recaptcha modal
-  const handlePublicCheck = () => {
+  // 5) The normal "Check" button approach
+  const handleCheckButton = () => {
     setErrorMsg('');
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
-    // Show the small recaptcha modal
-    setShowCaptchaModal(true);
+    if (!isLoggedIn) {
+      // partial
+      setShowCaptchaModal(true);
+    } else {
+      handleFullMotCheck(reg);
+    }
   };
 
-  // Once user solves reCAPTCHA in the modal:
+  // 6) partial => after reCAPTCHA success => fetchPublicPreview
   const handleCaptchaSuccess = async (token) => {
     setShowCaptchaModal(false);
     setCaptchaToken(token);
     setErrorMsg('');
-
     try {
       await fetchPublicPreview({ variables: { reg, captchaToken: token } });
     } catch (err) {
@@ -116,8 +118,8 @@ export default function MOTPage() {
     }
   };
 
-  // 7) Full MOT check if logged in
-  const handleFullMotCheck = () => {
+  // 7) Full MOT check
+  const handleFullMotCheck = (regToCheck = reg) => {
     setErrorMsg('');
     if (!userProfile) {
       setErrorMsg('Unable to load your profile. Please try again.');
@@ -127,33 +129,37 @@ export default function MOTPage() {
       setErrorMsg('No MOT credits left. Please purchase more.');
       return;
     }
-    // Show usage modal
+    // usage modal => confirm => run motCheck
     showCreditsModal(totalMot, () => {
-      motCheck({ variables: { reg } });
+      motCheck({ variables: { reg: regToCheck } });
     });
   };
 
-  // 8) Single "Check" button => partial or full
-  const handleCheckButton = () => {
-    setErrorMsg('');
-    if (!reg) {
-      setErrorMsg('Please enter a valid registration.');
-      return;
+  // 8) Show usage modal
+  const usageModalRef = useRef(null);
+  const showCreditsModal = (creditsCount, actionFn) => {
+    setModalMsg(`You have ${creditsCount} MOT checks left. Use 1 credit now?`);
+    setModalSearchType('MOT');
+    setShowModal(true);
+    setPendingSearchAction(() => actionFn);
+  };
+  const handleConfirmSearch = () => {
+    if (pendingSearchAction) {
+      pendingSearchAction();
     }
-    if (!isLoggedIn) {
-      handlePublicCheck();
-    } else {
-      handleFullMotCheck();
-    }
+    setShowModal(false);
+  };
+  const handleCancelSearch = () => {
+    setShowModal(false);
+    setPendingSearchAction(null);
   };
 
-  // 9) Once user logs in or registers => do the full check or refresh
+  // 9) if user logs in from partial => full check
   const handleAuthSuccess = () => {
-    handleFullMotCheck();
-    // or window.location.reload();
+    handleFullMotCheck(reg);
   };
 
-  // 10) Print logic
+  // 10) For printing final results
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -162,12 +168,93 @@ export default function MOTPage() {
 
   return (
     <>
+    <style>{`
+      .mot-hero {
+        width: 100%;
+        min-height: 50vh;
+        background: url(${heroBg}) center top no-repeat;
+        background-size: cover;
+        color: #fff;
+        text-align: center;
+        padding: 3rem 1rem;
+      }
+      .mot-hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: #003366;
+        text-shadow: 2px 2px #ffde45;
+      }
+      .mot-hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: #fff;
+        text-shadow: 1px 1px #000;
+      }
+      .plate-container {
+        width: 70%;
+        height: 200px;
+        margin: 2rem auto;
+        display: flex;
+        align-items: stretch;
+        border: 2px solid #000;
+        border-radius: 25px;
+        overflow: hidden;
+        max-width: 785px;
+      }
+      .plate-blue {
+        background-color: #003399;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 130px;
+        font-size: 4.5rem;
+        font-weight: bold;
+        padding: 5px;
+      }
+      .plate-input {
+        flex: 1;
+        background-color: #FFDE46;
+        color: #000;
+        font-weight: bold;
+        font-size: 7rem;
+        border: none;
+        text-transform: uppercase;
+        padding: 0 1rem;
+        outline: none;
+        line-height: 1;
+        padding-left: 10%;
+      }
+      @media (max-width: 768px) {
+        .plate-container {
+          width: 100%;
+          height: 120px;
+          margin: 1rem auto;
+        }
+        .plate-blue {
+          width: 80px;
+          font-size: 2.5rem;
+        }
+        .plate-input {
+          font-size: 3rem;
+          padding-left: 5%;
+        }
+      }
+      .mot-info-section {
+        background: #fff;
+        padding: 3rem 1rem;
+        margin-top: 2rem;
+      }
+      .mot-info-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 700;
+      }
+    `}</style>
       <Helmet>
         <title>MOT History Check | Vehicle Data Information</title>
-        <meta
-          name="description"
-          content="Quickly view your vehicle’s MOT history, mileage records, and advisories."
-        />
+        <meta name="description" content="Quickly view your vehicle’s MOT history, mileage records, and advisories." />
       </Helmet>
 
       {/* HERO SECTION */}
@@ -197,7 +284,7 @@ export default function MOTPage() {
           Instantly view your vehicle’s MOT history and advisories.
         </p>
 
-        {/* Plate input & button */}
+        {/* Plate & Button */}
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div
             style={{
@@ -285,7 +372,7 @@ export default function MOTPage() {
             )}
           </div>
 
-          {/* error messages */}
+          {/* Errors */}
           {errorMsg && (
             <div
               className="alert alert-danger mt-3"
@@ -311,7 +398,7 @@ export default function MOTPage() {
             </div>
           )}
 
-          {/* PARTIAL DATA if found & user not logged in */}
+          {/* Partial result if not logged in */}
           {partialData && !isLoggedIn && partialData.found && (
             <div
               className="alert alert-info mt-3"
@@ -325,17 +412,15 @@ export default function MOTPage() {
                   style={{ maxWidth: '100%', marginBottom: '1rem' }}
                 />
               )}
-              <p style={{fontSize:'25px'}}>
+              <p style={{ fontSize: '25px' }}>
                 <strong>
                   {partialData.colour} {partialData.make}
                   {partialData.year && ` from ${partialData.year}`}
                 </strong>
               </p>
               <p>
-                Please register or log in below to unlock the full MOT history, including 
-                mileages, advisories, and more.
+                Please register or log in below to unlock the full MOT history.
               </p>
-
               <AuthTabs onAuthSuccess={handleAuthSuccess} />
             </div>
           )}
@@ -350,11 +435,11 @@ export default function MOTPage() {
         </div>
       </div>
 
-      {/* Full MOT data if logged in */}
+      {/* If logged in & we have MOT data => show results */}
       {motData?.motCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div className="text-end mb-2">
-            {/* Optionally a Print button */}
+            {/* Print button, if desired */}
           </div>
           <div ref={printRef}>
             <VehicleDetailsMOT dataItems={motData.motCheck} userProfile={userProfile} />
@@ -363,7 +448,7 @@ export default function MOTPage() {
         </div>
       )}
 
-      {/* Confirm credit usage modal */}
+      {/* Confirm usage modal */}
       {showModal && (
         <div
           className="modal fade show"
@@ -396,7 +481,7 @@ export default function MOTPage() {
         </div>
       )}
 
-      {/* reCAPTCHA Modal for partial search if user is not logged in */}
+      {/* reCAPTCHA modal for partial data if not logged in */}
       {showCaptchaModal && !isLoggedIn && (
         <div
           className="modal fade show"
@@ -423,28 +508,28 @@ export default function MOTPage() {
         </div>
       )}
 
-      {/* Additional info area */}
-      <div style={{ background: '#fff', padding: '3rem 1rem' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <h2>Why is an MOT History Check Important?</h2>
-          <p>
-            Regular MOT checks ensure your vehicle meets the minimum safety 
-            standards required by law. Our MOT service helps you quickly see 
-            the car’s test results, mileage records, and advisories, so 
-            you’ll never be in the dark about a vehicle’s condition.
-          </p>
-          <ul>
-            <li>Uncover hidden or recurring faults</li>
-            <li>Validate the accuracy of the stated mileage</li>
-            <li>Check for signs of poor maintenance</li>
-          </ul>
-          <p>
-            By running an MOT check through our system, you’ll have peace 
-            of mind before committing to a purchase or taking a long trip 
-            with your car.
-          </p>
-        </div>
+      {/* Additional Info ... */}
+      <div className="mot-info-section">
+      <h2>Why is an MOT History Check Important?</h2>
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <p>
+          Regular MOT checks ensure your vehicle meets the minimum safety 
+          standards required by law. Our MOT service helps you quickly see 
+          the car’s test results, mileage records, and advisories, so 
+          you’ll never be in the dark about a vehicle’s condition.
+        </p>
+        <ul>
+          <li>Uncover hidden or recurring faults</li>
+          <li>Validate the accuracy of the stated mileage</li>
+          <li>Check for signs of poor maintenance</li>
+        </ul>
+        <p>
+          By running an MOT check through our system, you’ll have peace 
+          of mind before committing to a purchase or taking a long trip 
+          with your car.
+        </p>
       </div>
+    </div>
     </>
   );
 }

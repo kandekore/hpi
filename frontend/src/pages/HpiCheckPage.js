@@ -23,10 +23,9 @@ export default function HPICheckPage() {
   // 1) Query params / navigation
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialReg = searchParams.get('reg') || '';
 
   // 2) Local state
-  const [reg, setReg] = useState(initialReg.toUpperCase());
+  const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [partialData, setPartialData] = useState(null); // from publicVehiclePreview
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
@@ -68,19 +67,37 @@ export default function HPICheckPage() {
     useLazyQuery(HPI_CHECK, { fetchPolicy: 'no-cache' });
   const hasResults = !!(hpiData?.hpiCheck);
 
-  // 5) If there's ?reg param => remove from URL
+  // 5) Auto-trigger search if ?reg=... is present
   useEffect(() => {
+    const initialReg = searchParams.get('reg');
     if (initialReg) {
-      navigate('/hpi', { replace: true });
+      const upperReg = initialReg.toUpperCase();
+      setReg(upperReg);
+      autoTriggerHpiCheck(upperReg);  // <--- call auto search
+      navigate('/hpi', { replace: true }); // remove ?reg from URL
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams, navigate]);
 
-  // 6) Usage confirmation modal
+  // Helper: same logic as "Check" button
+  const autoTriggerHpiCheck = (incomingReg) => {
+    setErrorMsg('');
+    if (!incomingReg) {
+      setErrorMsg('Please enter a valid registration.');
+      return;
+    }
+    if (!isLoggedIn) {
+      // partial => reCAPTCHA
+      setShowCaptchaModal(true);
+    } else {
+      // full usage
+      handleFullHpiCheck(incomingReg);
+    }
+  };
+
+  // 6) Confirm usage modal
   const showCreditsModal = (creditsCount, actionFn) => {
     setModalMsg(
-      `You have ${creditsCount} Full Vehicle History credits left. ` +
-      `This check will deduct 1 credit.`
+      `You have ${creditsCount} Full Vehicle History credits left. This check will deduct 1 credit.`
     );
     setModalSearchType('HPI');
     setShowModal(true);
@@ -104,11 +121,10 @@ export default function HPICheckPage() {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
-    // Show the reCAPTCHA modal
     setShowCaptchaModal(true);
   };
 
-  // Once user solves reCAPTCHA:
+  // On recaptcha success => partial data
   const handleCaptchaSuccess = async (token) => {
     setShowCaptchaModal(false);
     setCaptchaToken(token);
@@ -122,7 +138,7 @@ export default function HPICheckPage() {
   };
 
   // 8) Full HPI check if logged in
-  const handleFullHpiCheck = () => {
+  const handleFullHpiCheck = (regToCheck = reg) => {
     setErrorMsg('');
     if (!userProfile) {
       setErrorMsg('Unable to fetch your profile. Please try again later.');
@@ -134,7 +150,7 @@ export default function HPICheckPage() {
     }
     // Show usage modal => run hpiCheck on confirm
     showCreditsModal(hpiCredits, () => {
-      hpiCheck({ variables: { reg } });
+      hpiCheck({ variables: { reg: regToCheck } });
     });
   };
 
@@ -152,19 +168,17 @@ export default function HPICheckPage() {
     }
   };
 
-  // 10) onAuthSuccess => do full check or reload
+  // 10) On Auth success => do the full check
   const handleAuthSuccess = () => {
-    handleFullHpiCheck();
-    // or window.location.reload();
+    handleFullHpiCheck(reg);
   };
 
-  // 11) Reg input logic
+  // 11) For reg input
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
     if (val.length <= 8) {
       setReg(val);
     }
-    // Clear old partial data / errors
     setPartialData(null);
     setErrorMsg('');
   };
@@ -430,18 +444,16 @@ export default function HPICheckPage() {
                   style={{ maxWidth: '100%', marginBottom: '1rem' }}
                 />
               )}
-              <p style={{ fontSize: '25px' }}>
+              <p style={{ fontSize: '25px', color: '#003366', textShadow: 'none' }}>
                 <strong>
                   {partialData.colour} {partialData.make}
                   {partialData.year && ` from ${partialData.year}`}
                 </strong>
               </p>
-              <p>
+              <p style={{ color: '#003366', textShadow: 'none' }}>
                 Please register or log in below to unlock the full HPI-style check,
                 including outstanding finance, theft records, and more.
               </p>
-
-              {/* AuthTabs => inline login/register */}
               <AuthTabs onAuthSuccess={handleAuthSuccess} />
             </div>
           )}
@@ -456,7 +468,7 @@ export default function HPICheckPage() {
         </div>
       </div>
 
-      {/* Full HPI data if we have it */}
+      {/* If we have full HPI data => show it */}
       {hpiData?.hpiCheck && (
         <div style={{ maxWidth: '1200px', margin: '2rem auto' }}>
           <div ref={printRef}>

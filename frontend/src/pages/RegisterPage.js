@@ -248,9 +248,7 @@ function RegisterPage() {
         Already have an account? <a href="/login">Login here</a>.
       </p>
 
-      <div className="card border rounded p-3 mt-4 text-center">
-        [Ad Banner]
-      </div>
+      
     </div></>
   );
 }
