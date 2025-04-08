@@ -5,6 +5,16 @@ import { VERIFY_EMAIL, LOGIN } from '../graphql/mutations';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 function VerifyEmailPage() {
+  useEffect(() => {
+    // Suppose you want to trigger the conversion right after the page loads:
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        send_to: 'AW-929213712/AUt6CMji8L0DEJDairsD'
+      });
+    } else {
+      console.log('gtag not found');
+    }
+  }, []);
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
@@ -141,6 +151,7 @@ function VerifyEmailPage() {
         )}
       </div>
     </div>
+    
   );
 }
 
