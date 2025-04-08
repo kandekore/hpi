@@ -119,17 +119,28 @@ export default function MOTPage() {
   };
 
   // 7) Full MOT check
-  const handleFullMotCheck = (regToCheck = reg) => {
+  const handleFullMotCheck = (regToCheck, newProfile) => {
     setErrorMsg('');
-    if (!userProfile) {
+  
+    // Use newProfile if it’s provided; fallback to the old userProfile
+    const profileToUse = newProfile || userProfile;
+  
+    if (!profileToUse) {
       setErrorMsg('Unable to load your profile. Please try again.');
       return;
     }
+  
+    // Then check credits from `profileToUse`
+    const freeMotChecksUsed = profileToUse.freeMotChecksUsed ?? 0;
+    const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
+    const motCredits = profileToUse.motCredits ?? 0;
+    const totalMot = freeMotLeft + motCredits;
+  
     if (totalMot < 1) {
       setErrorMsg('No MOT credits left. Please purchase more.');
       return;
     }
-    // usage modal => confirm => run motCheck
+  
     showCreditsModal(totalMot, () => {
       motCheck({ variables: { reg: regToCheck } });
     });
@@ -156,11 +167,18 @@ export default function MOTPage() {
 
   // 9) if user logs in from partial => full check
   const handleAuthSuccess = () => {
-    refetch().then(() => {
-      
-      handleFullMotCheck(reg);
+    refetch().then((result) => {
+      console.log('Refetch result =>', result.data);
+      const newProfile = result.data?.getUserProfile;
+      if (!newProfile) {
+        setErrorMsg('No user profile found after login');
+        return;
+      }
+      // Now do the usage logic with newProfile
+      handleFullMotCheck(reg, newProfile);
     });
   };
+  
 
   // 10) For printing final results
   const printRef = useRef(null);

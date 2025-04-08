@@ -1,36 +1,44 @@
 // src/pages/HomePage.js
+
 import React, { useState } from 'react';
 import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ReCAPTCHA from 'react-google-recaptcha';
 
+// GraphQL
 import { GET_USER_PROFILE, PUBLIC_VEHICLE_PREVIEW } from '../graphql/queries';
 import { CREATE_CREDIT_PURCHASE_SESSION } from '../graphql/mutations';
 
+// Components
 import AuthTabs from '../components/AuthTabs';
 import MainPricing from '../components/MainPricing';
 
+// Images
 import drkbgd from '../images/drkbgd.jpg';
 import flexiblePlansBg from '../images/happyuser.jpg';
 
 export default function HomePage() {
   const navigate = useNavigate();
 
-  // 1) Local states
+  // ========== 1) Local States ==========
   const [reg, setReg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [partialData, setPartialData] = useState(null); // from publicVehiclePreview
+  const [partialData, setPartialData] = useState(null);
+
+  // For reCAPTCHA modal if not logged in
   const [showCaptchaModal, setShowCaptchaModal] = useState(false);
   const [captchaToken, setCaptchaToken] = useState(null);
-  const [searchType, setSearchType] = useState(null); // 'MOT', 'VALUATION', 'FULL_HISTORY'
 
-  // 2) Queries + user data
-  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
+  // Which search type user clicked: 'MOT', 'VALUATION', 'FULL_HISTORY'
+  const [searchType, setSearchType] = useState(null);
+
+  // ========== 2) Get user profile ==========
+  const { data: profileData, loading: profileLoading, refetch } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
-  // Credits
+  // Quick checks for usage
   const freeMotChecksUsed = userProfile?.freeMotChecksUsed ?? 0;
   const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
   const motCredits = userProfile?.motCredits ?? 0;
@@ -38,7 +46,7 @@ export default function HomePage() {
   const hasValuationCredits = (userProfile?.valuationCredits ?? 0) > 0;
   const hasVdiCredits = (userProfile?.hpiCredits ?? 0) > 0;
 
-  // 3) Lazy query for partial data
+  // ========== 3) Partial query for publicVehiclePreview ==========
   const [fetchPublicPreview, { loading: publicLoading, error: publicError }] =
     useLazyQuery(PUBLIC_VEHICLE_PREVIEW, {
       onCompleted: (data) => {
@@ -46,10 +54,10 @@ export default function HomePage() {
       },
     });
 
-  // 4) Mutation for purchase session
+  // ========== 4) Create purchase session (Stripe) ==========
   const [createSession] = useMutation(CREATE_CREDIT_PURCHASE_SESSION);
 
-  // 5) Handle registration input
+  // ========== 5) Handle input changes ==========
   const handleRegChange = (e) => {
     const val = e.target.value.toUpperCase();
     if (val.length <= 8) {
@@ -59,27 +67,40 @@ export default function HomePage() {
     setErrorMsg('');
   };
 
-  // 6) If user is logged in => go to the correct page with ?reg
-  const handleLoggedInSearch = (type) => {
+  // ========== 6) If user is logged in, go to the appropriate page (MOT / VALUATION / etc.) ==========
+  // NOTE: We add a second argument newProfile so that if we just fetched a new profile
+  // in handleAuthSuccess, we can pass it here. Otherwise, fallback to the existing userProfile.
+  const handleLoggedInSearch = (type, newProfile) => {
     setErrorMsg('');
-    if (!reg) {
-      setErrorMsg('Please enter a valid registration.');
+
+    const profileToUse = newProfile || userProfile;
+    if (!profileToUse) {
+      setErrorMsg('Unable to fetch your profile. Please try again later.');
       return;
     }
-    if (!userProfile) {
-      setErrorMsg('Unable to fetch your profile. Please try again later.');
+
+    const freeMotChecksUsed = profileToUse.freeMotChecksUsed ?? 0;
+    const freeMotLeft = Math.max(0, 3 - freeMotChecksUsed);
+    const motCredits = profileToUse.motCredits ?? 0;
+    const totalMot = freeMotLeft + motCredits;
+    const hasValuationCredits = (profileToUse?.valuationCredits ?? 0) > 0;
+    const hasVdiCredits = (profileToUse?.hpiCredits ?? 0) > 0;
+
+    if (!reg) {
+      setErrorMsg('Please enter a valid registration.');
       return;
     }
 
     switch (type) {
       case 'MOT':
-        // check if user has free or paid MOT left
         if (totalMot > 0) {
+          // They have MOT credits => go to /mot
           navigate(`/mot?reg=${reg}`);
         } else {
           setErrorMsg('You have no MOT checks remaining. Please purchase more credits.');
         }
         break;
+
       case 'VALUATION':
         if (hasValuationCredits) {
           navigate(`/valuation?reg=${reg}`);
@@ -87,6 +108,7 @@ export default function HomePage() {
           setErrorMsg('You have no Valuation credits left. Please purchase more.');
         }
         break;
+
       case 'FULL_HISTORY':
         if (hasVdiCredits) {
           navigate(`/hpi?reg=${reg}`);
@@ -94,37 +116,40 @@ export default function HomePage() {
           setErrorMsg('You have no Full Vehicle History credits left. Please purchase more.');
         }
         break;
+
       default:
         break;
     }
   };
 
-  // 7) If not logged in => partial data => reCAPTCHA
+  // ========== 7) If NOT logged in => partial check via reCAPTCHA ==========
   const handlePublicSearch = (type) => {
     setErrorMsg('');
-    setSearchType(type); // store which type they clicked
+    setSearchType(type); // store which button they clicked
     if (!reg) {
       setErrorMsg('Please enter a valid registration.');
       return;
     }
-    // show reCAPTCHA modal
-    setShowCaptchaModal(true);
+    setShowCaptchaModal(true); // open reCAPTCHA modal
   };
 
-  // reCAPTCHA success => fetch partial
+  // ========== 8) reCAPTCHA success => run fetchPublicPreview ==========
   const handleCaptchaSuccess = async (token) => {
     setShowCaptchaModal(false);
     setCaptchaToken(token);
     setErrorMsg('');
+
     try {
-      await fetchPublicPreview({ variables: { reg, captchaToken: token } });
+      await fetchPublicPreview({
+        variables: { reg, captchaToken: token },
+      });
     } catch (err) {
       console.error(err);
       setErrorMsg(err.message);
     }
   };
 
-  // 8) The "click" handlers for each search type
+  // ========== 9) The main "click" handlers for each search button ==========
   const handleClickMOT = () => {
     if (isLoggedIn) {
       handleLoggedInSearch('MOT');
@@ -149,16 +174,24 @@ export default function HomePage() {
     }
   };
 
-  // 9) If they log in or register => proceed to the correct search
+  // ========== 10) If user logs in => do the "full" search after refetch ==========
+  // Compare to MOTPage's handleAuthSuccess: we refetch, then pass the newProfile forward.
   const handleAuthSuccess = () => {
-    refetch().then(() => {
-    if (searchType) {
-      handleLoggedInSearch(searchType);
-    }
-  });
+    refetch().then((result) => {
+      const newProfile = result.data?.getUserProfile;
+      if (!newProfile) {
+        setErrorMsg('No user profile found after login');
+        return;
+      }
+      // The user just logged in, so let's continue whichever search they tried.
+      // e.g. if they had clicked "MOT" but were forced to log in, we now do the full search:
+      if (searchType) {
+        handleLoggedInSearch(searchType, newProfile);
+      }
+    });
   };
 
-  // 10) Purchase
+  // ========== 11) Purchasing credits from the pricing table ==========
   const handlePurchase = async (product, quantity) => {
     const productMap = {
       VALUATION: 'VALUATION',
@@ -169,7 +202,7 @@ export default function HomePage() {
     try {
       const { data } = await createSession({ variables: { creditType, quantity } });
       if (data.createCreditPurchaseSession) {
-        window.location.href = data.createCreditPurchaseSession;
+        window.location.href = data.createCreditPurchaseSession; // Redirect to Stripe
       }
     } catch (err) {
       console.error(err);
@@ -180,16 +213,23 @@ export default function HomePage() {
     <>
       <Helmet>
         <title>Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks</title>
-        <meta name="description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
-        {/* Social meta tags */}
+        <meta
+          name="description"
+          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+        />
         <meta property="og:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
-        <meta property="og:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
+        <meta
+          property="og:description"
+          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+        />
         <meta property="og:image" content={drkbgd} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
-        <meta name="twitter:description" content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place" />
+        <meta
+          name="twitter:description"
+          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+        />
         <meta name="twitter:image" content={drkbgd} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
@@ -458,7 +498,7 @@ export default function HomePage() {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content" style={{ borderRadius: '8px' }}>
               <div className="modal-header">
-                <h5 className="modal-title">Verify You're Human</h5>
+                <h5 className="modal-title justify-content-center">Verify You're Human</h5>
                 <button
                   type="button"
                   className="btn-close"

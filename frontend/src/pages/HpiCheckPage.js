@@ -46,11 +46,12 @@ export default function HPICheckPage() {
   });
 
   // 3) Query user
-  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
   // If user is logged in, get their HPI credits
+  // (We will also recalc from the newProfile if we fetch it after login)
   const hpiCredits = userProfile?.hpiCredits ?? 0;
 
   // 4) Lazy Queries
@@ -73,7 +74,7 @@ export default function HPICheckPage() {
     if (initialReg) {
       const upperReg = initialReg.toUpperCase();
       setReg(upperReg);
-      autoTriggerHpiCheck(upperReg);  // <--- call auto search
+      autoTriggerHpiCheck(upperReg);
       navigate('/hpi', { replace: true }); // remove ?reg from URL
     }
   }, [searchParams, navigate]);
@@ -138,18 +139,27 @@ export default function HPICheckPage() {
   };
 
   // 8) Full HPI check if logged in
-  const handleFullHpiCheck = (regToCheck = reg) => {
+  //    Accept a second argument "newProfile" (like your MOTPage) so that after login
+  //    we can pass the fresh user data in, ensuring we don’t get errors about the old userProfile.
+  const handleFullHpiCheck = (regToCheck = reg, newProfile) => {
     setErrorMsg('');
-    if (!userProfile) {
+
+    // If we've just refetched a new profile, use it; otherwise fallback to existing userProfile
+    const profileToUse = newProfile || userProfile;
+    if (!profileToUse) {
       setErrorMsg('Unable to fetch your profile. Please try again later.');
       return;
     }
-    if (hpiCredits < 1) {
+
+    // Recompute hpiCredits from the chosen profile
+    const hpiCreditsAvailable = profileToUse.hpiCredits ?? 0;
+    if (hpiCreditsAvailable < 1) {
       setErrorMsg('You have no Full Vehicle History credits left. Please purchase more.');
       return;
     }
+
     // Show usage modal => run hpiCheck on confirm
-    showCreditsModal(hpiCredits, () => {
+    showCreditsModal(hpiCreditsAvailable, () => {
       hpiCheck({ variables: { reg: regToCheck } });
     });
   };
@@ -164,15 +174,21 @@ export default function HPICheckPage() {
     if (!isLoggedIn) {
       handlePublicCheck();
     } else {
-      handleFullHpiCheck();
+      handleFullHpiCheck(reg);
     }
   };
 
-  // 10) On Auth success => do the full check
+  // 10) On Auth success => refetch user, then do the full check
   const handleAuthSuccess = () => {
-    refetch().then(() => {
-    handleFullHpiCheck(reg);
-  });
+    refetch().then((result) => {
+      const newProfile = result.data?.getUserProfile;
+      if (!newProfile) {
+        setErrorMsg('No user profile found after login');
+        return;
+      }
+      // Now proceed with the full HPI check using the new profile
+      handleFullHpiCheck(reg, newProfile);
+    });
   };
 
   // 11) For reg input
@@ -194,14 +210,26 @@ export default function HPICheckPage() {
           content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
         />
         {/* Open Graph tags */}
-        <meta property="og:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
-        <meta property="og:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+        <meta
+          property="og:title"
+          content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information"
+        />
+        <meta
+          property="og:description"
+          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+        />
         <meta property="og:image" content={heroBg} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
         <meta property="og:type" content="website" />
         {/* Twitter */}
-        <meta name="twitter:title" content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information" />
-        <meta name="twitter:description" content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more." />
+        <meta
+          name="twitter:title"
+          content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information"
+        />
+        <meta
+          name="twitter:description"
+          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+        />
         <meta name="twitter:image" content={heroBg} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

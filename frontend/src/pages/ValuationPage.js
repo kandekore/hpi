@@ -40,7 +40,7 @@ export default function ValuationPage() {
   const modalRef = useRef(null);
 
   // 3) Query user
-  const { data: profileData, loading: profileLoading, refetch  } = useQuery(GET_USER_PROFILE);
+  const { data: profileData, loading: profileLoading, refetch } = useQuery(GET_USER_PROFILE);
   const userProfile = profileData?.getUserProfile || null;
   const isLoggedIn = !!localStorage.getItem('authToken');
 
@@ -145,18 +145,25 @@ export default function ValuationPage() {
   };
 
   // 10) Full Valuation check if logged in
-  const handleFullValuationCheck = async (regToCheck = reg) => {
+  //     We pass a newProfile argument so that after login we can use the fresh data from refetch.
+  const handleFullValuationCheck = async (regToCheck = reg, newProfile) => {
     setErrorMsg('');
-    if (!userProfile) {
+
+    // use newProfile if provided; fallback to existing userProfile
+    const profileToUse = newProfile || userProfile;
+    if (!profileToUse) {
       setErrorMsg('Unable to fetch your profile. Please try again later.');
       return;
     }
-    if (valuationCredits < 1) {
+
+    const valCreditsAvailable = profileToUse.valuationCredits ?? 0;
+    if (valCreditsAvailable < 1) {
       setErrorMsg('You have no Valuation credits left. Please purchase more.');
       return;
     }
+
     // usage modal => confirm => run
-    showCreditsModal(valuationCredits, async () => {
+    showCreditsModal(valCreditsAvailable, async () => {
       await valuationCheck({ variables: { reg: regToCheck } });
     });
   };
@@ -177,10 +184,15 @@ export default function ValuationPage() {
     }
   };
 
-  // 12) If user logs in => do the full check
+  // 12) If user logs in => do the full check, using newProfile from refetch
   const handleAuthSuccess = () => {
-    refetch().then(() => {
-      handleFullValuationCheck(reg);
+    refetch().then((result) => {
+      const newProfile = result.data?.getUserProfile;
+      if (!newProfile) {
+        setErrorMsg('No user profile found after login');
+        return;
+      }
+      handleFullValuationCheck(reg, newProfile);
     });
   };
 
@@ -193,14 +205,14 @@ export default function ValuationPage() {
     
         {/* Open Graph tags */}
         <meta property="og:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
-        <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes real market data to give you a realistic price range for your vehicle." />
         <meta property="og:image" content={heroBg} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
         <meta property="og:type" content="website" />
     
         {/* Twitter */}
         <meta name="twitter:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
-        <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes real market data to give you a realistic price range for your vehicle." />
         <meta name="twitter:image" content={heroBg} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
