@@ -39,9 +39,9 @@ export default function ExampleReportsPage() {
   const [activeTab, setActiveTab] = useState('vdi');
 
   // Replace these IDs with your actual "sample" record IDs
-  const MOT_SEARCH_ID = '67d9f2258b58f829acf6fb29';       // searchType === 'MOT'
-  const VAL_SEARCH_ID = '67e0716182e6f36e8d462228';       // searchType === 'Valuation'
-  const VDI_SEARCH_ID = '67dddad18b58f829acf6fb9e';       // searchType === 'VDI' or 'HPI'
+  const MOT_SEARCH_ID = '67e6526b77ab38ba1b893812';       // searchType === 'MOT'
+  const VAL_SEARCH_ID = '67de8be9752f5283612dff7f';       // searchType === 'Valuation'
+  const VDI_SEARCH_ID = '67da6e8a8b58f829acf6fb53';       // searchType === 'VDI' or 'HPI'
 
   // Query each record via getSampleSearchById 
   const {
