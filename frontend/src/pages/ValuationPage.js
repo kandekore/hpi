@@ -1,5 +1,3 @@
-// src/pages/ValuationPage.js
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
@@ -200,19 +198,19 @@ export default function ValuationPage() {
   return (
     <>
       <Helmet>
-        <title>Instant Vehicle Valuations & Full MOT History | Vehicle Data Information</title>
-        <meta name="description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our vehicle valuation tool analyzes current market data to give you a realistic price range for your vehicle." />
+        <title>Accurate Car Valuation Online UK | Vehicle Price Check & Estimator</title>
+        <meta name="description" content="Get an instant, accurate car valuation online for any UK car, van, or motorbike. Discover private sale, trade-in value, and compare market prices with our reliable vehicle price estimator." />
     
         {/* Open Graph tags */}
-        <meta property="og:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
-        <meta property="og:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes real market data to give you a realistic price range for your vehicle." />
+        <meta property="og:title" content="Accurate Car Valuation Online UK | Vehicle Price Check & Estimator" />
+        <meta property="og:description" content="Get an instant, accurate car valuation online for any UK car, van, or motorbike. Discover private sale, trade-in value, and compare market prices with our reliable vehicle price estimator." />
         <meta property="og:image" content={heroBg} />
-        <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+        <meta property="og:url" content="https://vehicledatainformation.co.uk/valuation" />
         <meta property="og:type" content="website" />
     
         {/* Twitter */}
-        <meta name="twitter:title" content="Instant Vehicle Valuations & Full MOT History | Vehicle Data Information" />
-        <meta name="twitter:description" content="Knowing a car’s true market value helps you avoid overpaying or underselling. Our valuation tool analyzes real market data to give you a realistic price range for your vehicle." />
+        <meta name="twitter:title" content="Accurate Car Valuation Online UK | Vehicle Price Check & Estimator" />
+        <meta name="twitter:description" content="Get an instant, accurate car valuation online for any UK car, van, or motorbike. Discover private sale, trade-in value, and compare market prices with our reliable vehicle price estimator." />
         <meta name="twitter:image" content={heroBg} />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
@@ -300,6 +298,87 @@ export default function ValuationPage() {
           margin-bottom: 2rem;
           font-weight: 700;
         }
+        /* New styles for expanded content */
+        .content-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            line-height: 1.7;
+        }
+        .content-section h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #003366;
+        }
+        .content-section h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1560bd;
+        }
+        .content-section ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 1.5rem;
+        }
+        .content-section ul li {
+            margin-bottom: 0.7rem;
+        }
+        .cta-box {
+            background-color: #f4f4f4;
+            border-left: 5px solid #1560bd;
+            padding: 1.5rem;
+            margin: 2.5rem auto;
+            text-align: center;
+            max-width: 800px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .cta-box p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .cta-box a {
+            background-color: #1560bd;
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .cta-box a:hover {
+            background-color: #0d4f9c;
+        }
+        .key-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .key-point-card {
+            background: #e9f5ff;
+            border: 1px solid #cceeff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            flex: 1 1 280px;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .key-point-card h4 {
+            color: #003366;
+            margin-bottom: 0.7rem;
+            font-size: 1.3rem;
+        }
+        .key-point-card i {
+            font-size: 2.5rem;
+            color: #1560bd;
+            margin-bottom: 1rem;
+        }
       `}</style>
 
       {/* USAGE MODAL */}
@@ -370,8 +449,10 @@ export default function ValuationPage() {
 
       {/* HERO */}
       <div className="valuation-hero">
-        <h1>Valuation Check</h1>
-        <p>Get an instant estimate of your vehicle’s market value.</p>
+        <h1>Accurate Car Valuation Online: Discover Your Vehicle's True Market Value</h1>
+        <p>
+          Get an instant estimate of your vehicle’s market value whether you’re looking to buy, sell, or trade-in. Our vehicle valuation tool analyzes current market data to give you a realistic price range for your car or van.
+        </p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Registration input */}
@@ -405,7 +486,7 @@ export default function ValuationPage() {
                   marginTop: '1rem',
                 }}
               >
-                Search Again
+                Get Another Valuation
               </button>
             ) : (
               <button
@@ -422,7 +503,7 @@ export default function ValuationPage() {
                   marginTop: '1rem',
                 }}
               >
-                {valLoading || publicLoading ? 'Checking...' : 'Get Valuation'}
+                {valLoading || publicLoading ? 'Calculating...' : 'Get Instant Valuation'}
               </button>
             )}
           </div>
@@ -506,23 +587,88 @@ export default function ValuationPage() {
         </div>
       )}
 
-      {/* Additional Info */}
-      <div className="valuation-info-section">
-        <h2>Why Get a Vehicle Valuation?</h2>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      {/* Additional Info / Content Sections */}
+      <div className="content-section">
+        <h2>Why an Accurate Vehicle Valuation is Your Essential Guide</h2>
+        <p>
+          Whether you're planning to buy your dream car, sell your current one, or looking to value your trade in, understanding a vehicle's true market value is absolutely crucial. The automotive market is dynamic, and relying on guesswork or outdated information can lead to significant financial loss. Our accurate car valuation online tool empowers you with the knowledge to make smart, confident financial decisions.
+        </p>
+        <p>
+          Don't get caught out by overpaying for a purchase or underselling your own vehicle. Our car value estimator provides a realistic car price check based on the very latest market data.
+        </p>
+
+        <h3>How Our Vehicle Valuation Tool Empowers You:</h3>
+        <div className="key-points">
+            <div className="key-point-card">
+                <i className="bi bi-tag"></i>
+                <h4>Set the Right Price for Selling</h4>
+                <p>If you want to price my car for a private sale, our car appraisal online helps you set a competitive and attractive price, drawing serious buyers and preventing you from underselling. Get an independent car estimate that truly reflects its worth.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-cart-check"></i>
+                <h4>Avoid Overpaying When Buying</h4>
+                <p>Use our car value lookup to verify if the asking price of a vehicle you're interested in aligns with its true car value. This is your essential guide to smart negotiation and ensures you're getting a fair deal.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-arrow-left-right"></i>
+                <h4>Negotiate Your Trade-In Value</h4>
+                <p>Curious about the trade in value car at a dealership? Get an independent vehicle trade in value estimate from us to ensure you're receiving a fair offer and not leaving money on the table. This is especially useful for a motorway car valuation or comparing against offers like "we buy any car valuation".</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-cash-coin"></i>
+                <h4>Financial Planning & Insurance</h4>
+                <p>Accurate car valuations are often necessary for insurance policies, refinancing existing loans, or simply for personal financial planning. Our tool provides a reliable car price calculator for these needs.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-calendar-range"></i>
+                <h4>Assess the Value of Older Cars</h4>
+                <p>Even if you're looking for an old car valuation, our system can provide relevant insights into its current market standing, helping you understand its residual car value.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-truck"></i>
+                <h4>Valuations for All Vehicle Types</h4>
+                <p>Our comprehensive car value estimator isn't just for cars. Easily value my van or get an accurate market price for your motorbike, providing versatile used car values across different vehicle categories.</p>
+            </div>
+        </div>
+
+        <h3>Our Advanced Valuation Methodology: Data-Driven Accuracy</h3>
+        <p>
+          Our car valuation online service goes beyond basic assumptions. We employ a sophisticated algorithm that meticulously processes vast amounts of real-time vehicle data from a multitude of reliable sources, ensuring you receive the most accurate car estimate possible.
+        </p>
+        <ul>
+            <li>Recent Sales Data: Analyzing thousands of actual vehicle transactions across the UK to understand what cars are genuinely selling for.</li>
+            <li>Dealer Listings & Auction Results: Cross-referencing current prices from reputable dealerships and incorporating the dynamic pricing from live automotive auctions.</li>
+            <li>Industry Trends: Factoring in seasonal demand, fuel price impacts, economic shifts, and broader market sentiment.</li>
+            <li>Vehicle Specifics: Considering key attributes like the vehicle's exact make, model, trim level, engine size, age, mileage, overall condition, and valuable optional extras.</li>
+        </ul>
+        <p>
+          This comprehensive, data-driven approach ensures our used car valuation tool provides a highly reliable car value check, whether you’re looking for a quick car valuation online or a detailed analysis comparable to Parkers car valuation or Motorway car valuation standards. You can confidently check my car value knowing it's based on the market's pulse.
+        </p>
+
+        <div className="cta-box">
+            <p>Ready to discover your vehicle's true worth?</p>
+            <p>Get your instant, accurate car valuation today!</p>
+            <a href="#top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Get My Car Valuation</a>
+        </div>
+
+        <h3>Combine Your Valuation with a Full Vehicle History Check</h3>
+        <p>
+          While our vehicle valuation provides insight into a vehicle's monetary worth, understanding its full history is equally important for a truly informed decision. We highly recommend complementing your car valuation with a comprehensive HPI check.
+        </p>
+        <ul>
+            <li>An HPI car valuation is not just about price; it's about validating that value. A vehicle free from outstanding finance, stolen records, or undeclared accident damage (an HPI clear status) will inherently command a higher and more secure market price.</li>
+            <li>Our full HPI report can uncover hidden issues that drastically reduce a vehicle's true worth, regardless of its initial estimated value.</li>
+        </ul>
+        <p>
+          By getting both an accurate car valuation by registration number and a full HPI check, you gain the ultimate peace of mind, ensuring both the financial and historical integrity of your prospective purchase or sale.
+        </p>
+      </div>
+
+      {/* BOTTOM BRAND MENTION */}
+      <div className="valuation-info-section"> {/* Reusing this class for general styling */}
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           <p>
-            Knowing a car’s true market value helps you avoid overpaying 
-            or underselling. Our <strong>instant vehicle valuation tool</strong> analyzes current market 
-            data to give you a realistic price range for your vehicle.
-          </p>
-          <ul>
-            <li>Compare private vs. trade-in values</li>
-            <li>Understand local market demand</li>
-            <li>Negotiate from an informed position</li>
-          </ul>
-          <p>
-            Whether you’re buying, selling, or just curious, an accurate 
-            valuation empowers you to make the right financial decision.
+            All Vehicle Data Information reports, including our instant vehicle valuation estimates, are generated using secure, real-time data from leading industry sources. This includes market data provided by VDI Valuations, Experian Automotive, and other extensive sales and listings databases, ensuring the vehicle data you receive is accurate, current, and reliable. We are committed to providing you with transparent and comprehensive insights to empower your decisions. All reports are provided without prejudice on a Pay-As-You-Go basis, offering transparency and flexibility.
           </p>
         </div>
       </div>
