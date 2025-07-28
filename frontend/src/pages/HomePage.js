@@ -1,5 +1,3 @@
-// src/pages/HomePage.js
-
 import React, { useState } from 'react';
 import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
 import { Link, useNavigate } from 'react-router-dom';
@@ -215,12 +213,12 @@ export default function HomePage() {
         <title>Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks</title>
         <meta
           name="description"
-          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+          content="Unlock a vehicle's full story with Vehicle Data Information. Get instant HPI checks, accurate car valuations, and free MOT history to buy or sell with confidence in the UK."
         />
         <meta property="og:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta
           property="og:description"
-          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+          content="Unlock a vehicle's full story with Vehicle Data Information. Get instant HPI checks, accurate car valuations, and free MOT history to buy or sell with confidence in the UK."
         />
         <meta property="og:image" content={drkbgd} />
         <meta property="og:url" content="https://vehicledatainformation.co.uk" />
@@ -228,7 +226,7 @@ export default function HomePage() {
         <meta name="twitter:title" content="Vehicle Data Information | Valuations & Full Vehicle History | HPI / VDI Type Checks" />
         <meta
           name="twitter:description"
-          content="FREE MOT History, Vehicle Valuations & Full HPI/VDI style Vehicle History Data — All in One Place"
+          content="Unlock a vehicle's full story with Vehicle Data Information. Get instant HPI checks, accurate car valuations, and free MOT history to buy or sell with confidence in the UK."
         />
         <meta name="twitter:image" content={drkbgd} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -518,12 +516,11 @@ export default function HomePage() {
 
       {/* HERO SECTION */}
       <div className="hero section-fullwidth">
-        <h1 className="hero-title">Your One-Stop Vehicle Check Location</h1>
+        <h1 className="hero-title">Unlock Your Vehicle's Full Story: HPI Checks, Car Valuations & MOT History</h1>
         <p className="hero-subtitle">
-          FREE MOT History, Vehicle Valuations &amp; Full HPI/VDI style Vehicle History Data
-          — All in One Place
+          Your essential partner for accurate **vehicle data**, **car valuations**, and comprehensive **HPI checks** in the UK. Make informed decisions whether you're buying, selling, or just curious.
         </p>
-        <p className="hero-subtitle yellow">Enter Your Registration</p>
+        <p className="hero-subtitle yellow">Enter Your Registration for Instant Results</p>
 
         <div style={{ maxWidth: '1200px', margin: '-30px auto' }}>
           <div className="plate-container">
@@ -541,13 +538,13 @@ export default function HomePage() {
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '50px'}}>
             <button className="action-button" onClick={handleClickMOT}>
-              Full MOT History
+              Free MOT History Check
             </button>
             <button className="action-button" onClick={handleClickValuation}>
-              Vehicle Valuation
+              Accurate Vehicle Valuation
             </button>
             <button className="action-button" onClick={handleClickVDI}>
-              Full Vehicle History
+              Comprehensive HPI Check
             </button>
           </div>
 
@@ -620,31 +617,32 @@ export default function HomePage() {
 
       {/* YELLOW SECTION: "Why do I need to get a vehicle check?" */}
       <div className="why-vehicle-check section-fullwidth">
-        <h2>Why Check a Vehicle’s History?</h2>
+        <h2>Why is a Vehicle History Check So Important?</h2>
         <div className="content">
           <p>
-            Buying a second-hand car can be tricky—you can’t always tell its past 
-            just by looking. Running a vehicle history check helps you avoid 
-            nasty surprises and gives you confidence before buying.
+            Buying a used car or van can be an exciting prospect, but it also comes with inherent risks. Unlike a new vehicle, a second-hand car carries a past – a history that can significantly impact its safety, reliability, and true market **car value**. Without a thorough **vehicle data** check, you might unwittingly inherit costly problems, legal liabilities, or even a vehicle that isn't safe for the road. At Vehicle Data Information, we empower you to see beyond the showroom shine and uncover the full story.
+          </p>
+          <p>
+            Every day, numerous vehicles are sold with hidden issues. Our comprehensive checks are designed to reveal these critical details, protecting your investment and providing invaluable peace of mind. Consider these compelling statistics:
           </p>
 
           <div className="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">1 in 3</h4>
-                <p className="card-text">vehicles has some hidden history</p>
+                <p className="card-text">vehicles has some **hidden history** – don't let it be yours!</p>
               </div>
             </div>
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">74</h4>
-                <p className="card-text">stolen cars are identified daily</p>
+                <p className="card-text">**stolen cars** are identified daily, risking confiscation without compensation.</p>
               </div>
             </div>
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">1,771</h4>
-                <p className="card-text">insurance write-offs occur each day</p>
+                <p className="card-text">**insurance write-offs** occur each day, impacting safety and resale value.</p>
               </div>
             </div>
           </div>
@@ -653,38 +651,32 @@ export default function HomePage() {
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">1 in 3</h4>
-                <p className="card-text">has outstanding finance</p>
+                <p className="card-text">has **outstanding finance**, which could transfer to you.</p>
               </div>
             </div>
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">£11k</h4>
-                <p className="card-text">average finance amount on a car</p>
+                <p className="card-text">is the **average finance amount** on a car – a debt you could inherit!</p>
               </div>
             </div>
             <div className="col">
               <div className="card shadow h-100 text-center p-3">
                 <h4 className="card-title mb-2">1 in 16</h4>
-                <p className="card-text">shows a mileage discrepancy</p>
+                <p className="card-text">shows a **mileage discrepancy**, indicating potential fraud.</p>
               </div>
             </div>
             <p className="small">
-              Statistics based on cars checked by HPI® Ltd in 2017.
+              Statistics based on cars checked by HPI® Ltd in 2017. Current figures may vary but the risks remain.
             </p>
           </div>
 
           <div>
             <p>
-              Whether it’s <strong>outstanding finance</strong>, 
-              an <strong>insurance write-off</strong>, or even 
-              a <strong>stolen vehicle</strong>, our checks uncover critical 
-              details you need to know. We also validate for <strong>mileage anomalies</strong> 
-              to ensure you’re not inheriting a car that's already been round the clock. 
+              These statistics highlight the very real dangers of buying a used vehicle without a thorough **car history report**. Whether it’s an **outstanding finance** agreement still attached to the vehicle, a record as an **insurance write-off** (which can affect its safety and future insurability), or even if it's a **stolen vehicle** that the police could seize at any time, our checks provide crucial insights. We also meticulously validate for **mileage anomalies** to ensure you’re not inheriting a car that's already been driven far more than its odometer suggests.
             </p>
             <p>
-              Make an informed decision with a comprehensive report—because 
-              peace of mind is invaluable when you’re spending thousands 
-              on a used car.
+              A **full vehicle history** check, akin to a **HPI check DVLA** or **HPI check AA** standard, is your shield against unexpected expenses and serious liabilities. Make an informed decision with a comprehensive **HPI report** – because **peace of mind is invaluable** when you’re investing thousands in a used car, van, or even a **motorcycle HPI check**.
             </p>
           </div>
         </div>
@@ -692,30 +684,27 @@ export default function HomePage() {
 
       {/* WHY CHECK WITH US */}
       <div className="why-check-section section-fullwidth">
-        <h2 className="why-check-heading">Why Check Your Vehicle With Us?</h2>
+        <h2 className="why-check-heading">Why Choose Vehicle Data Information for Your Vehicle Check?</h2>
         <div className="why-check-items">
           <div className="why-check-card">
             <i className="bi bi-clock-history"></i>
-            <h4>Instant Information</h4>
+            <h4>Instant, Reliable Information</h4>
             <p>
-              Our streamlined system retrieves your vehicle’s details 
-              within seconds, so you’re never left waiting.
+              Our streamlined system retrieves your vehicle’s details, from **MOT history** to **full vehicle history** data, within seconds. You'll never be left waiting, getting the vital information you need exactly when you need it for swift decision-making.
             </p>
           </div>
           <div className="why-check-card">
             <i className="bi bi-shield-check"></i>
-            <h4>Accurate &amp; Reliable</h4>
+            <h4>Accurate &amp; Trustworthy Data</h4>
             <p>
-              We partner with leading data providers to ensure every 
-              detail you get is correct and up-to-date.
+              We pride ourselves on partnering with leading industry data providers, including official sources and major finance houses. This ensures that every detail you receive is **accurate, reliable**, and up-to-date, offering you genuine assurance in your vehicle purchase.
             </p>
           </div>
           <div className="why-check-card">
             <i className="bi bi-cash-stack"></i>
-            <h4>Save Money</h4>
+            <h4>Significant Cost Savings & Peace of Mind</h4>
             <p>
-              Identify hidden issues or outstanding finance before you buy, 
-              preventing expensive surprises down the line.
+              Identifying hidden issues like **outstanding finance on a car**, an undeclared write-off, or mileage discrepancies **before you buy** can save you thousands in unexpected repairs or financial liabilities. Our **cheap HPI check** helps you prevent expensive surprises down the line, ensuring you invest wisely.
             </p>
           </div>
         </div>
@@ -725,26 +714,15 @@ export default function HomePage() {
       <div className="flexible-plans-section section-fullwidth">
         <div className="flexible-plans-container">
           <div className="flexible-plans-box">
-            <h3>Flexible Plans &amp; Extra Features</h3>
+            <h3>Flexible Plans &amp; Comprehensive Features</h3>
             <p>
-              We understand that everyone has different needs when it 
-              comes to vehicle checks. That's why we offer a range of 
-              options, from free MOT checks and quick valuations to 
-              more comprehensive Full Vehicle History (HPI or VDI style) reports. You can purchase 
-              a single search for peace of mind or opt for a multi-check 
-              bundle if you're comparing several cars at once.
+              At Vehicle Data Information, we understand that every individual has unique needs when it comes to **vehicle checks**. That's why we offer a diverse range of flexible options tailored to suit various requirements and budgets. Whether you're a casual buyer, a dedicated enthusiast, or a dealer, our services are designed to provide maximum value and convenience.
             </p>
             <p>
-              All historical searches remain stored in your personal 
-              dashboard, accessible anytime you log in. Whether you’re 
-              confirming service records on a new purchase or revisiting 
-              data from months ago, your report details are always at 
-              your fingertips.
+              From our invaluable **free MOT checks** and swift **car value lookup** tools to our most thorough **Full Vehicle History (HPI or VDI style)** reports, we've got you covered. You have the flexibility to purchase a **single search** for immediate peace of mind on a specific vehicle or opt for a cost-effective **multi-check bundle** if you're actively comparing several cars at once. This makes checking multiple vehicles, whether it’s a **car valuation** or a full **HPI car check**, more affordable and efficient.
             </p>
             <p>
-              Take advantage of our affordable one-off checks or 
-              save with bulk credits—either way, you’ll have reliable 
-              vehicle insights whenever you need them.
+              What's more, all your historical searches and detailed reports remain securely stored within your personal dashboard. This means your data is always at your fingertips, accessible anytime you log in. Whether you’re confirming past service records on a new purchase, revisiting detailed **car history reports** from months ago, or just tracking your own vehicle's journey, your report details are permanently available for review. Take advantage of our affordable one-off checks or save substantially with our bulk credits—either way, you’ll have reliable **vehicle data** whenever you need it most.
             </p>
           </div>
         </div>
@@ -752,7 +730,7 @@ export default function HomePage() {
 
       {/* REPORT TABS SECTION */}
       <div className="report-tabs-section section-fullwidth">
-        <h2 className="report-tabs-heading">Our Reports</h2>
+        <h2 className="report-tabs-heading">Our Comprehensive Vehicle Data Reports</h2>
 
         <ul className="nav nav-tabs justify-content-center" id="myTab" role="tablist">
           <li className="nav-item" role="presentation">
@@ -766,7 +744,7 @@ export default function HomePage() {
               aria-controls="mot"
               aria-selected="true"
             >
-              Free MOT Check
+              Free MOT History Check
             </button>
           </li>
           <li className="nav-item" role="presentation">
@@ -780,7 +758,7 @@ export default function HomePage() {
               aria-controls="valuation"
               aria-selected="false"
             >
-              Simple Valuation
+              Accurate Vehicle Valuation
             </button>
           </li>
           <li className="nav-item" role="presentation">
@@ -794,7 +772,7 @@ export default function HomePage() {
               aria-controls="vdi"
               aria-selected="false"
             >
-              Full Vehicle History
+              Full Vehicle History (HPI)
             </button>
           </li>
         </ul>
@@ -807,18 +785,24 @@ export default function HomePage() {
             role="tabpanel"
             aria-labelledby="mot-tab"
           >
+            <h3>Discover Your Vehicle's Maintenance Journey with a Free MOT History Check</h3>
             <p>
-              Take advantage of up to three <strong>Free MOT Checks</strong> per 
-              user! Instantly see past test results, recorded mileages, 
-              and advisories to ensure your potential car has been 
-              well-maintained.
+              Take advantage of up to three **Free MOT Checks** per user! Our MOT History Check service provides instant, detailed insights into a vehicle's annual roadworthiness tests. This is a critical tool for understanding how well a car, van, or even a motorcycle has been maintained. By simply entering the registration number, you can instantly see all past test results, accurately recorded mileages at the time of each test, and crucial advisory notes. These advisories highlight minor defects that aren't severe enough for an immediate fail but indicate areas that may soon require attention, such as worn tyres or minor corrosion.
+            </p>
+            <p>
+              Understanding the full MOT history allows you to:
             </p>
             <ul>
-              <li>Up to 3 free checks per account</li>
-              <li>View MOT history &amp; mileage records</li>
-              <li>Check for recurring advisories</li>
-              <li>Identify signs of poor maintenance</li>
+              <li>View comprehensive pass, fail, and partial pass results from every test.</li>
+              <li>Analyze accurate **mileage records** over time, crucial for identifying potential "clocking" or mileage discrepancies.</li>
+              <li>Spot recurring advisories or issues that suggest chronic problems or a lack of proper maintenance.</li>
+              <li>Assess the vehicle's general roadworthiness and safety standards.</li>
+              <li>Gain peace of mind regarding the vehicle's structural and mechanical integrity, vital before purchase.</li>
             </ul>
+            <p>
+              This invaluable free service helps you identify signs of poor maintenance and ensure your potential next car has been well-cared for, protecting you from unexpected repair costs down the line.
+            </p>
+            <p><Link to="/mot">Learn more about our Free MOT History Check here.</Link></p>
           </div>
 
           {/* Simple Valuation Tab */}
@@ -828,19 +812,24 @@ export default function HomePage() {
             role="tabpanel"
             aria-labelledby="valuation-tab"
           >
+            <h3>Get an Accurate Car Valuation: Understand Your Vehicle's True Market Worth</h3>
             <p>
-              Get a quick market estimate of your car’s value. Our 
-              <strong> Vehicle Valuation</strong> tool leverages extensive 
-              market data to tell you if the asking price is fair.
+              Whether you're looking to sell, buy, or trade-in, knowing the precise **market value of my car** is essential. Our **Vehicle Valuation** tool provides an immediate, reliable **car value estimator** by leveraging extensive, real-time market data. We draw insights from thousands of recent sales, dealer listings, and auction results across the UK, giving you an honest and up-to-date appraisal. This helps you avoid overpaying for your next vehicle or underselling your current one.
+            </p>
+            <p>
+              Our comprehensive **car appraisal online** provides:
             </p>
             <ul>
-              <li>Immediate valuation report</li>
-              <li>Part Exchange valuations</li>
-              <li>Trade valuations</li>
-              <li>Auction Valuations</li>
-              <li>Up-to-date pricing from real market data</li>
-              <li>Avoid overpaying for your next car</li>
+              <li>An **immediate valuation report** showing realistic price ranges.</li>
+              <li>Estimates for both **private sale value** and **trade-in value car** (part exchange valuations).</li>
+              <li>Access to up-to-date pricing directly from real market data, not just theoretical figures.</li>
+              <li>Specific valuations for cars, **value my van**, and even motorbikes.</li>
+              <li>Insights that empower you to negotiate confidently, ensuring you get a fair deal.</li>
             </ul>
+            <p>
+              Don't just rely on general assumptions or basic price guides like **Parkers car valuation** or **Motorway car valuation**. Our tool offers a tailored **car estimate** based on your specific vehicle's details and current market trends, ensuring you get the most accurate **car price check** possible.
+            </p>
+            <p><Link to="/valuation">Find out how much your vehicle is worth with our Accurate Car Valuation service.</Link></p>
           </div>
 
           {/* Full VDI Check Tab */}
@@ -850,30 +839,34 @@ export default function HomePage() {
             role="tabpanel"
             aria-labelledby="vdi-tab"
           >
+            <h3>Full Vehicle History (HPI) Check: Uncover Every Hidden Detail</h3>
             <p>
-              Our most comprehensive offering, the <strong>Full Vehicle Data History </strong> check, 
-              uncovers all aspects of a vehicle’s past — from outstanding finance 
-              and theft records to plate changes, keeper history, technical 
-              specs, and more, just like a HPI check. 
+              Our most comprehensive offering, the **Full Vehicle History** check – often referred to as a **HPI check** or **VDI check** – is your absolute must-have before purchasing any used vehicle. This in-depth **HPI report** uncovers every aspect of a vehicle’s past, protecting you from significant financial and legal risks. We meticulously cross-reference data from the DVLA, Police National Computer, major UK finance companies, and insurance databases to give you a complete picture.
+            </p>
+            <p>
+              Our **comprehensive HPI check** includes crucial insights such as:
             </p>
             <ul>
-              <li>Finance checks &amp; stolen vehicle status</li>
-              <li>Insurance write-offs, import/export info</li>
-              <li>Mileage verification &amp; VIN match</li>
-              <li>Plate transfers &amp; keeper change history</li>
-              <li>Technical data &amp; emissions standards</li>
+              <li>**Finance checks**: Confirm if the vehicle has any **outstanding finance on a car** that could transfer to you, ensuring an **HPI clear** status.</li>
+              <li>**Stolen vehicle status**: Verify if the vehicle is recorded as stolen, preventing its confiscation by police without compensation.</li>
+              <li>**Insurance write-offs**: Detailed information on any insurance write-off categories (Cat A, B, S, N) and significant accident damage.</li>
+              <li>**Mileage verification**: Identify **mileage discrepancies** or signs of "clocking" by cross-referencing official records.</li>
+              <li>**Plate transfers & keeper history**: Track all previous number plate changes and the full history of registered keepers.</li>
+              <li>**Import/export information**: Confirm if the vehicle was legally imported or exported.</li>
+              <li>**VIN match**: Verify the Vehicle Identification Number (VIN) to ensure it matches official records.</li>
+              <li>**Technical data & emissions standards**: Comprehensive vehicle specifications.</li>
             </ul>
             <p>
-              This all-in-one check is perfect for absolute peace of mind 
-              before making your purchase.
+              This **all-in-one check** provides ultimate peace of mind, allowing you to **check a car's history** thoroughly and confidently before making your purchase. Don't risk buying blind – choose the **best HPI check** for complete transparency.
             </p>
+            <p><Link to="/hpi">Explore our Full Vehicle History (HPI) Check service for ultimate peace of mind.</Link></p>
           </div>
         </div>
       </div>
 
       {/* FAQ SECTION */}
       <div className="faq-section section-fullwidth" id="faqs">
-        <h2 className="faq-heading">Frequently Asked Questions</h2>
+        <h2 className="faq-heading">Frequently Asked Questions About Vehicle Checks</h2>
         <div className="container">
           <div className="accordion" id="faqAccordion">
             <div className="accordion-item">
@@ -897,10 +890,7 @@ export default function HomePage() {
               >
                 <div className="accordion-body">
                   <p>
-                    Absolutely! Hidden issues like outstanding finance, stolen 
-                    status, or incorrect mileage can cost you thousands. A quick 
-                    check can prevent losing your money or ending up with a 
-                    vehicle that’s unsafe.
+                    Absolutely! Performing a **vehicle data** check is paramount when considering a used car, van, or motorbike. Hidden issues like **outstanding finance**, stolen status, significant accident damage (insurance write-offs), or incorrect mileage can cost you thousands of pounds in unforeseen expenses or legal complications. A quick, comprehensive **HPI check** or **car history report** can expose these problems, preventing you from losing your hard-earned money or ending up with a vehicle that’s unsafe or has legal liabilities. It's a small investment for massive peace of mind.
                   </p>
                 </div>
               </div>
@@ -916,7 +906,7 @@ export default function HomePage() {
                   aria-expanded="false"
                   aria-controls="collapseTwo"
                 >
-                  How accurate are your valuations and reports?
+                  How accurate are your vehicle valuations and history reports?
                 </button>
               </h2>
               <div
@@ -927,10 +917,7 @@ export default function HomePage() {
               >
                 <div className="accordion-body">
                   <p>
-                    We pull data from multiple top-tier providers, ensuring your 
-                    vehicle’s records are accurate and up-to-date. Our valuation 
-                    tool references real market data, so you know exactly where 
-                    your car stands.
+                    We pride ourselves on the accuracy and reliability of all our reports. Our systems pull **vehicle data** from multiple top-tier and official providers, including the DVLA, Police National Computer, major UK finance companies, and leading automotive data sources. This ensures that your vehicle’s records, whether it’s a **car valuation online** or a full **HPI report**, are current, comprehensive, and dependable. Our **car value estimator** specifically references **real market data** and recent sales, so you know exactly where your car stands in today's market, giving you a trustworthy **car price check**.
                   </p>
                 </div>
               </div>
@@ -946,7 +933,7 @@ export default function HomePage() {
                   aria-expanded="false"
                   aria-controls="collapseThree"
                 >
-                  What if I need more than one check?
+                  What if I need more than one vehicle check?
                 </button>
               </h2>
               <div
@@ -957,13 +944,66 @@ export default function HomePage() {
               >
                 <div className="accordion-body">
                   <p>
-                    We offer multi-check options at discounted rates, perfect if 
-                    you’re considering several cars at once. Simply purchase 
-                    a bundle of checks and apply them when you need.
+                    We understand that when you're in the market for a used vehicle, you might be considering several options. That's why we offer convenient and cost-effective multi-check bundles at discounted rates. This is perfect if you’re comparing several cars, vans, or motorbikes at once. Simply purchase a bundle of credits and apply them to **check a car's history**, get a **car value estimator**, or perform an **HPI check** on different vehicles as and when you need. All your purchased credits are stored in your account, ready for use, and your past reports are always accessible in your personal dashboard.
                   </p>
                 </div>
               </div>
             </div>
+
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="faqFour">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseFour"
+                  aria-expanded="false"
+                  aria-controls="collapseFour"
+                >
+                  How do your services compare to others like HPI Check AA or Motorway Car Valuation?
+                </button>
+              </h2>
+              <div
+                id="collapseFour"
+                className="accordion-collapse collapse"
+                aria-labelledby="faqFour"
+                data-bs-parent="#faqAccordion"
+              >
+                <div className="accordion-body">
+                  <p>
+                    Vehicle Data Information strives to provide a comprehensive and user-friendly experience that often surpasses competitors. Our **HPI check** offers the same core data points as prominent services like **HPI Check AA** or those provided through **HPI Check Gov** sources, including crucial finance and stolen vehicle checks, but often at a more competitive price point for a **cheap HPI check**. For valuations, our **car value estimator** aggregates data from a wider array of sources than solely focusing on platforms like **Motorway car valuation** or **Parkers car valuation**, giving you a more rounded and accurate **market value of my car**. We also offer unique benefits like up to three **free MOT history checks** and a convenient dashboard to store all your **car history reports**, ensuring you have all your essential **vehicle data** in one accessible place.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="faqFive">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseFive"
+                  aria-expanded="false"
+                  aria-controls="collapseFive"
+                >
+                  What is an 'HPI Clear' check and why is it important?
+                </button>
+              </h2>
+              <div
+                id="collapseFive"
+                className="accordion-collapse collapse"
+                aria-labelledby="faqFive"
+                data-bs-parent="#faqAccordion"
+              >
+                <div className="accordion-body">
+                  <p>
+                    An '**HPI clear**' check indicates that a vehicle has no adverse history recorded on the HPI database concerning outstanding finance, stolen status, or being written off by an insurance company. This status is incredibly important as it signifies a clean record, meaning you can proceed with confidence, knowing the vehicle is not subject to hidden debts or legal complications. If a vehicle isn't HPI clear, it could mean you might lose the vehicle if finance is outstanding, or that it's been in a serious accident. Always aim for an **HPI clear check** to protect your investment and ensure legal ownership.
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -972,7 +1012,8 @@ export default function HomePage() {
       <div className="vdi-brand-section section-fullwidth">
         <div className="vdi-brand-content">
           <p>
-            All <strong>Vehicle Data Information</strong> reports are built using secure data from leading sources, including UK Vehicle Data, the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA. All reports are provided without prejudice on a PAYG basis
+            At **Vehicle Data Information**, we are committed to providing you with the most reliable and comprehensive insights into any UK vehicle. All our **vehicle data** reports are meticulously built using secure, real-time information from leading and authoritative sources, including:
+            **UK Vehicle Data, the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA**. We ensure you receive accurate and up-to-date information to empower your decisions. All reports are provided without prejudice on a Pay-As-You-Go basis, offering transparency and flexibility.
           </p>
         </div>
       </div>
