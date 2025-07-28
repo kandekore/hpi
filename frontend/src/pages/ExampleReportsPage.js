@@ -40,7 +40,7 @@ export default function ExampleReportsPage() {
 
   // Replace these IDs with your actual "sample" record IDs
   const MOT_SEARCH_ID = '67e6526b77ab38ba1b893812';       // searchType === 'MOT'
-  const VAL_SEARCH_ID = '67de8be9752f5283612dff7f';       // searchType === 'Valuation'
+  const VAL_SEARCH_ID = '67e32fec77ab38ba1b893247';       // searchType === 'Valuation'
   const VDI_SEARCH_ID = '67da6e8a8b58f829acf6fb53';       // searchType === 'VDI' or 'HPI'
 
   // Query each record via getSampleSearchById 
