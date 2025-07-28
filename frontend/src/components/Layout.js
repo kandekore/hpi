@@ -82,7 +82,7 @@ function Layout({ children }) {
             </button>
 
             <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
-              <ul className="navbar-nav" style={{ fontSize: '1.1rem' }}>
+              <ul className="navbar-nav" style={{ fontSize: '0.85rem' }}>
                 {/* Always visible: Home */}
                 <li className="nav-item">
                   <Link className="nav-link text-white" to="/">
