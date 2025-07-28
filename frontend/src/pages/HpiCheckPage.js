@@ -1,5 +1,3 @@
-// src/pages/HPICheckPage.js
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useLazyQuery } from '@apollo/client';
@@ -204,31 +202,31 @@ export default function HPICheckPage() {
   return (
     <>
       <Helmet>
-        <title>Full Vehicle History Report | HPI / VDI Type Check | Vehicle Data Information</title>
+        <title>Comprehensive HPI Check UK | Full Vehicle History Report & Finance Check</title>
         <meta
           name="description"
-          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+          content="Get an instant, comprehensive HPI check for any UK vehicle. Uncover outstanding finance, stolen status, insurance write-offs, mileage discrepancies, and more with our detailed HPI report."
         />
         {/* Open Graph tags */}
         <meta
           property="og:title"
-          content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information"
+          content="Comprehensive HPI Check UK | Full Vehicle History Report & Finance Check"
         />
         <meta
           property="og:description"
-          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+          content="Get an instant, comprehensive HPI check for any UK vehicle. Uncover outstanding finance, stolen status, insurance write-offs, mileage discrepancies, and more with our detailed HPI report."
         />
         <meta property="og:image" content={heroBg} />
-        <meta property="og:url" content="https://vehicledatainformation.co.uk" />
+        <meta property="og:url" content="https://vehicledatainformation.co.uk/hpi" />
         <meta property="og:type" content="website" />
         {/* Twitter */}
         <meta
           name="twitter:title"
-          content="Full Vehicle History | HPI / VDI Type Check | Vehicle Data Information"
+          content="Comprehensive HPI Check UK | Full Vehicle History Report & Finance Check"
         />
         <meta
           name="twitter:description"
-          content="Access complete vehicle history: outstanding finance, insurance write-offs, theft records, and more."
+          content="Get an instant, comprehensive HPI check for any UK vehicle. Uncover outstanding finance, stolen status, insurance write-offs, mileage discrepancies, and more with our detailed HPI report."
         />
         <meta name="twitter:image" content={heroBg} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -317,6 +315,87 @@ export default function HPICheckPage() {
           margin-bottom: 2rem;
           font-weight: 700;
         }
+        /* New Styles for expanded content */
+        .content-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            line-height: 1.7;
+        }
+        .content-section h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #003366;
+        }
+        .content-section h3 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1560bd;
+        }
+        .content-section ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 1.5rem;
+        }
+        .content-section ul li {
+            margin-bottom: 0.7rem;
+        }
+        .cta-box {
+            background-color: #f4f4f4;
+            border-left: 5px solid #1560bd;
+            padding: 1.5rem;
+            margin: 2.5rem auto;
+            text-align: center;
+            max-width: 800px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .cta-box p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .cta-box a {
+            background-color: #1560bd;
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .cta-box a:hover {
+            background-color: #0d4f9c;
+        }
+        .key-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .key-point-card {
+            background: #e9f5ff;
+            border: 1px solid #cceeff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            flex: 1 1 280px;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .key-point-card h4 {
+            color: #003366;
+            margin-bottom: 0.7rem;
+            font-size: 1.3rem;
+        }
+        .key-point-card i {
+            font-size: 2.5rem;
+            color: #1560bd;
+            margin-bottom: 1rem;
+        }
       `}</style>
 
       {/* Confirm usage modal */}
@@ -387,10 +466,9 @@ export default function HPICheckPage() {
 
       {/* HERO */}
       <div className="hpi-hero">
-        <h1>Full Vehicle History Check</h1>
+        <h1>Comprehensive HPI Check UK: Unlock Your Vehicle's Full Hidden History</h1>
         <p>
-          Access complete vehicle history: outstanding finance, 
-          insurance write-offs, theft records, and more.
+          Gain complete peace of mind with our in-depth HPI Check. Instantly access crucial vehicle data including outstanding finance, insurance write-offs, theft records, mileage discrepancies, and much more. Your essential guide to smart, safe used car buying.
         </p>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -419,7 +497,7 @@ export default function HPICheckPage() {
                   marginTop: '1rem',
                 }}
               >
-                Search Again
+                Search Another Vehicle
               </button>
             ) : (
               <button
@@ -436,7 +514,7 @@ export default function HPICheckPage() {
                   marginTop: '1rem',
                 }}
               >
-                {(hpiLoading || publicLoading) ? 'Checking...' : 'Check Vehicle History'}
+                {(hpiLoading || publicLoading) ? 'Checking History...' : 'Run Full HPI Check'}
               </button>
             )}
           </div>
@@ -510,23 +588,91 @@ export default function HPICheckPage() {
         </div>
       )}
 
-      {/* Additional Info */}
-      <div className="hpi-info-section">
-        <h2>Why Get a Full Vehicle History Check?</h2>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      {/* Main Content Sections */}
+      <div className="content-section">
+        <h2>Why a Full Vehicle History (HPI) Check is Non-Negotiable for UK Buyers</h2>
+        <p>
+          In the bustling UK used car market, appearances can be deceiving. A vehicle might look perfect on the surface, but underneath lies a complex history that can drastically impact its true value, safety, and your legal ownership. This is where a comprehensive Full Vehicle History Check, commonly known as an HPI check or VDI check, becomes absolutely indispensable. It's your ultimate tool for due diligence, providing peace of mind and protecting you from costly pitfalls when buying a used car, van, or even a motorcycle HPI check.
+        </p>
+        <p>
+          Our in-depth HPI report goes far beyond basic details, pulling crucial vehicle data from official and reputable sources across the UK. Don't risk inheriting someone else's problems – get the full story before you commit.
+        </p>
+
+        <h3>What Our Comprehensive HPI Check Uncovers:</h3>
+        <div className="key-points">
+            <div className="key-point-card">
+                <i className="bi bi-currency-pound"></i>
+                <h4>Outstanding Finance Check</h4>
+                <p>Crucially, we verify if the vehicle has outstanding finance recorded against it. This debt can legally transfer to you upon purchase, meaning you could lose the vehicle if the previous owner defaults on their loan. Our HPI finance check ensures you only buy HPI clear vehicles.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-shield-lock"></i>
+                <h4>Stolen Vehicle Status</h4>
+                <p>Avoid the devastating scenario of buying a stolen vehicle that could be confiscated by the police without compensation. Our report checks against the Police National Computer to confirm its theft status.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-car-front-fill"></i>
+                <h4>Insurance Write-Off History</h4>
+                <p>Understand if the vehicle has ever been declared an insurance write-off due to severe damage. We detail the write-off category (Cat A, B, S, N), indicating the extent of the damage and potential structural issues, which is vital for both safety and resale value.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-speedometer"></i>
+                <h4>Mileage Verification</h4>
+                <p>Combat mileage discrepancies or "clocking." Our HPI check cross-references mileage records from various sources (like previous MOTs) to identify inconsistencies and ensure the odometer reflects the vehicle's true journey.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-person-fill"></i>
+                <h4>Number of Previous Keepers</h4>
+                <p>Gain insight into the keeper history of the vehicle, including how many previous owners it's had. While not a red flag on its own, frequent changes can sometimes warrant further investigation.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-card-checklist"></i>
+                <h4>VIN/Chassis Match & Plate Changes</h4>
+                <p>We verify the Vehicle Identification Number (VIN match) and highlight any plate transfers or cherished plate changes, ensuring the vehicle's identity is consistent and legitimate.</p>
+            </div>
+            <div className="key-point-card">
+                <i className="bi bi-geo-alt"></i>
+                <h4>Import/Export & Scrapped Status</h4>
+                <p>Confirm if the vehicle has been legally imported or exported, or if it's been declared as scrapped – preventing you from buying a vehicle that shouldn't be on the road.</p>
+            </div>
+        </div>
+
+        <h3>Why Choose Vehicle Data Information for Your HPI Check?</h3>
+        <p>
+          We are committed to providing the best HPI check experience in the UK. Our service stands out for its accuracy, speed, and comprehensive nature.
+        </p>
+        <ul>
+          <li>Accuracy and Reliability: We aggregate data from official and trusted sources, including HPI Check DVLA records, Police National Computer, and major finance houses, ensuring your HPI report is precise and up-to-date.</li>
+          <li>Instant Results: Get your detailed HPI report within seconds. No more waiting – make quick, confident decisions.</li>
+          <li>Cost-Effective: We offer a cheap HPI check without compromising on the depth or quality of information, providing excellent value for your money.</li>
+          <li>User-Friendly Reports: Our reports are designed to be clear and easy to understand, highlighting critical information and potential red flags at a glance.</li>
+          <li>Compare with Confidence: Our data is comparable to standards set by major providers like HPI Check AA or other industry leaders, giving you a robust analysis.</li>
+        </ul>
+
+        <div className="cta-box">
+            <p>Ready to ensure your next vehicle purchase is safe and secure?</p>
+            <p>Don't buy blind. Get your comprehensive HPI check today!</p>
+            <a href="#top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Run Your HPI Check Now</a>
+        </div>
+
+        <h3>Beyond the HPI Check: Maximizing Your Vehicle Data Insight</h3>
+        <p>
+          While the HPI check is fundamental, combining it with our other services provides an even richer understanding of a vehicle's past and present value:
+        </p>
+        <ul>
+          <li>Free MOT History Check: Complement your HPI report by reviewing past MOT results, mileage records, and advisory notes. This helps you assess the vehicle's maintenance history and identify recurring physical issues.</li>
+          <li>Vehicle Valuation: Understand the true market value of my car. A clean HPI clear vehicle will naturally command a better price, while any hidden history found in your HPI check can significantly affect its worth. Our HPI car valuation helps you negotiate effectively.</li>
+        </ul>
+        <p>
+          By utilizing all our tools, you can ensure you've conducted a thorough investigation into every aspect of a vehicle's life, from its technical specifications to its financial and accident history. This holistic approach provides the ultimate peace of mind.
+        </p>
+      </div>
+
+      {/* BOTTOM BRAND MENTION */}
+      <div className="hpi-info-section"> {/* Reusing this class for general styling */}
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           <p>
-            A Full Vehicle History Check report ensures you don’t inherit someone else’s debt 
-            or risk owning a stolen vehicle. Verify finance status, previous 
-            accidents, theft records, and more—all in one detailed report.
-          </p>
-          <ul>
-            <li>Identify outstanding finance or hidden damage</li>
-            <li>Check for theft or insurance write-offs</li>
-            <li>Review the vehicle’s keeper history and VIN</li>
-          </ul>
-          <p>
-            Protect yourself before buying or selling a car, and gain 
-            total confidence with every transaction.
+            All Vehicle Data Information reports, including our comprehensive HPI checks, are powered by secure, real-time data from leading industry sources. This includes direct integration with UK Vehicle Data, the Association of British Insurers, the Police National Computer, VDI Valuations, Experian Automotive, major UK finance companies, VOSA / DVSA, and the DVLA. We are committed to providing you with the most accurate and up-to-date information, ensuring all reports are provided without prejudice on a Pay-As-You-Go basis for maximum transparency.
           </p>
         </div>
       </div>
