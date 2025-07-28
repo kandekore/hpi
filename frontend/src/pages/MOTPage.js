@@ -209,8 +209,8 @@ export default function MOTPage() {
       .mot-hero p {
         font-size: 1.2rem;
         margin-bottom: 2rem;
-        color: #fff;
-        text-shadow: 1px 1px #000;
+        text-shadow: 1px 1px #ffde45;
+          color: #003366;
       }
       .plate-container {
         width: 70%;

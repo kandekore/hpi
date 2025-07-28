@@ -235,8 +235,8 @@ export default function ValuationPage() {
         .valuation-hero p {
           font-size: 1.2rem;
           margin-bottom: 2rem;
-          color: #fff;
-          text-shadow: 2px 2px #000;
+          text-shadow: 1px 1px #ffde45;
+          color: #003366;
         }
         .plate-container {
           width: 70%;
